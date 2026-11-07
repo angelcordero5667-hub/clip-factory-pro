@@ -1,0 +1,455 @@
+import json
+import logging
+import math
+import re
+from typing import List, Optional
+import requests
+
+from src.common.config import settings
+from src.common.models import TranscriptResult, TranscriptSegment, ViralMomentCandidate, ViralityBreakdown
+from src.agents.agent2_viral_detector.audio_energy import energy_bonus, find_hype_moments
+from src.agents.agent2_viral_detector.analysis import (
+    build_windows,
+    compile_keyword_patterns,
+    count_keyword_hits,
+    flatten_words,
+    normalize_text,
+    sliding_windows,
+    snap_to_pauses,
+)
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - [%(levelname)s] - %(message)s")
+logger = logging.getLogger("Agent2_ViralDetector")
+
+OPUS_PROMPT_TEMPLATE = """
+Eres el motor de Inteligencia Artificial de OpusClip (el creador de clips virales #1 del mundo para TikTok, Shorts y Reels).
+Analiza la siguiente transcripción con marcas de tiempo (en segundos).
+
+Extrae entre 3 y {max_clips} momentos VIRALES de ALTO IMPACTO (humor, debates intensos, giros inesperados, lecciones poderosas, reacciones).
+
+REGLAS OBLIGATORIAS:
+1. Cada clip debe durar entre {min_duration} y {max_duration} segundos.
+2. Cada clip debe tener un GANCHO magnético en los primeros 3 segundos.
+3. El clip DEBE ser una idea autocontenida y completa (inicio claro y remate natural).
+4. Genera un TÍTULO viral irresistible (con 1 emoji).
+5. Calcula el 'virality_score' general (de 50 a 99), y su desglose: 'hook_score', 'flow_score' y 'trend_score' (todos 0-100).
+6. Redacta un copy persuasivo ('social_description') y 4-6 hashtags estratégicos ('hashtags').
+7. Usa SOLO tiempos que existan en la transcripción y frases que realmente se digan en ella. No copies los textos del formato.
+8. Devuelve ÚNICAMENTE un objeto JSON válido con la clave "clips" (lista de momentos), sin texto adicional.
+
+Formato (reemplaza cada <...> con contenido real de la transcripción):
+{{"clips": [
+  {{
+    "start_time": <segundo de inicio, número>,
+    "end_time": <segundo de fin, número>,
+    "title": "<título viral basado en el contenido, con 1 emoji>",
+    "hook_text": "<frase textual con la que abre el clip>",
+    "context_text": "<resumen de lo que se explica en el clip>",
+    "virality_score": <50 a 99>,
+    "hook_score": <0 a 100>,
+    "flow_score": <0 a 100>,
+    "trend_score": <0 a 100>,
+    "category": "<humor | discusion | reaccion | sorpresa | ensenanza>",
+    "reasoning": "<por qué este momento retiene a la audiencia>",
+    "social_description": "<copy persuasivo para redes>",
+    "hashtags": ["<4 a 6 hashtags>"]
+  }}
+]}}
+
+Transcripción:
+{transcript_text}
+"""
+
+# Textos de ejemplo (versiones anteriores del prompt y placeholders) que delatan una respuesta copiada
+TEMPLATE_MARKERS = (
+    "El Secreto Que Nadie Te Dice",
+    "Si estás cometiendo este error, estás perdiendo todo tu dinero",
+    "<título viral",
+    "<frase textual",
+)
+
+VIRAL_KEYWORDS = {
+    "humor": ["jaja", "risa", "broma", "gracioso", "chiste", "ridículo", "meme", "locura"],
+    "discusion": ["error", "mentira", "pero", "falso", "problema", "culpa", "crítica", "pelea", "discutir"],
+    "reaccion": ["increíble", "no puede ser", "dios mío", "wow", "brutal", "impactante", "imposible"],
+    "sorpresa": ["secreto", "nadie sabe", "la verdad", "revelar", "descubrí", "atención", "jamás"],
+    "ensenanza": ["estrategia", "aprende", "regla", "método", "consejo", "paso 1", "fórmula"],
+}
+# Se normalizan (sin acentos) al compilar: "increíble" y "increible" coinciden con el mismo patrón.
+_KEYWORD_PATTERNS = {cat: compile_keyword_patterns(kws) for cat, kws in VIRAL_KEYWORDS.items()}
+
+CATEGORY_TITLES = {
+    "humor": "La Risa Que No Esperabas 😂",
+    "discusion": "El Gran Debate Que Divide Opiniones 💥",
+    "reaccion": "Reacción Brutal Que Te Dejará en Shock 🤯",
+    "sorpresa": "Lo Que Nadie Se Atreve a Decir 🤫",
+    "ensenanza": "La Regla De Oro Que Debes Saber 💡",
+}
+CATEGORY_EMOJIS = {"humor": "😂", "discusion": "💥", "reaccion": "🤯", "sorpresa": "🤫", "ensenanza": "💡"}
+
+
+class ViralMomentDetector:
+    """
+    Agente 2: Detección semántica con puntuación 0-100, desglose (Hook, Flow, Trend),
+    títulos virales y copies para redes. Motor LLM por ventanas + heurístico de respaldo.
+    """
+
+    def __init__(
+        self,
+        ollama_url: Optional[str] = None,
+        model_name: Optional[str] = None,
+        min_duration: float = 20.0,
+        max_duration: float = 65.0,
+        max_candidates: int = 20,
+        window_sec: float = 360.0,       # 5 a 8 minutos por ventana para el LLM
+        window_overlap_sec: float = 30.0,
+        heuristic_step_sec: float = 10.0,
+        pause_tolerance_sec: float = 3.0,
+    ):
+        self.ollama_url = ollama_url or settings.ollama.base_url
+        self.model_name = model_name or settings.ollama.model
+        self.min_duration = min_duration
+        self.max_duration = max_duration
+        self.max_candidates = max_candidates
+        self.window_sec = min(480.0, max(300.0, window_sec))
+        self.window_overlap_sec = window_overlap_sec
+        self.heuristic_step_sec = heuristic_step_sec
+        self.pause_tolerance_sec = pause_tolerance_sec
+
+    def format_transcript_for_llm(self, transcript) -> str:
+        """Acepta un TranscriptResult o una lista de segmentos (una ventana)."""
+        segments = transcript.segments if hasattr(transcript, "segments") else transcript
+        return "\n".join(f"[{seg.start:.1f}s -> {seg.end:.1f}s] {seg.text}" for seg in segments)
+
+    @staticmethod
+    def _apply_energy(candidates: List[ViralMomentCandidate], energy) -> List[ViralMomentCandidate]:
+        """Sube o baja hasta ±8 puntos según la energía del audio del tramo (risas, énfasis, ritmo)."""
+        if energy is None:
+            return candidates
+        for c in candidates:
+            e = energy.window_score(c.start_time, c.end_time)
+            bonus = energy_bonus(e)
+            c.virality_score = round(min(100.0, max(0.0, c.virality_score + bonus)), 1)
+            sign = "+" if bonus >= 0 else ""
+            c.reasoning = f"{c.reasoning} Energía de audio {int(e * 100)}/100 ({sign}{bonus} pts).".strip()
+        return candidates
+
+    def detect_moments(self, transcript: TranscriptResult, use_llm: bool = True, energy=None, include_hype: bool = True) -> List[ViralMomentCandidate]:
+        if transcript.duration < self.min_duration:
+            logger.warning(f"Duración ({transcript.duration}s) menor al mínimo requerido.")
+            return []
+
+        candidates: List[ViralMomentCandidate] = []
+        if use_llm:
+            try:
+                candidates = self._detect_with_ollama(transcript)
+            except Exception as e:
+                logger.warning(f"Ollama no respondió: {e}. Activando motor heurístico.")
+
+        if not candidates:
+            candidates = self._detect_heuristic(transcript)
+
+        if energy is not None and include_hype:
+            try:
+                hype_peaks = find_hype_moments(
+                    energy,
+                    min_duration=self.min_duration,
+                    max_duration=self.max_duration,
+                    top_n=max(2, self.max_candidates // 2)
+                )
+                for idx, (p_start, p_end, p_score) in enumerate(hype_peaks, 1):
+                    matching_segs = [s for s in transcript.segments if s.end >= p_start and s.start <= p_end]
+                    text_snippet = " ".join(s.text for s in matching_segs).strip()
+                    hook_snippet = matching_segs[0].text if matching_segs else "¡Momento épico en directo!"
+                    
+                    p_score_pct = int(p_score * 100)
+                    vir_score = round(min(99.0, max(75.0, 78.0 + p_score * 20.0)), 1)
+                    
+                    candidates.append(ViralMomentCandidate(
+                        id=f"clip_hype_{idx}",
+                        start_time=round(p_start, 2),
+                        end_time=round(min(transcript.duration, p_end), 2),
+                        duration=round(p_end - p_start, 2),
+                        title="Momento Épico en Directo 🔥",
+                        hook_text=hook_snippet[:120],
+                        context_text=text_snippet[:250] if text_snippet else "Pico de energía acústica y reacción en vivo.",
+                        virality_score=vir_score,
+                        breakdown=ViralityBreakdown(
+                            hook_score=min(100.0, vir_score + 2.0),
+                            flow_score=min(100.0, vir_score),
+                            trend_score=min(100.0, vir_score + 1.0),
+                        ),
+                        category="reaccion",
+                        reasoning=f"Pico de volumen y energía acústica ({p_score_pct}/100) característico de momentos virales en streaming.",
+                        social_description="¡No te pierdas esta reacción en el directo! 🔥",
+                        hashtags=["#streamer", "#twitch", "#gaming", "#momentoepico", "#viral"],
+                        status="pending",
+                        engine="audio_energy",
+                    ))
+            except Exception as e:
+                logger.debug(f"Hype moments scan fallback: {e}")
+
+        validated = self._validate_and_adjust_boundaries(candidates, transcript)
+        if not validated and candidates and candidates[0].engine == "llm":
+            logger.warning("Ningún candidato del LLM cumplió las duraciones; se usa el motor heurístico.")
+            validated = self._validate_and_adjust_boundaries(self._detect_heuristic(transcript), transcript)
+        aligned = self._align_to_pauses(validated, transcript)
+        aligned = self._apply_energy(aligned, energy)
+        deduped = self.deduplicate_candidates(aligned)
+        deduped.sort(key=lambda c: c.virality_score, reverse=True)
+        return deduped[: self.max_candidates]
+
+    # ------------------------------------------------------------------
+    # Motor LLM por ventanas
+    # ------------------------------------------------------------------
+    def _detect_with_ollama(self, transcript: TranscriptResult) -> List[ViralMomentCandidate]:
+        windows = build_windows(transcript.segments, self.window_sec, self.window_overlap_sec)
+        if not windows:
+            return []
+        per_window = max(3, math.ceil(self.max_candidates / len(windows)) + 1)
+
+        candidates: List[ViralMomentCandidate] = []
+        failures = 0
+        last_error: Optional[Exception] = None
+        for n, window in enumerate(windows, 1):
+            try:
+                found = self._query_window(window, per_window, id_offset=len(candidates))
+                logger.info(f"Ventana {n}/{len(windows)} "
+                            f"({window[0].start:.0f}s-{window[-1].end:.0f}s): {len(found)} candidatos")
+                candidates.extend(found)
+            except Exception as e:
+                failures += 1
+                last_error = e
+                logger.warning(f"Ventana {n}/{len(windows)} falló: {e}")
+        if failures == len(windows) and last_error is not None:
+            raise last_error  # nada funcionó: que detect_moments active el heurístico
+        # Une resultados y elimina duplicados por solape temporal entre ventanas
+        return self.deduplicate_candidates(candidates)
+
+    def _query_window(self, segments: List[TranscriptSegment], max_clips: int, id_offset: int = 0) -> List[ViralMomentCandidate]:
+        prompt = OPUS_PROMPT_TEMPLATE.format(
+            min_duration=int(self.min_duration),
+            max_duration=int(self.max_duration),
+            max_clips=max_clips,
+            transcript_text=self.format_transcript_for_llm(segments),
+        )
+        payload = {
+            "model": self.model_name,
+            "prompt": prompt,
+            "stream": False,
+            "format": "json",
+            "options": {"temperature": 0.3, "num_ctx": 4096},
+        }
+        response = requests.post(f"{self.ollama_url}/api/generate", json=payload, timeout=settings.ollama.timeout_seconds)
+        response.raise_for_status()
+        raw_output = response.json().get("response", "[]").strip()
+
+        data = self._extract_json_array(raw_output)
+        candidates = []
+        for idx, item in enumerate(data):
+            try:
+                if any(m in str(item.get("hook_text", "")) + str(item.get("title", "")) for m in TEMPLATE_MARKERS):
+                    continue  # el modelo copió el ejemplo del prompt en vez de analizar la transcripción
+                start = float(item["start_time"])
+                end = float(item["end_time"])
+                raw_score = float(item.get("virality_score", 85.0))
+                score = raw_score * 10.0 if (0.0 < raw_score <= 10.0) else raw_score
+                score = round(min(100.0, max(0.0, score)), 1)
+                hook_s = float(item.get("hook_score", min(100.0, score + 2.0)))
+                flow_s = float(item.get("flow_score", max(0.0, score - 1.0)))
+                trend_s = float(item.get("trend_score", score))
+
+                candidates.append(ViralMomentCandidate(
+                    id=f"clip_{id_offset + idx + 1}",
+                    start_time=round(start, 2),
+                    end_time=round(end, 2),
+                    duration=round(end - start, 2),
+                    title=item.get("title", f"Momento Viral #{id_offset + idx + 1} 🔥"),
+                    hook_text=item.get("hook_text", "").strip(),
+                    context_text=item.get("context_text", "").strip(),
+                    virality_score=score,
+                    breakdown=ViralityBreakdown(hook_score=hook_s, flow_score=flow_s, trend_score=trend_s),
+                    category=item.get("category", "sorpresa").strip().lower(),
+                    reasoning=item.get("reasoning", "Alto potencial de retención y debate.").strip(),
+                    social_description=item.get("social_description", "").strip(),
+                    hashtags=item.get("hashtags", ["#viral", "#shorts", "#reels"]),
+                    status="pending",
+                    engine="llm",
+                ))
+            except Exception as err:
+                logger.debug(f"Error parseando clip: {err}")
+        return candidates
+
+    @staticmethod
+    def _clips_from_json(parsed) -> list:
+        """Acepta una lista de clips, un objeto {"clips": [...]} (o candidates/moments/...),
+        o un único clip suelto (los modelos pequeños con format=json suelen devolver uno solo)."""
+        if isinstance(parsed, list):
+            return [x for x in parsed if isinstance(x, dict)]
+        if isinstance(parsed, dict):
+            if "start_time" in parsed and "end_time" in parsed:
+                return [parsed]
+            for key in ("clips", "candidates", "moments", "momentos", "results"):
+                if isinstance(parsed.get(key), list):
+                    return [x for x in parsed[key] if isinstance(x, dict)]
+            for value in parsed.values():  # cualquier lista de objetos con tiempos
+                if isinstance(value, list) and value and all(isinstance(x, dict) for x in value):
+                    return value
+        return []
+
+    def _extract_json_array(self, text: str) -> list:
+        try:
+            clips = self._clips_from_json(json.loads(text))
+            if clips:
+                return clips
+        except Exception:
+            pass
+
+        # Texto con basura alrededor: busca el primer objeto o arreglo JSON completo
+        for pattern in (r"\{.*\}", r"\[.*\]"):
+            match = re.search(pattern, text, re.DOTALL)
+            if match:
+                try:
+                    clips = self._clips_from_json(json.loads(match.group(0)))
+                    if clips:
+                        return clips
+                except Exception:
+                    continue
+        return []
+
+    # ------------------------------------------------------------------
+    # Motor heurístico: ventana deslizante con paso fijo + texto sin acentos
+    # ------------------------------------------------------------------
+    def _detect_heuristic(self, transcript: TranscriptResult) -> List[ViralMomentCandidate]:
+        segments = transcript.segments
+        normalized = [normalize_text(s.text) for s in segments]
+        spans = sliding_windows(segments, self.min_duration, self.max_duration, step_sec=self.heuristic_step_sec)
+
+        candidates: List[ViralMomentCandidate] = []
+        for i, j in spans:
+            start_seg, end_seg = segments[i], segments[j]
+            duration = end_seg.end - start_seg.start
+            block_text = " ".join(normalized[i : j + 1])
+
+            score = 75
+            matched_category = "sorpresa"
+            best_hits = 0
+            for cat, patterns in _KEYWORD_PATTERNS.items():
+                matches = count_keyword_hits(block_text, patterns)
+                if matches > 0:
+                    score += min(matches * 6, 20)
+                    if matches >= best_hits:  # la categoría con más coincidencias da nombre al clip
+                        matched_category, best_hits = cat, matches
+
+            first_sentence = start_seg.text
+            if "?" in first_sentence or "¿" in first_sentence:
+                score += 5
+            if "!" in first_sentence or "¡" in first_sentence:
+                score += 4
+            score = min(98, score)
+
+            clean_hook = re.sub(r"[¿?¡!\"'.,;:()]", "", first_sentence).strip()
+            words_hook = clean_hook.split()
+            emoji = CATEGORY_EMOJIS.get(matched_category, "🔥")
+            if len(words_hook) >= 4:
+                cand_title = f"{' '.join(words_hook[:6]).title()} {emoji}"
+            else:
+                cand_title = CATEGORY_TITLES.get(matched_category, f"Momento Viral {emoji}")  # ya incluye su emoji
+
+            candidates.append(ViralMomentCandidate(
+                id=f"clip_h_{len(candidates)+1}",
+                start_time=round(start_seg.start, 2),
+                end_time=round(end_seg.end, 2),
+                duration=round(duration, 2),
+                title=cand_title,
+                hook_text=first_sentence[:120],
+                context_text=" ".join(s.text for s in segments[i : j + 1])[:250] + "...",
+                virality_score=score,
+                breakdown=ViralityBreakdown(
+                    hook_score=min(100, score + 3),
+                    flow_score=min(100, score - 2),
+                    trend_score=min(100, score + 1),
+                ),
+                category=matched_category,
+                reasoning=f"Detectado gancho de alto impacto y patrones semánticos de {matched_category}.",
+                social_description=f"Mira este momento increíble sobre {matched_category}. ¿Estás de acuerdo? Comenta abajo 👇",
+                hashtags=[f"#{matched_category}", "#viral", "#fyp", "#shorts", "#podcast"],
+                status="pending",
+                engine="heuristic",
+            ))
+        return candidates
+
+    # ------------------------------------------------------------------
+    # Límites, pausas y deduplicación
+    # ------------------------------------------------------------------
+    def _validate_and_adjust_boundaries(
+        self, candidates: List[ViralMomentCandidate], transcript: TranscriptResult
+    ) -> List[ViralMomentCandidate]:
+        adjusted = []
+        for c in candidates:
+            s = max(0.0, c.start_time)
+            e = min(transcript.duration, c.end_time)
+            if s >= transcript.duration - 1.0:
+                continue  # el inicio cae fuera del video
+            if c.engine == "llm":
+                # Los modelos pequeños eligen bien el momento pero ignoran la duración pedida:
+                # se amplía (o recorta) alrededor de su inicio para cumplir mínimo y máximo.
+                target = self.min_duration + 5.0
+                if e - s < self.min_duration:
+                    e = min(transcript.duration, s + target)
+                    if e - s < self.min_duration:
+                        s = max(0.0, e - target)
+                elif e - s > self.max_duration + 5.0:
+                    e = s + self.max_duration
+            dur = e - s
+            if self.min_duration <= dur <= self.max_duration + 5.0:
+                c.start_time = round(s, 2)
+                c.end_time = round(e, 2)
+                c.duration = round(dur, 2)
+                adjusted.append(c)
+        return adjusted
+
+    def _align_to_pauses(self, candidates: List[ViralMomentCandidate], transcript: TranscriptResult) -> List[ViralMomentCandidate]:
+        """Ajusta inicio y fin a la pausa más cercana (timestamps por palabra) para no cortar a media frase."""
+        words = flatten_words(transcript.segments)
+        if not words:
+            return candidates
+        for c in candidates:
+            s, e, changed = snap_to_pauses(
+                c.start_time, c.end_time, words,
+                tolerance=self.pause_tolerance_sec,
+                min_duration=self.min_duration,
+                max_duration=self.max_duration + 5.0,
+            )
+            if changed:
+                c.start_time = s
+                c.end_time = min(e, transcript.duration)
+                c.duration = round(c.end_time - c.start_time, 2)
+                c.pause_aligned = True
+        return candidates
+
+    def deduplicate_candidates(
+        self, candidates: List[ViralMomentCandidate], overlap_threshold: float = 0.5
+    ) -> List[ViralMomentCandidate]:
+        if not candidates:
+            return []
+
+        sorted_candidates = sorted(candidates, key=lambda x: x.virality_score, reverse=True)
+        unique_candidates: List[ViralMomentCandidate] = []
+
+        for cand in sorted_candidates:
+            overlaps = False
+            for kept in unique_candidates:
+                inter_start = max(cand.start_time, kept.start_time)
+                inter_end = min(cand.end_time, kept.end_time)
+                inter_len = max(0.0, inter_end - inter_start)
+
+                min_len = min(cand.duration, kept.duration)
+                if min_len > 0 and (inter_len / min_len) >= overlap_threshold:
+                    overlaps = True
+                    break
+
+            if not overlaps:
+                unique_candidates.append(cand)
+
+        return unique_candidates

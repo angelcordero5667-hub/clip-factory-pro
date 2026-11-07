@@ -1,0 +1,44 @@
+# Python & Virtual Environment
+.venv/
+env/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Local data & temporary runtime folders
+data/cache/
+data/inputs/
+data/outputs/
+data/temp/
+data/*.db
+data/*.db-journal
+data/*.txt
+data/*.json
+data/*.ass
+data/*.mp4
+data/*.m4a
+data/*.jpg
+
+# Don't ignore models directory
+!data/models/
+!data/models/**
+
+# Temporary artifacts
+temp_unzip/
+docs/video_frames/
+
+# Heavy binaries
+tools/*.exe
+tools/*.zip
+tools/ffmpeg/
+tools/Library/
+!tools/
+!tools/.gitkeep
+
+# Operating system files
+Thumbs.db
+.DS_Store

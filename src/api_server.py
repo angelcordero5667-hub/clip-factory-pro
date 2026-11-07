@@ -1,0 +1,642 @@
+"""Dashboard único de Clip Factory: FastAPI + src/web/index.html.
+
+Arranque: python -m src.api_server   (escucha solo en 127.0.0.1:8501)
+Token opcional: variable de entorno CLIP_API_TOKEN.
+"""
+import io
+import ipaddress
+import os
+import re
+import secrets
+import socket
+import subprocess
+import zipfile
+from datetime import datetime, timezone
+from urllib.parse import urlparse
+import psutil
+from contextlib import asynccontextmanager
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
+from fastapi import FastAPI, File, HTTPException, Request, UploadFile
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel, Field
+
+from src.common.config import settings
+from src.common.database import db
+from src.jobs import JobWorker
+
+STATIC_DIR = Path(__file__).resolve().parent.parent / "static"
+WEB_DIR = Path(__file__).resolve().parent / "web"
+OUTPUTS_DIR = settings.outputs_dir
+OUTPUTS_DIR.mkdir(parents=True, exist_ok=True)
+
+SUBTITLE_STYLES = (
+    "hormozi", "limpio", "karaoke", "minimal",
+    "hormozi_classic", "hormozi_neon", "beast", "mrbeast",
+    "gaming", "podcast", "clean", "classic", "neon", "minimal_white"
+)
+ASPECT_RATIOS = ("9:16", "1:1", "16:9")
+LAYOUT_MODES = ("auto", "gaming", "blur")
+VALID_STATUS = ("pending", "approved", "rejected")
+MIN_CLIP_SEC, MAX_CLIP_SEC = 5.0, 180.0
+
+worker = JobWorker()
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    if os.environ.get("CLIP_NO_WORKER") != "1":
+        worker.start()
+    yield
+    worker.stop()
+
+
+app = FastAPI(title="Clip Factory Pro", lifespan=lifespan)
+
+
+# Hosts con los que se puede abrir el dashboard. Evita el "DNS rebinding" (una web ajena que
+# resuelve su dominio a 127.0.0.1 para manejar tu servidor). Para un túnel o dominio propio:
+#   set CLIP_ALLOWED_HOSTS=mi-tunel.trycloudflare.com
+_ALLOWED_HOSTS = {"127.0.0.1", "localhost", "[::1]", "testserver"} | {
+    h.strip().lower() for h in os.environ.get("CLIP_ALLOWED_HOSTS", "").split(",") if h.strip()}
+_SAFE_METHODS = {"GET", "HEAD", "OPTIONS"}
+
+
+def _host_without_port(host_header: str) -> str:
+    h = (host_header or "").strip().lower()
+    if h.startswith("["):                      # IPv6: [::1]:8501
+        return h.split("]")[0] + "]"
+    return h.rsplit(":", 1)[0] if h.count(":") == 1 else h
+
+
+@app.middleware("http")
+async def request_guard(request: Request, call_next):
+    """Rechaza Host desconocidos (rebinding) y peticiones que cambian datos desde otro origen (CSRF)."""
+    host_header = request.headers.get("host", "")
+    h = _host_without_port(host_header)
+    if h not in _ALLOWED_HOSTS and not h.endswith(".trycloudflare.com"):
+        return JSONResponse({"detail": "Host no permitido."}, status_code=400)
+    if request.method not in _SAFE_METHODS:
+        origin = request.headers.get("origin")
+        cross_site = request.headers.get("sec-fetch-site") == "cross-site"
+        if cross_site or (origin and origin.split("://", 1)[-1].lower() != host_header.strip().lower()):
+            return JSONResponse({"detail": "Origen no permitido."}, status_code=403)
+    return await call_next(request)
+
+
+def _expected_token() -> str:
+    """Token de acceso: variable CLIP_API_TOKEN o, si no existe, el archivo data/api_token.txt.
+
+    Con el archivo, el servidor queda protegido sin importar quién lo arranque (start.bat, un agente,
+    un túnel). Se relee en cada petición: cambiar el archivo rota el token sin reiniciar.
+    """
+    env = os.environ.get("CLIP_API_TOKEN", "").strip()
+    if env:
+        return env
+    token_file = Path(os.environ.get("CLIP_TOKEN_FILE") or (settings.base_dir / "data" / "api_token.txt"))
+    try:
+        return token_file.read_text(encoding="utf-8").strip()
+    except OSError:
+        return ""
+
+
+@app.middleware("http")
+async def token_guard(request: Request, call_next):
+    """Si hay token (variable o archivo), lo exige en /api y /clips_media (salvo /api/health).
+
+    Se acepta como cabecera `Authorization: Bearer <t>`, `X-API-Token`, cookie
+    `clip_token` o `?token=` (al abrir `/?token=...` se guarda la cookie).
+    """
+    expected = _expected_token()
+    if not expected:
+        return await call_next(request)
+
+    path = request.url.path
+    provided = (
+        request.headers.get("x-api-token")
+        or request.headers.get("authorization", "").removeprefix("Bearer ").strip()
+        or request.cookies.get("clip_token")
+        or request.query_params.get("token")
+    )
+    token_ok = provided is not None and secrets.compare_digest(provided, expected)
+
+    if (path.startswith("/api") or path.startswith("/clips_media")) and path != "/api/health" and not token_ok:
+        return JSONResponse({"detail": "Token inválido o ausente."}, status_code=401)
+
+    response = await call_next(request)
+    if path == "/" and request.query_params.get("token") and token_ok:
+        # `secure` cuando se entra por HTTPS (túnel de Cloudflare); en local (http) no se puede exigir
+        secure = request.headers.get("x-forwarded-proto", request.url.scheme) == "https"
+        response.set_cookie("clip_token", expected, httponly=True, samesite="strict", secure=secure,
+                            max_age=60 * 60 * 24 * 30)
+    return response
+
+
+if STATIC_DIR.exists():
+    app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
+app.mount("/clips_media", StaticFiles(directory=str(OUTPUTS_DIR)), name="clips_media")
+
+
+# --------------------------------------------------------------------------- utilidades
+def generate_thumbnail(video_path: Path, output_thumb: Path):
+    """Miniatura para clips antiguos que no la tienen (los nuevos la crean al renderizar)."""
+    if not output_thumb.exists() and video_path.exists():
+        try:
+            subprocess.run(
+                [settings.ffmpeg_exe, "-y", "-hide_banner", "-loglevel", "error", "-ss", "1.0",
+                 "-i", str(video_path.resolve()), "-frames:v", "1", "-vf", "scale=540:-2", "-q:v", "4",
+                 str(output_thumb.resolve())],
+                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=20)
+        except Exception:
+            pass
+
+
+def _clock(seconds: float) -> str:
+    seconds = max(0, int(seconds))
+    return f"{seconds // 60}:{seconds % 60:02d}"
+
+
+def _human_duration(seconds: float) -> str:
+    minutes = int((seconds or 0) // 60)
+    return f"{minutes}m" if minutes < 60 else f"{minutes // 60}h {minutes % 60}m"
+
+
+def _clean_title(filename: str) -> str:
+    stem = Path(filename).stem
+    stem = re.sub(r"_[A-Za-z0-9_-]{11}_(audio|video)$", "", stem)
+    return stem.replace("_", " ").strip()
+
+
+def format_clip(c: Dict[str, Any]) -> Dict[str, Any]:
+    """Clip de la BD -> JSON que consume el dashboard."""
+    title = c.get("title") or "Clip sin título"
+    hook = c.get("hook_text") or ""
+    tags = c.get("hashtags") or ["#viral", "#podcast", "#fyp"]
+    tags_str = " ".join(tags) if isinstance(tags, list) else str(tags)
+    social = c.get("social_description") or ""
+
+    video_url = thumb_url = download_url = ""
+    c_path = c.get("clip_path")
+    if c_path and Path(c_path).exists():
+        clip_file = Path(c_path)
+        video_url = f"/clips_media/{clip_file.name}"
+        download_url = f"/api/clips/{c['id']}/download"
+        thumb_path = clip_file.with_suffix(".jpg")
+        generate_thumbnail(clip_file, thumb_path)
+        if thumb_path.exists():
+            thumb_url = f"/clips_media/{thumb_path.name}"
+
+    return {
+        "id": c["id"],
+        "video_id": c.get("video_id"),
+        "img": thumb_url,
+        "video_url": video_url,
+        "download_url": download_url,
+        "score": int(c.get("virality_score") or 0),
+        "dur": _clock(c.get("duration") or 0),
+        "title": title,
+        "ts": f"{_clock(c['start_time'])} – {_clock(c['end_time'])}",
+        "start": c["start_time"],
+        "end": c["end_time"],
+        "status": c.get("status") or "pending",
+        "engine": c.get("engine") or "heuristic",
+        "category": c.get("category") or "",
+        "dirty": bool(c.get("dirty")),
+        "breakdown": {"hook": c.get("hook_score"), "flow": c.get("flow_score"), "trend": c.get("trend_score")},
+        "copy": {
+            "TikTok": [f"{title}\n\n\"{hook}\"\n\n¿Estás de acuerdo? Comenta abajo 👇", tags_str],
+            "Shorts": [f"{title} | Momento imperdible\n\n{social or 'Suscríbete para más contenido diario.'}", f"#Shorts {tags_str}"],
+            "Reels": [f"\"{hook}\"\n\nGuarda este clip para después.", f"#Reels {tags_str}"],
+        },
+    }
+
+
+def _get_clip_or_404(clip_id: str) -> Dict[str, Any]:
+    cand = db.get_candidate(clip_id)
+    if not cand:
+        raise HTTPException(status_code=404, detail="Clip no encontrado.")
+    return cand
+
+
+# ------------------------------------------------------------------------------- páginas
+@app.get("/", response_class=HTMLResponse)
+def get_home():
+    html_file = WEB_DIR / "index.html"
+    if not html_file.exists():
+        raise HTTPException(status_code=404, detail="index.html no encontrado")
+    return html_file.read_text(encoding="utf-8")
+
+
+@app.get("/api/health")
+def health():
+    return {"status": "ok", "app": "Clip Factory Pro", "auth": bool(_expected_token())}
+
+
+# ------------------------------------------------------------------------------- videos/clips
+@app.get("/api/videos")
+def list_videos():
+    out = []
+    for v in db.get_all_videos():
+        cands = db.get_candidates_by_video(v["id"])
+        out.append({
+            "id": v["id"], "title": _clean_title(v["filename"]), "duration": _human_duration(v["duration"]),
+            "clips": len(cands), "approved": sum(1 for c in cands if c.get("status") == "approved"),
+        })
+    return out
+
+
+@app.get("/api/clips")
+def get_clips(video_id: Optional[str] = None):
+    videos = db.get_all_videos()
+    if not videos:
+        return {"source_title": "", "duration": "", "video_id": None, "clips": []}
+
+    target = None
+    cands: List[Dict[str, Any]] = []
+    if video_id:
+        target = next((v for v in videos if v["id"] == video_id), None)
+        if not target:
+            raise HTTPException(status_code=404, detail="Video no encontrado.")
+        cands = db.get_candidates_by_video(video_id)
+    else:
+        for v in videos:  # el más reciente que tenga clips
+            c_list = db.get_candidates_by_video(v["id"])
+            if c_list:
+                target, cands = v, c_list
+                break
+        if not target:
+            target = videos[0]
+
+    return {
+        "source_title": _clean_title(target["filename"]),
+        "duration": _human_duration(target["duration"]),
+        "video_id": target["id"],
+        "clips": [format_clip(c) for c in cands],
+    }
+
+
+class StatusBody(BaseModel):
+    status: str
+
+
+class EditBody(BaseModel):
+    title: Optional[str] = Field(default=None, max_length=200)
+    start_time: Optional[float] = None
+    end_time: Optional[float] = None
+
+
+@app.post("/api/clips/{clip_id}/status")
+def set_status(clip_id: str, body: StatusBody):
+    _get_clip_or_404(clip_id)
+    if body.status not in VALID_STATUS:
+        raise HTTPException(status_code=400, detail="Estado inválido. Usa: pending, approved o rejected.")
+    db.update_candidate_status(clip_id, body.status)
+    return {"id": clip_id, "status": body.status}
+
+
+@app.patch("/api/clips/{clip_id}")
+def edit_clip(clip_id: str, body: EditBody):
+    cand = _get_clip_or_404(clip_id)
+    start = cand["start_time"] if body.start_time is None else body.start_time
+    end = cand["end_time"] if body.end_time is None else body.end_time
+    video = db.get_video(cand["video_id"])
+    if start < 0 or end <= start:
+        raise HTTPException(status_code=400, detail="El tiempo de fin debe ser mayor que el de inicio.")
+    if not (MIN_CLIP_SEC <= end - start <= MAX_CLIP_SEC):
+        raise HTTPException(status_code=400, detail=f"La duración debe estar entre {MIN_CLIP_SEC:.0f} y {MAX_CLIP_SEC:.0f} segundos.")
+    if video and video.get("duration") and end > video["duration"] + 0.5:
+        raise HTTPException(status_code=400, detail="El fin supera la duración del video.")
+    title = body.title.strip() if body.title is not None else None
+    if title == "":
+        raise HTTPException(status_code=400, detail="El título no puede estar vacío.")
+    updated = db.update_candidate_fields(clip_id, title=title, start_time=start, end_time=end)
+    return format_clip(updated)
+
+
+@app.post("/api/clips/{clip_id}/rerender")
+def rerender_clip(clip_id: str, style: str = "hormozi", aspect: str = "9:16"):
+    _get_clip_or_404(clip_id)
+    if style not in SUBTITLE_STYLES or aspect not in ASPECT_RATIOS:
+        raise HTTPException(status_code=400, detail="Estilo o formato inválido.")
+    job_id = db.create_job(source=clip_id, kind="rerender", candidate_id=clip_id,
+                           options={"subtitle_style": style, "aspect_ratio": aspect})
+    return {"job_id": job_id}
+
+
+@app.get("/api/clips/{clip_id}/download")
+def download_clip(clip_id: str):
+    cand = _get_clip_or_404(clip_id)
+    path = Path(cand.get("clip_path") or "")
+    if not path.is_file():
+        raise HTTPException(status_code=404, detail="El archivo del clip no existe todavía.")
+    safe = re.sub(r"[^\w\- ]", "", cand.get("title") or "clip").strip().replace(" ", "_") or "clip"
+    return FileResponse(path, media_type="video/mp4", filename=f"{safe}.mp4")
+
+
+@app.get("/api/videos/{video_id}/zip")
+def download_video_zip(video_id: str, only: str = "all"):
+    """ZIP con los clips de UN video (mp4 + miniatura jpg) y un copys.txt. only=approved filtra aprobados."""
+    video = db.get_video(video_id)
+    if not video:
+        raise HTTPException(status_code=404, detail="Video no encontrado.")
+    cands = db.get_candidates_by_video(video_id)
+    if only == "approved":
+        cands = [c for c in cands if c.get("status") == "approved"]
+    cands = [c for c in cands if c.get("clip_path") and Path(c["clip_path"]).is_file()]
+    if not cands:
+        raise HTTPException(status_code=404, detail="No hay clips disponibles para descargar en este video.")
+
+    buf = io.BytesIO()
+    copys = []
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+        for i, c in enumerate(cands, 1):
+            clip = Path(c["clip_path"])
+            slug = re.sub(r"[^\w-]", "_", c.get("title") or "clip")[:40]
+            base = f"{i:02d}_{slug}"
+            zf.write(clip, arcname=f"{base}.mp4")
+            thumb = clip.with_suffix(".jpg")
+            if thumb.is_file():
+                zf.write(thumb, arcname=f"{base}.jpg")
+            fc = format_clip(c)
+            copys.append(f"## {c.get('title')}  (puntaje {fc['score']}/100)\n" +
+                         "\n\n".join(f"[{net}]\n{txt}\n{tags}" for net, (txt, tags) in fc["copy"].items()))
+        zf.writestr("copys.txt", "\n\n----------------\n\n".join(copys))
+    buf.seek(0)
+    name = re.sub(r"[^\w-]", "_", _clean_title(video["filename"]))[:50] or video_id
+    return StreamingResponse(buf, media_type="application/zip",
+                             headers={"Content-Disposition": f'attachment; filename="{name}_clips.zip"'})
+
+
+# ------------------------------------------------------------------------------- trabajos
+class JobBody(BaseModel):
+    source: str
+    max_clips: int = Field(default=5, ge=1, le=20)
+    fast: bool = False
+    language: Optional[str] = Field(default=None, max_length=8)
+    subtitle_style: str = "hormozi"
+    aspect_ratio: str = "9:16"
+    include_emojis: bool = True
+    time_range_start: Optional[str] = None
+    time_range_end: Optional[str] = None
+    layout: Optional[str] = "auto"
+
+
+def _is_public_url(url: str) -> bool:
+    """False si el host apunta a esta máquina o a la red local (evita usar el servidor como proxy SSRF).
+
+    Si el nombre no resuelve se deja pasar: yt-dlp fallará después con su propio error.
+    """
+    host = urlparse(url).hostname
+    if not host:
+        return False
+    try:
+        infos = socket.getaddrinfo(host, None)
+    except socket.gaierror:
+        return True
+    for info in infos:
+        ip = ipaddress.ip_address(info[4][0].split("%")[0])
+        if (ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved
+                or ip.is_multicast or ip.is_unspecified):
+            return False
+    return True
+
+
+def _validate_source(source: str) -> str:
+    source = source.strip()
+    if source.lower().startswith(("http://", "https://")):
+        if not _is_public_url(source):
+            raise HTTPException(status_code=400, detail="Ese enlace apunta a una dirección local o privada; no se permite.")
+        return source
+    # Archivos locales: solo dentro de data/inputs (los sube /api/upload)
+    candidate = (settings.inputs_dir / source).resolve() if not Path(source).is_absolute() else Path(source).resolve()
+    try:
+        candidate.relative_to(settings.inputs_dir.resolve())
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Solo se aceptan enlaces http(s) o archivos de la carpeta de entradas.")
+    if not candidate.is_file():
+        raise HTTPException(status_code=400, detail="El archivo no existe en la carpeta de entradas.")
+    return str(candidate)
+
+
+@app.post("/api/jobs")
+def create_job(body: JobBody):
+    if body.subtitle_style not in SUBTITLE_STYLES:
+        raise HTTPException(status_code=400, detail=f"Estilo de subtítulos inválido. Opciones: {', '.join(SUBTITLE_STYLES)}.")
+    if body.aspect_ratio not in ASPECT_RATIOS:
+        raise HTTPException(status_code=400, detail="Formato inválido. Opciones: 9:16, 1:1, 16:9.")
+    if body.layout and body.layout not in LAYOUT_MODES:
+        raise HTTPException(status_code=400, detail=f"Diseño inválido. Opciones: {', '.join(LAYOUT_MODES)}.")
+    source = _validate_source(body.source)
+    options = body.model_dump(exclude={"source"})
+    job_id = db.create_job(source=source, options=options)
+    return {"job_id": job_id, "status": "queued"}
+
+
+@app.post("/api/process")
+def process_alias(body: JobBody):
+    return create_job(body)
+
+
+def _with_idle(job: Dict[str, Any]) -> Dict[str, Any]:
+    """Añade `idle_seconds`: segundos desde la última novedad de un trabajo en curso (None si no aplica).
+
+    Un paso largo y silencioso (p. ej. detectar escenas) y un trabajo colgado se parecen: este dato
+    deja que el dashboard avise cuando lleva mucho sin novedades.
+    """
+    idle = None
+    if job.get("status") == "running" and job.get("updated_at"):
+        try:
+            last = datetime.strptime(job["updated_at"], "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
+            idle = max(0, int((datetime.now(timezone.utc) - last).total_seconds()))
+        except ValueError:
+            pass
+    return {**job, "idle_seconds": idle}
+
+
+@app.get("/api/jobs")
+def list_jobs(limit: int = 20):
+    return [_with_idle(j) for j in db.list_jobs(limit=max(1, min(limit, 100)))]
+
+
+@app.get("/api/jobs/{job_id}")
+def get_job(job_id: int):
+    job = db.get_job(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail="Trabajo no encontrado.")
+    return _with_idle(job)
+
+
+@app.get("/api/job_status")
+def job_status_alias(job_id: int):
+    return get_job(job_id)
+
+
+@app.get("/api/download_zip")
+def download_zip_alias(video_id: Optional[str] = None):
+    videos = db.get_all_videos()
+    if not videos:
+        raise HTTPException(status_code=404, detail="No hay videos para descargar.")
+    vid = video_id or videos[0]["id"]
+    return download_video_zip(vid)
+
+
+@app.post("/api/jobs/{job_id}/cancel")
+def cancel_job(job_id: int, force: bool = False):
+    j = db.get_job(job_id)
+    if not j:
+        raise HTTPException(status_code=404, detail="Trabajo no encontrado.")
+    if j.get("status") in {"cancelled", "done", "error"}:
+        raise HTTPException(status_code=409, detail="El trabajo ya finalizó o fue cancelado.")
+    if j.get("status") == "running" and not force:
+        raise HTTPException(status_code=409, detail="Solo se pueden cancelar trabajos que siguen en cola.")
+    if not db.cancel_job(job_id, allow_running=force or (j.get("status") == "queued")):
+        raise HTTPException(status_code=409, detail="No se pudo cancelar el trabajo.")
+    return {"job_id": job_id, "status": "cancelled"}
+
+
+@app.post("/api/upload")
+async def upload_video(file: UploadFile = File(...)):
+    name = re.sub(r"[^\w.\- ]", "_", Path(file.filename or "video.mp4").name)
+    if Path(name).suffix.lower() not in {".mp4", ".mov", ".mkv", ".webm", ".m4a", ".mp3", ".wav", ".avi"}:
+        raise HTTPException(status_code=400, detail="Formato no soportado. Usa mp4, mov, mkv, webm, m4a, mp3, wav o avi.")
+    max_bytes = int(float(os.environ.get("CLIP_MAX_UPLOAD_MB", "4096")) * 1024 * 1024)
+    target = settings.inputs_dir / name
+    idx = 1
+    while True:  # nunca sobrescribe: 'xb' falla si el archivo ya existe (sin carrera entre comprobar y crear)
+        try:
+            f = open(target, "xb")
+            break
+        except FileExistsError:
+            target = settings.inputs_dir / f"{Path(name).stem}_{idx}{Path(name).suffix}"
+            idx += 1
+    written = 0
+    try:
+        with f:
+            while chunk := await file.read(1024 * 1024):
+                written += len(chunk)
+                if written > max_bytes:
+                    raise HTTPException(status_code=413, detail=f"El archivo supera el máximo de {max_bytes // (1024 * 1024)} MB.")
+                f.write(chunk)
+    except BaseException:
+        target.unlink(missing_ok=True)   # no dejar archivos a medias
+        raise
+    return {"filename": target.name, "source": target.name}
+
+
+@app.get("/api/validate_url")
+def validate_url(url: str):
+    if not url or not url.strip().lower().startswith(("http://", "https://")):
+        return {"valid": False, "message": "Pega un enlace que empiece por http:// o https://."}
+    if not _is_public_url(url.strip()):
+        return {"valid": False, "message": "Ese enlace apunta a una dirección local o privada; no se permite."}
+    try:
+        import yt_dlp
+        ydl_opts = {"quiet": True, "no_warnings": True, "extract_flat": True}
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(url, download=False)
+            dur = info.get("duration") or 0
+            low_url = url.lower()
+            is_stream = dur > 1800 or any(k in low_url for k in ("twitch.tv", "kick.com", "live"))
+            platform = "Twitch" if "twitch.tv" in low_url else ("Kick" if "kick.com" in low_url else "YouTube / Web")
+            return {
+                "valid": True,
+                "title": info.get("title") or f"Directo / Video de {platform}",
+                "duration": dur,
+                "uploader": info.get("uploader") or "",
+                "is_stream": is_stream,
+                "platform": platform,
+            }
+    except Exception as e:
+        return {"valid": False, "message": f"No se pudo consultar el video: {str(e).replace('ERROR: ', '')[:200]}"}
+
+
+@app.delete("/api/clips")
+def clear_all_clips(confirm: str = ""):
+    if confirm != "yes":
+        raise HTTPException(status_code=400, detail="Esto borra TODOS los clips. Repite la llamada con ?confirm=yes para confirmar.")
+    with db.get_connection() as conn:
+        conn.execute("DELETE FROM candidates")
+        conn.commit()
+    return {"status": "ok", "message": "Todos los clips han sido eliminados."}
+
+
+@app.get("/api/analytics")
+def get_analytics():
+    videos = db.get_all_videos()
+    total_clips = 0
+    approved_clips = 0
+    scores = []
+    for v in videos:
+        cands = db.get_candidates_by_video(v["id"])
+        total_clips += len(cands)
+        for c in cands:
+            if c.get("status") == "approved":
+                approved_clips += 1
+            if c.get("virality_score"):
+                scores.append(c["virality_score"])
+    
+    avg_score = round(sum(scores) / len(scores), 1) if scores else 0.0
+    return {
+        "total_videos": len(videos),
+        "total_clips": total_clips,
+        "approved_clips": approved_clips,
+        "avg_score": avg_score,
+        "time_saved_hours": round(total_clips * 0.45, 1)
+    }
+
+
+@app.get("/api/config")
+def get_config():
+    return {
+        "whisper_model": settings.hardware.whisper_model_size,
+        "device": settings.hardware.device,
+        "compute_type": settings.hardware.compute_type,
+        "cpu_threads": settings.hardware.cpu_threads,
+        "encoder": settings.ffmpeg_encoder,
+        "outputs_dir": str(settings.outputs_dir),
+        "max_ram_gb": settings.hardware.max_ram_usage_gb
+    }
+
+
+@app.get("/api/system/metrics")
+def get_system_metrics():
+    """Métricas reales de hardware para el monitor del dashboard."""
+    try:
+        cpu = psutil.cpu_percent(interval=None)
+        vm = psutil.virtual_memory()
+        encoder = settings.ffmpeg_encoder
+        jobs = db.list_jobs(limit=10)
+        running = sum(1 for j in jobs if j.get("status") == "running")
+        queued = sum(1 for j in jobs if j.get("status") == "queued")
+        gpu_label = "AMD AMF Activo" if encoder == "h264_amf" else "CPU libx264"
+        return {
+            "status": "online",
+            "cpu_percent": round(cpu, 1),
+            "ram_percent": round(vm.percent, 1),
+            "ram_used_gb": round(vm.used / (1024 ** 3), 1),
+            "ram_total_gb": round(vm.total / (1024 ** 3), 1),
+            "encoder": encoder,
+            "gpu_status": gpu_label,
+            "running_jobs": running,
+            "queued_jobs": queued,
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "cpu_percent": "N/D",
+            "ram_percent": "N/D",
+            "ram_used_gb": "N/D",
+            "ram_total_gb": "N/D",
+            "encoder": settings.ffmpeg_encoder,
+            "gpu_status": "N/D",
+            "running_jobs": 0,
+            "queued_jobs": 0,
+            "error": str(e)
+        }
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("src.api_server:app", host="127.0.0.1", port=8501, reload=False)
