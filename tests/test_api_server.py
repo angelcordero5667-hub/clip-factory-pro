@@ -292,3 +292,61 @@ def test_create_job_language_and_duration_validation(tdb):
     assert r_bad_order.status_code == 400
 
 
+def test_health_deps_endpoint_structure():
+    r = client.get("/api/health/deps")
+    assert r.status_code == 200
+    data = r.json()
+    assert "ffmpeg" in data
+    assert "encoder" in data
+    assert "ollama" in data
+    assert "whisper" in data
+    assert "yunet" in data
+    # No expone rutas sensibles de usuario ni tokens
+    text = str(data)
+    assert "api_token" not in text
+    assert "Bearer" not in text
+
+
+def test_health_deps_mocked_ollama_and_ffmpeg(monkeypatch, tmp_path):
+    import subprocess
+    import requests
+
+    # Mock FFmpeg
+    class FakeProc:
+        returncode = 0
+        stdout = "ffmpeg version 7.0.1-mock Copyright (c) 2000-2024"
+        stderr = ""
+
+    monkeypatch.setattr(subprocess, "run", lambda *a, **k: FakeProc())
+
+    # Mock Ollama no responde
+    class BadResp:
+        status_code = 503
+        def json(self): return {}
+
+    monkeypatch.setattr(requests, "get", lambda *a, **k: BadResp())
+
+    r = client.get("/api/health/deps")
+    assert r.status_code == 200
+    data = r.json()
+    assert data["ffmpeg"]["available"] is True
+    assert "7.0.1-mock" in data["ffmpeg"]["version"]
+    assert data["ollama"]["accessible"] is False
+    assert "Ollama no responde: se usará el motor heurístico" in data["ollama"]["message"]
+
+    # Mock Ollama responde con modelo cargado
+    class GoodResp:
+        status_code = 200
+        def json(self): return {"models": [{"name": "llama3.2:3b:latest"}]}
+
+    monkeypatch.setattr(requests, "get", lambda *a, **k: GoodResp())
+
+    r2 = client.get("/api/health/deps")
+    assert r2.status_code == 200
+    data2 = r2.json()
+    assert data2["ollama"]["accessible"] is True
+    assert data2["ollama"]["model_loaded"] is True
+    assert "cargado" in data2["ollama"]["message"]
+
+
+

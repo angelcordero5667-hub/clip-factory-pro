@@ -6337,12 +6337,80 @@
 
   async function openSettingsModal() {
     try {
-      const c = await apiJson('/api/config');
-      const item = (label, val) => `<div style="display:flex; justify-content:space-between; gap:12px; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.06);"><span>${label}</span><strong style="color:#fff; text-align:right; word-break:break-all;">${esc(val)}</strong></div>`;
-      openInfoModal('Configuración (solo lectura)', item('Modelo Whisper', c.whisper_model) + item('Dispositivo', c.device) +
-        item('Precisión', c.compute_type) + item('Hilos de CPU', c.cpu_threads) + item('Codificador de video', c.encoder) +
-        item('RAM máxima', c.max_ram_gb + ' GB') + item('Carpeta de salida', c.outputs_dir) +
-        '<div style="margin-top:10px; font-size:11px;">Se cambia con variables de entorno (ver README): CLIP_HW_ENCODER, CLIP_SMART_FRAMING, CLIP_DB_PATH.</div>');
+      const [c, deps] = await Promise.all([
+        apiJson('/api/config').catch(() => ({})),
+        apiJson('/api/health/deps').catch(() => null)
+      ]);
+
+      const item = (label, val) => `<div style="display:flex; justify-content:space-between; gap:12px; padding:7px 0; border-bottom:1px solid rgba(255,255,255,0.06); font-size:12px;"><span>${label}</span><strong style="color:#fff; text-align:right; word-break:break-all;">${esc(val)}</strong></div>`;
+
+      let depsHtml = '';
+      if (deps) {
+        const depRow = (ok, title, desc) => `
+          <div style="display:flex; align-items:flex-start; gap:10px; padding:8px 10px; margin-bottom:6px; background:${ok ? 'rgba(34, 197, 94, 0.08)' : 'rgba(239, 68, 68, 0.08)'}; border:1px solid ${ok ? 'rgba(34, 197, 94, 0.25)' : 'rgba(239, 68, 68, 0.25)'}; border-radius:8px;">
+            <span style="font-weight:700; font-size:14px; color:${ok ? '#4ade80' : '#f87171'}; line-height:1.2;">${ok ? '✓' : '✗'}</span>
+            <div style="flex:1; min-width:0;">
+              <div style="font-size:12.5px; font-weight:600; color:#fff;">${esc(title)}</div>
+              <div style="font-size:11.5px; color:${ok ? 'var(--text-muted)' : '#fca5a5'}; line-height:1.35; margin-top:2px;">${esc(desc)}</div>
+            </div>
+          </div>`;
+
+        // 1. FFmpeg
+        const ffmpegOk = !!(deps.ffmpeg && deps.ffmpeg.available);
+        depsHtml += depRow(
+          ffmpegOk,
+          `FFmpeg ${ffmpegOk ? (deps.ffmpeg.version || 'disponible') : 'no disponible'}`,
+          ffmpegOk ? `Versión instalada: ${deps.ffmpeg.version || 'Detectado'}` : 'FFmpeg no encontrado en el sistema'
+        );
+
+        // 2. Encoder
+        const encName = deps.encoder?.chosen || c.encoder || 'libx264';
+        depsHtml += depRow(
+          true,
+          `Codificador: ${deps.encoder?.type || encName}`,
+          deps.encoder?.is_hardware_accelerated ? 'Aceleración por GPU AMD AMF activa para renderizado rápido.' : 'Codificador por CPU activo (máxima compatibilidad).'
+        );
+
+        // 3. Ollama
+        const ollamaOk = !!(deps.ollama && deps.ollama.accessible && deps.ollama.model_loaded);
+        depsHtml += depRow(
+          ollamaOk,
+          `Ollama IA (${deps.ollama?.model_name || 'llama3.2:3b'})`,
+          deps.ollama?.message || (ollamaOk ? 'Ollama accesible con modelo cargado' : 'Ollama no responde: se usará el motor heurístico')
+        );
+
+        // 4. Whisper
+        const whisperOk = !!(deps.whisper && deps.whisper.present);
+        depsHtml += depRow(
+          whisperOk,
+          `Modelo Whisper (${deps.whisper?.model_name || c.whisper_model || 'small'})`,
+          deps.whisper?.message || (whisperOk ? 'Modelo de transcripción presente en caché' : 'Se descargará automáticamente al transcribir')
+        );
+
+        // 5. YuNet
+        const yunetOk = !!(deps.yunet && deps.yunet.present);
+        depsHtml += depRow(
+          yunetOk,
+          `Detección de rostros YuNet`,
+          deps.yunet?.message || (yunetOk ? 'Modelo ONNX de rostros activo para encuadre vertical' : 'Modelo YuNet no presente: se usará encuadre central de respaldo')
+        );
+      }
+
+      let content = '';
+      if (depsHtml) {
+        content += `<div style="margin-bottom:14px;"><div style="font-size:11px; font-weight:700; text-transform:uppercase; color:#c084fc; letter-spacing:0.5px; margin-bottom:8px;">Estado de Requisitos y Dependencias:</div>${depsHtml}</div>`;
+      }
+      content += `<div style="font-size:11px; font-weight:700; text-transform:uppercase; color:var(--text-muted); letter-spacing:0.5px; margin-bottom:6px;">Parámetros del Sistema:</div>`;
+      content += item('Modelo Whisper', c.whisper_model || 'small');
+      content += item('Dispositivo', c.device || 'CPU');
+      content += item('Precisión', c.compute_type || 'int8');
+      content += item('Hilos de CPU', c.cpu_threads || '8');
+      content += item('Codificador de video', c.encoder || 'libx264');
+      content += item('RAM máxima', (c.max_ram_gb || 18) + ' GB');
+      content += item('Carpeta de salida', 'data/outputs');
+      content += '<div style="margin-top:10px; font-size:11px; color:var(--text-muted);">Ajustes configurables por variables de entorno: CLIP_HW_ENCODER, CLIP_WHISPER_MODEL, CLIP_MAX_UPLOAD_MB.</div>';
+
+      openInfoModal('Configuración y Diagnóstico (solo lectura)', content);
     } catch (e) {
       showToast('No se pudo cargar la configuración: ' + e.message);
     }

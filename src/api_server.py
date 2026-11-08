@@ -7,6 +7,7 @@ import io
 import ipaddress
 import os
 import re
+import requests
 import secrets
 import socket
 import subprocess
@@ -908,6 +909,97 @@ def get_system_metrics():
             "queued_jobs": 0,
             "error": str(e)
         }
+
+
+def check_dependencies() -> Dict[str, Any]:
+    # 1. FFmpeg
+    ffmpeg_exe = getattr(settings, "ffmpeg_exe", "ffmpeg")
+    ffmpeg_info = {"available": False, "version": None}
+    try:
+        proc = subprocess.run([ffmpeg_exe, "-version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, timeout=2)
+        if proc.returncode == 0:
+            first_line = proc.stdout.splitlines()[0] if proc.stdout else ""
+            m = re.search(r"version\s+([^\s]+)", first_line)
+            ver = m.group(1) if m else first_line[:30]
+            ffmpeg_info = {"available": True, "version": ver}
+    except Exception:
+        pass
+
+    # 2. Encoder
+    enc = getattr(settings, "ffmpeg_encoder", "libx264")
+    is_amf = (enc == "h264_amf")
+    encoder_info = {
+        "chosen": enc,
+        "type": "h264_amf (GPU AMD)" if is_amf else "libx264 (CPU)",
+        "is_hardware_accelerated": is_amf
+    }
+
+    # 3. Ollama
+    ollama_url = getattr(settings.ollama, "base_url", "http://127.0.0.1:11434")
+    target_model = getattr(settings.ollama, "model", "llama3.2:3b")
+    ollama_info = {
+        "accessible": False,
+        "model_loaded": False,
+        "model_name": target_model,
+        "message": "Ollama no responde: se usará el motor heurístico"
+    }
+    try:
+        r = requests.get(f"{ollama_url}/api/tags", timeout=1.5)
+        if r.status_code == 200:
+            models = [m.get("name") for m in r.json().get("models", [])]
+            loaded = any(target_model in m for m in models)
+            if loaded:
+                ollama_info = {
+                    "accessible": True,
+                    "model_loaded": True,
+                    "model_name": target_model,
+                    "message": f"Ollama accesible y modelo {target_model} cargado"
+                }
+            else:
+                ollama_info = {
+                    "accessible": True,
+                    "model_loaded": False,
+                    "model_name": target_model,
+                    "message": f"Ollama responde pero modelo {target_model} no encontrado: se usará el motor heurístico"
+                }
+    except Exception:
+        pass
+
+    # 4. Whisper model
+    whisper_size = getattr(settings.hardware, "whisper_model_size", "small")
+    whisper_dir = settings.cache_dir / "whisper_models"
+    whisper_present = False
+    if whisper_dir.is_dir():
+        matches = list(whisper_dir.glob(f"*{whisper_size}*")) + list(whisper_dir.glob("models--*"))
+        whisper_present = len(matches) > 0 or any(whisper_dir.iterdir())
+    whisper_info = {
+        "present": whisper_present,
+        "model_name": whisper_size,
+        "message": f"Modelo Whisper '{whisper_size}' presente en caché" if whisper_present else f"Modelo Whisper '{whisper_size}' no encontrado en caché"
+    }
+
+    # 5. YuNet face model
+    face_path = Path(getattr(settings, "face_model_path", ""))
+    yunet_present = face_path.is_file()
+    yunet_info = {
+        "present": yunet_present,
+        "model_name": face_path.name or "face_detection_yunet_2023mar.onnx",
+        "message": "Modelo de rostros YuNet presente" if yunet_present else "Modelo YuNet no presente: se usará encuadre central de respaldo"
+    }
+
+    return {
+        "ffmpeg": ffmpeg_info,
+        "encoder": encoder_info,
+        "ollama": ollama_info,
+        "whisper": whisper_info,
+        "yunet": yunet_info
+    }
+
+
+@app.get("/api/health/deps")
+def get_health_deps():
+    """Informe de estado de dependencias del sistema (solo lectura, sin rutas sensibles ni tokens)."""
+    return check_dependencies()
 
 
 if __name__ == "__main__":
