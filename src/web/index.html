@@ -3847,6 +3847,15 @@
         </div>
       </div>
 
+      <!-- Historial de URLs recientes -->
+      <div id="recent-urls-box" style="display:none; margin: 4px 0 10px 0;">
+        <div style="font-size:11px; color:var(--text-muted); margin-bottom:4px; display:flex; align-items:center; gap:5px;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span>Recientes:</span>
+        </div>
+        <div id="recent-urls-chips" style="display:flex; gap:6px; flex-wrap:wrap;"></div>
+      </div>
+
       <!-- VISTA PREVIA DEL ENLACE Y ESTIMACIÓN DE TIEMPO (TAREA 1) -->
       <div id="url-preview-card" class="url-preview-card" style="display: none;" aria-live="polite">
         <div class="url-preview-thumb-wrap">
@@ -4070,6 +4079,20 @@
                 <button type="button" class="sub-pill-btn sub-pos-pill" data-pos="top" onclick="selectSubPos(this, 'top')" title="Superior">Arriba</button>
               </div>
             </div>
+
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="font-size:12px; font-weight:600; color:var(--text-secondary); display:flex; align-items:center; gap:5px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24"/></svg>
+                Resalte:
+              </span>
+              <div id="hl-color-palette" style="display:flex; gap:6px; align-items:center;">
+                <button type="button" class="hl-color-btn active" data-color="" onclick="selectHighlightColor('', this)" style="width:19px; height:19px; border-radius:50%; background:#facc15; border:2px solid #fff; cursor:pointer;" title="Amarillo Neón (Estilo original)"></button>
+                <button type="button" class="hl-color-btn" data-color="&H0000FF00" onclick="selectHighlightColor('&H0000FF00', this)" style="width:19px; height:19px; border-radius:50%; background:#22c55e; border:2px solid transparent; cursor:pointer;" title="Verde Lima"></button>
+                <button type="button" class="hl-color-btn" data-color="&H00FFFF00" onclick="selectHighlightColor('&H00FFFF00', this)" style="width:19px; height:19px; border-radius:50%; background:#06b6d4; border:2px solid transparent; cursor:pointer;" title="Cian Eléctrico"></button>
+                <button type="button" class="hl-color-btn" data-color="&H00FF00FF" onclick="selectHighlightColor('&H00FF00FF', this)" style="width:19px; height:19px; border-radius:50%; background:#ec4899; border:2px solid transparent; cursor:pointer;" title="Fucsia TikTok"></button>
+                <button type="button" class="hl-color-btn" data-color="&H000080FF" onclick="selectHighlightColor('&H000080FF', this)" style="width:19px; height:19px; border-radius:50%; background:#f97316; border:2px solid transparent; cursor:pointer;" title="Naranja Fuego"></button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -4205,6 +4228,7 @@
             <button class="btn-outline btn-ico" id="btn-reject" onclick="setClipStatus('rejected')"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Descartar</button>
             <button class="btn-outline btn-ico" onclick="downloadActiveClip()"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Descargar</button>
             <button class="btn-outline btn-ico" onclick="copyActiveClipCopy()"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copiar copy</button>
+            <button class="btn-outline btn-ico" style="grid-column: span 2;" onclick="exportActiveTranscript('txt')"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Exportar Guion Completo (TXT)</button>
 
             <!-- Control de Tamaño y Posición para Re-renderizar -->
             <div style="grid-column:span 2; display:flex; flex-direction:column; gap:6px; background:rgba(0,0,0,0.35); padding:8px 10px; border-radius:6px; border:1px solid rgba(255,255,255,0.06); margin-top:2px;">
@@ -4514,8 +4538,17 @@
             </div>
           </div>
 
-          <div style="margin-bottom:8px;">
-            <input type="text" class="input-glow" placeholder="Filtrar clips..." style="font-size:11.5px; padding:6px 10px;" oninput="filterClips(this.value)">
+          <div style="display:flex; gap:6px; margin-bottom:8px; align-items:center;">
+            <div style="position:relative; flex:1;">
+              <input type="text" id="clip-search-input" class="input-glow" placeholder="🔍 Buscar clips o frases..." style="font-size:11.5px; padding:6px 10px 6px 26px; width:100%;" oninput="onClipSearchOrSortChange()">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="position:absolute; left:8px; top:50%; transform:translateY(-50%); opacity:0.55;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </div>
+            <select id="clip-sort-select" onchange="onClipSearchOrSortChange()" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); border-radius:6px; color:#e2e8f0; font-size:11.5px; padding:6px 8px; cursor:pointer;" aria-label="Ordenar clips">
+              <option value="score_desc">🔥 Mayor puntaje</option>
+              <option value="date_desc">🕒 Más recientes</option>
+              <option value="dur_desc">⏱️ Mayor duración</option>
+              <option value="dur_asc">⚡ Más cortos</option>
+            </select>
           </div>
 
           <div style="display:flex; gap:5px; margin-bottom:12px; flex-wrap:wrap;" id="category-filter-pills">
@@ -4988,6 +5021,47 @@
     updateVideoPreviewEstimate();
   }
 
+  function loadRecentUrls() {
+    try {
+      const box = document.getElementById('recent-urls-box');
+      const container = document.getElementById('recent-urls-chips');
+      if (!box || !container) return;
+      const raw = localStorage.getItem('clip_recent_urls');
+      const list = raw ? JSON.parse(raw) : [];
+      if (!list || !list.length) {
+        box.style.display = 'none';
+        return;
+      }
+      box.style.display = 'block';
+      container.innerHTML = list.map(item => {
+        const titleSafe = esc(item.title || item.url);
+        const urlAttr = esc(item.url);
+        return `<button type="button" class="preset-chip" style="font-size:11px; padding:3px 8px; max-width:240px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; cursor:pointer;" onclick="selectRecentUrl('${urlAttr}')" title="${titleSafe}">🔗 ${titleSafe}</button>`;
+      }).join('');
+    } catch (e) {}
+  }
+
+  function addRecentUrl(url, title = '') {
+    if (!url || typeof url !== 'string' || !url.startsWith('http')) return;
+    try {
+      let list = JSON.parse(localStorage.getItem('clip_recent_urls') || '[]');
+      list = list.filter(item => item.url !== url);
+      const displayTitle = title ? title.slice(0, 40) : url.replace(/^https?:\/\/(www\.)?/, '').slice(0, 30);
+      list.unshift({ url, title: displayTitle, timestamp: Date.now() });
+      if (list.length > 6) list = list.slice(0, 6);
+      localStorage.setItem('clip_recent_urls', JSON.stringify(list));
+      loadRecentUrls();
+    } catch (e) {}
+  }
+
+  function selectRecentUrl(url) {
+    const input = document.getElementById('yt-url-input');
+    if (input) {
+      input.value = url;
+      validateInputUrl(url);
+    }
+  }
+
   function setUrlBadge(show, msg, ok) {
     const badge = document.getElementById('val-badge');
     const text = document.getElementById('val-badge-text');
@@ -5039,6 +5113,7 @@
           }
           setUrlBadge(true, label, true);
           renderVideoPreview(data);
+          addRecentUrl(val, data.title || '');
         } else {
           setUrlBadge(true, data.message || 'Enlace listo (se procesará con el descargador)', false);
           renderVideoPreview(null);
@@ -5198,6 +5273,17 @@
 
   let activeSubSize = 'medium';
   let activeSubPos = 'bottom';
+  let activeHighlightColor = '';
+
+  function selectHighlightColor(colorCode, btn) {
+    activeHighlightColor = colorCode || '';
+    document.querySelectorAll('.hl-color-btn').forEach(b => {
+      const match = (b.getAttribute('data-color') || '') === (colorCode || '');
+      b.classList.toggle('active', match);
+      b.style.border = match ? '2px solid #fff' : '2px solid transparent';
+    });
+    if (typeof saveLastSettings === 'function') saveLastSettings();
+  }
 
   function selectSubSize(el, sz) {
     activeSubSize = sz;
@@ -5304,6 +5390,7 @@
       sub_style: activeSubStyle || 'hormozi',
       sub_size: activeSubSize || 'medium',
       sub_pos: activeSubPos || 'bottom',
+      custom_highlight: activeHighlightColor || '',
       layout: activeLayoutMode || 'auto',
       speed: activeSpeedMode || 'turbo',
       hook_zoom: !!document.getElementById('hook-zoom-check')?.checked,
@@ -5323,6 +5410,7 @@
     if (s.sub_style) selectSubStyle(s.sub_style);
     if (s.sub_size) selectSubSize(null, s.sub_size);
     if (s.sub_pos) selectSubPos(null, s.sub_pos);
+    if (s.custom_highlight !== undefined) selectHighlightColor(s.custom_highlight);
     if (s.layout) selectLayoutMode(s.layout);
     if (s.speed) selectSpeedMode(s.speed);
     if (s.target_duration) selectClipDuration(s.target_duration);
@@ -5486,8 +5574,10 @@
       watermark_text: document.getElementById('watermark-input')?.value.trim() || null,
       focus_prompt: document.getElementById('focus-prompt-input')?.value.trim() || null,
       subtitle_position: activeSubPos || 'bottom',
-      subtitle_size: activeSubSize || 'medium'
+      subtitle_size: activeSubSize || 'medium',
+      custom_highlight: activeHighlightColor || null
     };
+    addRecentUrl(url, document.getElementById('url-preview-title')?.innerText || '');
 
     const btn = document.getElementById('btn-submit-process');
     if (btn) btn.disabled = true;
@@ -6083,11 +6173,12 @@
       const badgeText = catBadge[catKey] || '';
       return `
       <div class="grid-clip-card" onclick="selectClipForEditorById('${esc(c.id)}')" title="${esc(c.title)}">
-        <div class="grid-thumb-box">
+        <div class="grid-thumb-box" onmouseenter="playHoverPreview(this, '${esc(c.video_url || '')}')" onmouseleave="stopHoverPreview(this)">
           ${clipThumb(c, 20)}
+          <video class="hover-video-preview" muted loop playsinline preload="none" style="display:none; position:absolute; inset:0; width:100%; height:100%; object-fit:cover; border-radius:inherit; z-index:2;"></video>
           <span class="grid-score">🔥 ${c.score}%</span>
           <span class="grid-duration">${clock(c.end - c.start)}</span>
-          ${badgeText ? `<span class="pill-tag" style="position:absolute; bottom:6px; left:6px; font-size:9.5px; padding:2px 6px; background:rgba(15,23,42,0.85); backdrop-filter:blur(4px); border:1px solid rgba(255,255,255,0.15);">${badgeText}</span>` : ''}
+          ${badgeText ? `<span class="pill-tag" style="position:absolute; bottom:6px; left:6px; font-size:9.5px; padding:2px 6px; background:rgba(15,23,42,0.85); backdrop-filter:blur(4px); border:1px solid rgba(255,255,255,0.15); z-index:3;">${badgeText}</span>` : ''}
         </div>
         <div class="grid-card-info">
           <div class="grid-card-title">${esc(c.title)}</div>
@@ -6349,9 +6440,50 @@
     const c = currentActiveClip;
     if (!c) { showToast('Primero selecciona un clip'); return; }
     if (!c.download_url) { showToast('Este clip aún no tiene archivo para descargar'); return; }
+    const titleClean = (c.title || 'clip').replace(/[^\w\d\-]/gi, '_').substring(0, 45);
+    const filename = `clip_${c.score || 0}pts_${titleClean}.mp4`;
     const a = document.createElement('a');
     a.href = c.download_url;
+    a.download = filename;
+    document.body.appendChild(a);
     a.click();
+    document.body.removeChild(a);
+    showToast(`Descargando "${filename}"`);
+  }
+
+  function exportActiveTranscript(format = 'txt') {
+    const c = currentActiveClip;
+    const vid = c ? c.video_id : (loadedClips[0] ? loadedClips[0].video_id : null);
+    if (!vid) {
+      showToast('No hay un video activo para exportar su guion');
+      return;
+    }
+    showToast(`Descargando guion (${format.toUpperCase()})...`);
+    window.location.href = `/api/videos/${encodeURIComponent(vid)}/transcript/export?format=${encodeURIComponent(format)}`;
+  }
+
+  function playHoverPreview(container, videoUrl) {
+    if (!videoUrl) return;
+    const v = container ? container.querySelector('.hover-video-preview') : null;
+    if (!v) return;
+    if (!v.src || !v.src.endsWith(videoUrl)) {
+      v.src = videoUrl;
+    }
+    v.style.display = 'block';
+    v.currentTime = 0;
+    const p = v.play();
+    if (p && typeof p.catch === 'function') p.catch(() => {});
+  }
+
+  function stopHoverPreview(container) {
+    if (!container) return;
+    const v = container.querySelector('.hover-video-preview');
+    if (!v) return;
+    try {
+      v.pause();
+      v.currentTime = 0;
+    } catch (e) {}
+    v.style.display = 'none';
   }
 
   function copyActiveClipCopy() {
@@ -6365,8 +6497,9 @@
     const style = activeSubStyle || 'hormozi';
     const size = document.getElementById('editor-sub-size')?.value || activeSubSize || 'medium';
     const pos = document.getElementById('editor-sub-pos')?.value || activeSubPos || 'bottom';
+    const hl = activeHighlightColor || '';
     try {
-      const data = await apiJson(`/api/clips/${encodeURIComponent(c.id)}/rerender?style=${encodeURIComponent(style)}&aspect=${encodeURIComponent(activeFormat || '9:16')}&position=${encodeURIComponent(pos)}&size=${encodeURIComponent(size)}`, { method: 'POST' });
+      const data = await apiJson(`/api/clips/${encodeURIComponent(c.id)}/rerender?style=${encodeURIComponent(style)}&aspect=${encodeURIComponent(activeFormat || '9:16')}&position=${encodeURIComponent(pos)}&size=${encodeURIComponent(size)}&highlight=${encodeURIComponent(hl)}`, { method: 'POST' });
       showToast(`Re-renderizando con tamaño y posición elegidos (trabajo #${data.job_id})`);
       activeJobId = data.job_id;
       trackJobProgress(data.job_id);
@@ -6389,16 +6522,44 @@
     showToast(`Filtrando: ${names[cat] || cat}`);
   }
 
+  function onClipSearchOrSortChange() {
+    applyClipFilters();
+  }
+
   function applyClipFilters() {
-    let list = loadedClips;
+    let list = [...loadedClips];
     if (statusFilter === 'approved') list = list.filter(c => c.status === 'approved');
     if (categoryFilter !== 'all') list = list.filter(c => (c.category || '').toLowerCase() === categoryFilter.toLowerCase());
-    if (textFilter) list = list.filter(c => (c.title || '').toLowerCase().includes(textFilter));
+
+    const searchInputVal = document.getElementById('clip-search-input')?.value;
+    const query = (searchInputVal !== undefined ? searchInputVal : textFilter || '').trim().toLowerCase();
+    if (query) {
+      list = list.filter(c =>
+        (c.title || '').toLowerCase().includes(query) ||
+        (c.hook_text || '').toLowerCase().includes(query) ||
+        (c.reasoning || '').toLowerCase().includes(query) ||
+        (c.category || '').toLowerCase().includes(query)
+      );
+    }
+
+    const sortMode = document.getElementById('clip-sort-select')?.value || 'score_desc';
+    if (sortMode === 'score_desc') {
+      list.sort((a, b) => (b.score || 0) - (a.score || 0));
+    } else if (sortMode === 'date_desc') {
+      list.sort((a, b) => (b.created_at || '').localeCompare(a.created_at || ''));
+    } else if (sortMode === 'dur_desc') {
+      list.sort((a, b) => ((b.end || 0) - (b.start || 0)) - ((a.end || 0) - (a.start || 0)));
+    } else if (sortMode === 'dur_asc') {
+      list.sort((a, b) => ((a.end || 0) - (a.start || 0)) - ((b.end || 0) - (b.start || 0)));
+    }
+
     renderGridClips(list);
   }
 
   function filterClips(val) {
     textFilter = (val || '').trim().toLowerCase();
+    const input = document.getElementById('clip-search-input');
+    if (input && input.value !== textFilter) input.value = textFilter;
     applyClipFilters();
   }
 
@@ -6493,9 +6654,10 @@
 
   async function openSettingsModal() {
     try {
-      const [c, deps] = await Promise.all([
+      const [c, deps, storage] = await Promise.all([
         apiJson('/api/config').catch(() => ({})),
-        apiJson('/api/health/deps').catch(() => null)
+        apiJson('/api/health/deps').catch(() => null),
+        apiJson('/api/system/storage').catch(() => null)
       ]);
 
       const item = (label, val) => `<div style="display:flex; justify-content:space-between; gap:12px; padding:7px 0; border-bottom:1px solid rgba(255,255,255,0.06); font-size:12px;"><span>${label}</span><strong style="color:#fff; text-align:right; word-break:break-all;">${esc(val)}</strong></div>`;
@@ -6564,11 +6726,39 @@
       content += item('Codificador de video', c.encoder || 'libx264');
       content += item('RAM máxima', (c.max_ram_gb || 18) + ' GB');
       content += item('Carpeta de salida', 'data/outputs');
+      if (storage && !storage.error) {
+        content += `<div style="margin-top:14px; margin-bottom:14px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:10px 12px;">
+          <div style="font-size:11px; font-weight:700; text-transform:uppercase; color:#38bdf8; letter-spacing:0.5px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+            <span>Almacenamiento Local</span>
+            <span style="color:var(--text-muted); font-size:10.5px;">Libre: ${storage.free_disk_gb || 0} GB</span>
+          </div>
+          ${item('Caché Temporal (WAV / ASS)', (storage.cache_mb || 0) + ' MB')}
+          ${item('Archivos de Entrada', (storage.inputs_mb || 0) + ' MB')}
+          ${item('Clips Generados', (storage.outputs_mb || 0) + ' MB')}
+          <div style="margin-top:10px; display:flex; justify-content:flex-end;">
+            <button type="button" class="btn-outline btn-ico" onclick="cleanTempCache()" style="font-size:11px; padding:4px 10px; color:#f87171; border-color:rgba(248,113,113,0.35);">
+              <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+              Limpiar caché temporal (${storage.cache_mb || 0} MB)
+            </button>
+          </div>
+        </div>`;
+      }
       content += '<div style="margin-top:10px; font-size:11px; color:var(--text-muted);">Ajustes configurables por variables de entorno: CLIP_HW_ENCODER, CLIP_WHISPER_MODEL, CLIP_MAX_UPLOAD_MB.</div>';
 
       openInfoModal('Configuración y Diagnóstico (solo lectura)', content);
     } catch (e) {
       showToast('No se pudo cargar la configuración: ' + e.message);
+    }
+  }
+
+  async function cleanTempCache() {
+    try {
+      showToast('Limpiando archivos temporales...');
+      const res = await apiJson('/api/system/cleanup_cache', { method: 'POST' });
+      showToast(res.message || `Se liberaron ${res.cleaned_mb || 0} MB de caché temporal`);
+      await openSettingsModal();
+    } catch (e) {
+      showToast('Error al limpiar caché: ' + e.message);
     }
   }
 
@@ -6960,6 +7150,7 @@
   });
 
   restoreLastSettings();
+  loadRecentUrls();
 
   ['stream-start-time', 'stream-end-time'].forEach(id => {
     document.getElementById(id)?.addEventListener('input', () => {

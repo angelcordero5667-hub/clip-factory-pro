@@ -84,6 +84,15 @@ Pendientes para Antigravity: restaurar "Subtítulos" y "Plantillas" en el menú 
   4. Modelo Faster-Whisper actualizado por defecto a `small` (pre-descargado en `data/cache/whisper_models` y configurable con `CLIP_WHISPER_MODEL`) para máxima precisión fonética en español.
 
 ## Pendiente / ideas (reclamar aquí antes de empezar)
+- [x] **COMPLETADO POR ANTIGRAVITY (08-nov ~08:45):** Tarea 14: Paquete de 7 mejoras de productividad y refinamiento:
+  1. 🔍 Búsqueda rápida y ordenación interactiva en la galería de clips (`#clip-search-input`, `#clip-sort-select` por mayor puntaje, más recientes o duración).
+  2. 🎨 Selector de paleta de colores de resalte karaoke en subtítulos (`custom_highlight` en API, jobs y pipeline: amarillo, verde lima, cian eléctrico, fucsia TikTok, naranja fuego).
+  3. 🎬 Hover preview dinámico (reproducción silenciosa en video HTML5 al pasar el cursor sobre las miniaturas).
+  4. 🧹 Monitor de almacenamiento y limpiador de caché temporal (`GET /api/system/storage` y `POST /api/system/cleanup_cache` con botón en ajustes).
+  5. 🏷️ Nombres de archivo limpios y descriptivos al descargar clips individuales (`clip_[score]pts_[titulo].mp4`).
+  6. 🕒 Historial interactivo de URLs recientes en panel Crear (`#recent-urls-box` con chips clicables y persistencia en `localStorage`).
+  7. 📄 Exportación del guion / transcripción completa en formatos TXT y VTT (`/api/videos/{video_id}/transcript/export?format=txt|vtt`).
+  Verificado: 222 tests unitarios pasando al 100% y validación Playwright completa en navegador.
 - [x] **COMPLETADO POR ANTIGRAVITY (08-nov ~08:28):** Tarea 13: Prueba de fuego en vivo con video real de YouTube (envío de trabajo real vía /api/jobs con descarga de tramo real, transcripción Whisper small, detector de momentos virales, auto-encuadre vertical 9:16, renderizado con subtítulos estilo Hormozi y descarga verificada del paquete ZIP de 15 MB en 32 segundos).
 - [x] **COMPLETADO POR ANTIGRAVITY (08-nov ~08:08):** Tarea 12: Marcadores de chat de Twitch / YouTube Live (analizador de velocidad de chat, picos de mensajes por segundo y emotes de hype 'LUL/OMG/????/KEKW/CLIP' como señal de viralidad en momentos candidatos).
 - [x] **COMPLETADO POR ANTIGRAVITY (08-nov ~07:55):** Tarea 11: Modo B-Roll / Video secundario inferior (Estilo TikTok Gameplay: opción de metraje inferior en bucle de data/broll o generador procedural dinámico de retención en FFmpeg bajo el hablante centrado).

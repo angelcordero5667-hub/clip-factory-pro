@@ -293,6 +293,7 @@ class ClipFactoryPipeline:
         subtitle_position: str = "bottom",
         custom_fontsize: Optional[int] = None,
         subtitle_size: Optional[str] = None,
+        custom_highlight: Optional[str] = None,
     ) -> Path:
         """Vuelve a renderizar un clip con los tiempos/título actuales de la base de datos."""
         cand_row = db.get_candidate(candidate_id)
@@ -330,7 +331,7 @@ class ClipFactoryPipeline:
             with_subtitles=True, subtitle_style=subtitle_style, include_emojis=include_emojis,
             aspect_ratio=aspect_ratio, use_scene_detection=False,
             subtitle_position=subtitle_position, custom_fontsize=custom_fontsize,
-            subtitle_size=subtitle_size,
+            subtitle_size=subtitle_size, custom_highlight=custom_highlight,
         )
         db.update_candidate_clip_path(candidate_id, str(out.resolve()), dirty=False)
         return out

@@ -84,6 +84,7 @@ class JobWorker:
                     subtitle_position=opts.get("subtitle_position", "bottom"),
                     custom_fontsize=opts.get("custom_fontsize"),
                     subtitle_size=opts.get("subtitle_size"),
+                    custom_highlight=opts.get("custom_highlight"),
                 )
                 self.db.update_job(job_id, status="done", progress=1.0, message="Clip actualizado.")
                 return
@@ -134,6 +135,7 @@ class JobWorker:
                 subtitle_position=opts.get("subtitle_position", "bottom"),
                 custom_fontsize=opts.get("custom_fontsize"),
                 subtitle_size=opts.get("subtitle_size"),
+                custom_highlight=opts.get("custom_highlight"),
             )
             self.db.update_job(job_id, status="done", progress=1.0, video_id=video_id,
                                step_index=len(STEPS) - 1, step_label=STEPS[-1],

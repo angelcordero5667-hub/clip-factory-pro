@@ -5,10 +5,12 @@ Token opcional: variable de entorno CLIP_API_TOKEN.
 """
 import io
 import ipaddress
+import json
 import os
 import re
 import requests
 import secrets
+import shutil
 import socket
 import subprocess
 import zipfile
@@ -381,6 +383,7 @@ def rerender_clip(
     position: str = "bottom",
     size: str = "medium",
     fontsize: Optional[int] = None,
+    highlight: Optional[str] = None,
 ):
     _get_clip_or_404(clip_id)
     if style not in SUBTITLE_STYLES or aspect not in ASPECT_RATIOS:
@@ -392,6 +395,7 @@ def rerender_clip(
                                "subtitle_position": position,
                                "subtitle_size": size,
                                "custom_fontsize": fontsize,
+                               "custom_highlight": highlight,
                            })
     return {"job_id": job_id}
 
@@ -602,6 +606,58 @@ def download_video_zip(video_id: str, only: str = "all"):
                              headers={"Content-Disposition": f'attachment; filename="{name}_clips.zip"'})
 
 
+@app.get("/api/videos/{video_id}/transcript/export")
+def export_transcript(video_id: str, format: str = "txt"):
+    """Exporta la transcripción completa del video en formato TXT legible o VTT con marcas de tiempo."""
+    video = db.get_video(video_id)
+    if not video:
+        raise HTTPException(status_code=404, detail="Video no encontrado.")
+    tpath = Path(settings.cache_dir) / f"{video_id}_transcript.json"
+    segments = []
+    if tpath.is_file():
+        try:
+            data = json.loads(tpath.read_text(encoding="utf-8"))
+            segments = data.get("segments", [])
+        except Exception:
+            pass
+
+    title_safe = re.sub(r"[^\w\- ]", "", video.get("title") or video_id).strip().replace(" ", "_") or video_id
+
+    if not segments:
+        cands = db.get_candidates_by_video(video_id)
+        if not cands:
+            raise HTTPException(status_code=404, detail="No hay transcripción disponible para este video.")
+        lines = [f"=== GUION / TRANSCRIPCION: {video.get('title') or video_id} ===\n\n"]
+        for c in cands:
+            lines.append(f"[{_clock(c['start_time'])} - {_clock(c['end_time'])}] {c.get('title')}\n{c.get('hook_text') or ''}\n\n")
+        return PlainTextResponse("".join(lines), media_type="text/plain; charset=utf-8",
+                                 headers={"Content-Disposition": f'attachment; filename="{title_safe}_guion.txt"'})
+
+    if format.lower() == "vtt":
+        def _to_vtt(sec: float) -> str:
+            total_ms = int(round(sec * 1000))
+            ms = total_ms % 1000
+            total_s = total_ms // 1000
+            s = total_s % 60
+            m = (total_s // 60) % 60
+            h = total_s // 3600
+            return f"{h:02d}:{m:02d}:{s:02d}.{ms:03d}"
+
+        out = ["WEBVTT\n\n"]
+        for s in segments:
+            st_str = _to_vtt(s.get("start", 0))
+            en_str = _to_vtt(s.get("end", 0))
+            out.append(f"{st_str} --> {en_str}\n{s.get('text', '').strip()}\n\n")
+        return PlainTextResponse("".join(out), media_type="text/vtt",
+                                 headers={"Content-Disposition": f'attachment; filename="{title_safe}.vtt"'})
+    else:
+        out = [f"=== TRANSCRIPCION: {video.get('title') or video_id} ===\n\n"]
+        for s in segments:
+            out.append(f"[{_clock(s.get('start', 0))}] {s.get('text', '').strip()}\n")
+        return PlainTextResponse("".join(out), media_type="text/plain; charset=utf-8",
+                                 headers={"Content-Disposition": f'attachment; filename="{title_safe}_transcripcion.txt"'})
+
+
 # ------------------------------------------------------------------------------- trabajos
 class JobBody(BaseModel):
     source: str
@@ -624,6 +680,7 @@ class JobBody(BaseModel):
     subtitle_position: Optional[str] = "bottom"
     subtitle_size: Optional[str] = "medium"
     custom_fontsize: Optional[int] = None
+    custom_highlight: Optional[str] = Field(default=None, max_length=25)
 
 
 def _is_public_url(url: str) -> bool:
@@ -932,6 +989,59 @@ def get_system_metrics():
             "queued_jobs": 0,
             "error": str(e)
         }
+
+
+@app.get("/api/system/storage")
+def get_system_storage():
+    """Métricas de uso de disco y carpetas temporales del proyecto."""
+    try:
+        def _dir_size(p: Path) -> int:
+            if not p.exists(): return 0
+            return sum(f.stat().st_size for f in p.rglob("*") if f.is_file())
+
+        inputs_b = _dir_size(settings.inputs_dir)
+        cache_b = _dir_size(settings.cache_dir)
+        outputs_b = _dir_size(settings.outputs_dir)
+        total_proj = inputs_b + cache_b + outputs_b
+
+        total_disk, used_disk, free_disk = shutil.disk_usage(str(settings.base_dir))
+        return {
+            "inputs_bytes": inputs_b,
+            "cache_bytes": cache_b,
+            "outputs_bytes": outputs_b,
+            "total_project_bytes": total_proj,
+            "free_disk_bytes": free_disk,
+            "total_disk_bytes": total_disk,
+            "inputs_mb": round(inputs_b / (1024 * 1024), 1),
+            "cache_mb": round(cache_b / (1024 * 1024), 1),
+            "outputs_mb": round(outputs_b / (1024 * 1024), 1),
+            "free_disk_gb": round(free_disk / (1024 * 1024 * 1024), 1),
+        }
+    except Exception as e:
+        return {"error": str(e)}
+
+
+@app.post("/api/system/cleanup_cache")
+def cleanup_temp_cache():
+    """Limpia archivos temporales de data/cache (wav, ass, etc.) sin tocar videos ni la DB."""
+    removed_bytes = 0
+    removed_count = 0
+    if settings.cache_dir.exists():
+        for f in settings.cache_dir.glob("*"):
+            if f.is_file() and not f.name.startswith("."):
+                try:
+                    sz = f.stat().st_size
+                    f.unlink()
+                    removed_bytes += sz
+                    removed_count += 1
+                except Exception as e:
+                    logger.debug(f"No se pudo eliminar {f}: {e}")
+    return {
+        "cleaned_files": removed_count,
+        "cleaned_bytes": removed_bytes,
+        "cleaned_mb": round(removed_bytes / (1024 * 1024), 1),
+        "message": f"Se liberaron {round(removed_bytes / (1024 * 1024), 1)} MB de caché temporal."
+    }
 
 
 def check_dependencies() -> Dict[str, Any]:

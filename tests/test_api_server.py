@@ -422,5 +422,76 @@ def test_create_job_layout_broll(tdb):
     assert job["options"]["layout"] == "broll"
 
 
+def test_system_storage_and_cleanup(tmp_path, monkeypatch):
+    from src.common.config import settings
+    monkeypatch.setattr(settings, "cache_dir", tmp_path / "cache")
+    (tmp_path / "cache").mkdir(parents=True, exist_ok=True)
+    temp_file = tmp_path / "cache" / "temp_audio.wav"
+    temp_file.write_bytes(b"0" * 2048)
+
+    r = client.get("/api/system/storage")
+    assert r.status_code == 200
+    data = r.json()
+    assert "cache_mb" in data
+    assert "free_disk_gb" in data
+
+    r_clean = client.post("/api/system/cleanup_cache")
+    assert r_clean.status_code == 200
+    clean_data = r_clean.json()
+    assert clean_data["cleaned_files"] >= 1
+    assert not temp_file.exists()
+
+
+def test_transcript_export_txt_and_vtt(tdb, tmp_path, monkeypatch):
+    from src.common.config import settings
+    monkeypatch.setattr(settings, "cache_dir", tmp_path / "cache")
+    (tmp_path / "cache").mkdir(parents=True, exist_ok=True)
+
+    # 1. Sin archivo de transcripción (fallback a candidatos de la DB)
+    r_txt_fallback = client.get("/api/videos/v1/transcript/export?format=txt")
+    assert r_txt_fallback.status_code == 200
+    assert "GUION / TRANSCRIPCION" in r_txt_fallback.text
+    assert "Gran momento" in r_txt_fallback.text
+
+    # 2. Con archivo de transcripción JSON en caché
+    t_file = tmp_path / "cache" / "v1_transcript.json"
+    t_file.write_text(json.dumps({
+        "segments": [
+            {"start": 10.5, "end": 15.2, "text": "Bienvenidos al podcast episodio 1"}
+        ]
+    }), encoding="utf-8")
+
+    r_txt = client.get("/api/videos/v1/transcript/export?format=txt")
+    assert r_txt.status_code == 200
+    assert "[0:10] Bienvenidos al podcast episodio 1" in r_txt.text
+
+    r_vtt = client.get("/api/videos/v1/transcript/export?format=vtt")
+    assert r_vtt.status_code == 200
+    assert r_vtt.text.startswith("WEBVTT")
+    assert "00:00:10.500 --> 00:00:15.200" in r_vtt.text
+    assert "Bienvenidos al podcast episodio 1" in r_vtt.text
+
+
+def test_job_and_rerender_custom_highlight(tdb):
+    # Job con custom_highlight
+    r = client.post("/api/jobs", json={
+        "source": "https://www.youtube.com/watch?v=highlight123",
+        "aspect_ratio": "9:16",
+        "custom_highlight": "&H0000FF00"
+    })
+    assert r.status_code == 200
+    job_id = r.json()["job_id"]
+    job = tdb.get_job(job_id)
+    assert job["options"]["custom_highlight"] == "&H0000FF00"
+
+    # Rerender con highlight
+    r_re = client.post("/api/clips/v1_clip_1/rerender?style=hormozi&aspect=9:16&highlight=%26H00FF00FF")
+    assert r_re.status_code == 200
+    re_job_id = r_re.json()["job_id"]
+    re_job = tdb.get_job(re_job_id)
+    assert re_job["options"]["custom_highlight"] == "&H00FF00FF"
+
+
+
 
 
