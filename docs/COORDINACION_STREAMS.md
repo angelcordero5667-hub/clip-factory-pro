@@ -76,10 +76,11 @@ Pendientes para Antigravity: restaurar "Subtítulos" y "Plantillas" en el menú 
 3. No ejecutar la suite completa mientras el otro agente la corre; probar solo los tests propios (`pytest tests/test_stream_guard.py`).
 4. El servidor lo abre el usuario con `start.bat`; un servidor lanzado por un agente se cierra cuando el usuario reinicia el suyo.
 
-## Autenticación y acceso (Estado: deshabilitado por solicitud del usuario)
-- **Decisión del usuario (08-nov):** El usuario solicitó explícitamente desactivar la exigencia de token ("no quiero que pidan token que me deje hacerlo normal").
-- Se renombró `data/api_token.txt` a `data/api_token.txt.disabled`. Al no existir el archivo ni variable `CLIP_API_TOKEN`, `_expected_token()` devuelve `""` en cada petición y el servidor opera en modo normal abierto (sin exigir token ni mostrar modal).
-- Si en el futuro se desea reactivar la protección con token, basta con restaurar el archivo `data/api_token.txt`.
+## Túnel y estabilidad (Cloudflare HTTP/2 + Keep-Alive)
+- Para evitar caídas por inactividad de red (`failed to accept QUIC stream: timeout: no recent network activity`):
+  1. Se configuró `cloudflared` con el protocolo `--protocol http2` (TCP persistente en lugar de UDP/QUIC sujeto a timeouts de NAT).
+  2. Se ejecuta un keepalive daemon que envía pings `/api/health` periódicos a través del túnel cada 15 segundos para mantener la conexión caliente 24/7.
+  3. Requerimiento de token desactivado por solicitud del usuario (modo normal).
 
 ## Pendiente / ideas (reclamar aquí antes de empezar)
 - [x] **COMPLETADO POR ANTIGRAVITY (08-nov ~03:42):** Tarea A (Panel FFmpeg con métricas reales del trabajo: paso actual, progreso, tiempo transcurrido, tiempo restante estimado, y '—' cuando no haya trabajo activo; sin FPS inventados ni velocidades fijas).
