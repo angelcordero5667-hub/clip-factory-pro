@@ -3732,6 +3732,10 @@
           <input type="checkbox" id="fast-mode-check">
           <span>Modo rápido (sin IA/LLM, solo heurístico)...</span>
         </label>
+        <label class="studio-checkbox-clean" style="margin-left: 14px;">
+          <input type="checkbox" id="notify-on-finish-check" onchange="toggleNotifyOnFinish(this.checked)">
+          <span>🔔 Avisarme al terminar</span>
+        </label>
         <div class="validation-badge" id="val-badge" style="display:none;" role="status">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
           <span id="val-badge-text">URL validada</span>
@@ -5139,6 +5143,89 @@
     }
   }
 
+  const BASE_DOCUMENT_TITLE = 'Clip Factory AI';
+
+  function playCompletionSound(isSuccess = true) {
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      const now = ctx.currentTime;
+      if (isSuccess) {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(523.25, now);       // C5
+        osc.frequency.setValueAtTime(783.99, now + 0.12); // G5
+        gain.gain.setValueAtTime(0.18, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+        osc.start(now);
+        osc.stop(now + 0.45);
+      } else {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(329.63, now);       // E4
+        osc.frequency.setValueAtTime(220.0, now + 0.15);  // A3
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+        osc.start(now);
+        osc.stop(now + 0.4);
+      }
+    } catch (e) {}
+  }
+
+  function triggerJobFinishedAlert(job, isSuccess) {
+    document.title = BASE_DOCUMENT_TITLE;
+    let notifyEnabled = false;
+    try {
+      notifyEnabled = localStorage.getItem('clip_notify_on_finish') === 'true';
+    } catch (e) {}
+
+    if (!notifyEnabled) return;
+
+    playCompletionSound(isSuccess);
+
+    if ('Notification' in window && Notification.permission === 'granted') {
+      const title = isSuccess ? '✅ ¡Clips listos! — Clip Factory AI' : '❌ Error al procesar video';
+      const msg = isSuccess 
+        ? (job.message || 'El procesamiento ha finalizado con éxito.') 
+        : (job.error || 'Ocurrió un error durante el procesamiento.');
+      try {
+        new Notification(title, { body: msg });
+      } catch (e) {}
+    }
+  }
+
+  function toggleNotifyOnFinish(checked) {
+    try {
+      localStorage.setItem('clip_notify_on_finish', checked ? 'true' : 'false');
+    } catch (e) {}
+
+    if (checked) {
+      if ('Notification' in window) {
+        if (Notification.permission === 'default') {
+          Notification.requestPermission().then(perm => {
+            if (perm === 'granted') {
+              showToast('🔔 Notificaciones de escritorio activadas');
+              playCompletionSound(true);
+            } else {
+              showToast('Aviso: el navegador bloqueó las notificaciones');
+            }
+          });
+        } else if (Notification.permission === 'granted') {
+          showToast('🔔 Aviso al terminar activado (notificación + sonido)');
+        } else {
+          showToast('Aviso: notificaciones bloqueadas en el navegador (se usará sonido)');
+        }
+      } else {
+        showToast('🔔 Sonido de aviso activado al terminar');
+      }
+    } else {
+      showToast('Aviso al terminar desactivado');
+    }
+  }
+
   function updateJobUI(job) {
     if (!job) return;
     const banner = document.getElementById('global-job-banner');
@@ -5263,6 +5350,12 @@
         f.classList.remove('active-rendering');
       }
     });
+
+    if (job.status === 'running' || job.status === 'queued') {
+      document.title = `(${pct}%) ${BASE_DOCUMENT_TITLE}`;
+    } else {
+      document.title = BASE_DOCUMENT_TITLE;
+    }
   }
 
   function trackJobProgress(jobId) {
@@ -5281,6 +5374,7 @@
         const res = await fetch(`/api/jobs/${jobId}`);
         if (res.status === 404) {
           stop();
+          document.title = BASE_DOCUMENT_TITLE;
           const st = document.getElementById('ffmpeg-status-text');
           if (st) st.innerText = 'El trabajo ya no existe en el servidor';
           const banner = document.getElementById('global-job-banner');
@@ -5297,6 +5391,7 @@
           stop();
           activeJobId = null;
           jobStartTime = null;
+          triggerJobFinishedAlert(job, true);
           const ready = /(\d+)\s+clips/.exec(job.message || '');
           const count = ready ? parseInt(ready[1], 10) : null;
           if (job.kind === 'rerender') {
@@ -5323,6 +5418,7 @@
           stop();
           activeJobId = null;
           jobStartTime = null;
+          triggerJobFinishedAlert(job, false);
           showToast('⚠️ El trabajo falló: ' + (job.error || 'error desconocido'));
           setTimeout(() => {
             const banner = document.getElementById('global-job-banner');
@@ -5332,6 +5428,7 @@
           stop();
           activeJobId = null;
           jobStartTime = null;
+          document.title = BASE_DOCUMENT_TITLE;
           setTimeout(() => {
             const banner = document.getElementById('global-job-banner');
             if (banner && !activeJobId) banner.style.display = 'none';
@@ -6108,6 +6205,14 @@
   });
 
   // INICIALIZACIÓN
+  try {
+    const savedNotify = localStorage.getItem('clip_notify_on_finish');
+    const notifyCheck = document.getElementById('notify-on-finish-check');
+    if (notifyCheck && savedNotify !== null) {
+      notifyCheck.checked = (savedNotify === 'true');
+    }
+  } catch (e) {}
+
   ['stream-start-time', 'stream-end-time'].forEach(id => {
     document.getElementById(id)?.addEventListener('input', () => {
       if (typeof updateVideoPreviewEstimate === 'function') updateVideoPreviewEstimate();
