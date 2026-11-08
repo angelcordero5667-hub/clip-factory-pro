@@ -44,7 +44,8 @@ FONT_FILES = {
 
 # Zona segura 9:16 (1080x1920): la interfaz de TikTok/Reels ocupa ~25 % inferior (descripción,
 # botones), ~10 % superior y ~14 % del lado derecho. Los márgenes son simétricos para centrar el texto.
-SAFE_V9x16 = {"bottom": 480, "middle": 0, "top": 250}
+# bottom_low (280px) es ideal para no tapar torsos ni caras en planos medios.
+SAFE_V9x16 = {"bottom": 480, "bottom_low": 280, "lower": 280, "middle": 0, "top": 250}
 SAFE_H9x16 = 140
 
 
@@ -198,19 +199,50 @@ class SubtitleGenerator:
     def _margins(self, position: str, res: Tuple[int, int]) -> Tuple[int, int, int]:
         """(alineación, marginV, marginLR) en la zona segura según el formato."""
         w, h = res
-        pos = (position or "bottom").lower()
-        align = {"top": 8, "middle": 5}.get(pos, 2)
+        pos = (str(position) or "bottom").lower().strip()
+        align = {"top": 8, "arriba": 8, "middle": 5, "centro": 5}.get(pos, 2)
+        try:
+            val = int(pos)
+            return 2, max(40, min(val, h - 80)), SAFE_H9x16 if h > w else 110
+        except ValueError:
+            pass
+
         if h > w:   # vertical 9:16
-            return align, SAFE_V9x16.get(pos, SAFE_V9x16["bottom"]), SAFE_H9x16
+            v_map = {
+                "bottom": 480,
+                "bottom_low": 280,
+                "lower": 280,
+                "low": 280,
+                "abajo": 280,
+                "middle": 0,
+                "centro": 0,
+                "top": 250,
+                "arriba": 250,
+            }
+            return align, v_map.get(pos, SAFE_V9x16.get(pos, 480)), SAFE_H9x16
         if w > h:   # horizontal 16:9: la interfaz es menor; margen inferior moderado
-            return align, {"bottom": 110, "middle": 0, "top": 90}.get(pos, 110), 220
-        return align, {"bottom": 150, "middle": 0, "top": 110}.get(pos, 150), 110   # cuadrado
+            v_map = {"bottom": 110, "bottom_low": 60, "lower": 60, "low": 60, "abajo": 60, "middle": 0, "centro": 0, "top": 90, "arriba": 90}
+            return align, v_map.get(pos, 110), 220
+        # cuadrado 1:1
+        v_map = {"bottom": 150, "bottom_low": 90, "lower": 90, "low": 90, "abajo": 90, "middle": 0, "centro": 0, "top": 110, "arriba": 110}
+        return align, v_map.get(pos, 150), 110
 
     def _get_header(self, style_name: str, position: str, res: Tuple[int, int],
-                    custom_fontsize: Optional[int] = None, custom_highlight: Optional[str] = None) -> str:
+                    custom_fontsize: Optional[int] = None, custom_highlight: Optional[str] = None,
+                    subtitle_size: Optional[str] = None) -> str:
         _, s = self.resolve_style(style_name)
         font, bold = resolve_font(s["font"])
-        size = custom_fontsize or s["size"]
+        size = custom_fontsize
+        if size is None and subtitle_size:
+            sz_str = str(subtitle_size).lower().strip()
+            if sz_str in ("small", "pequeno", "pequeño", "chico"):
+                size = max(42, int(s["size"] * 0.72))
+            elif sz_str in ("large", "grande", "big"):
+                size = min(110, int(s["size"] * 1.25))
+            elif sz_str.isdigit():
+                size = max(32, min(int(sz_str), 120))
+        if size is None:
+            size = s["size"]
         if s["mode"] == "karaoke":
             # \kf rellena de SecondaryColour (aún no cantado) a PrimaryColour (ya cantado)
             primary, secondary = (custom_highlight or s["highlight"]), "&H00FFFFFF"
@@ -272,6 +304,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         add_watermark: bool = False,
         watermark_text: Optional[str] = None,
         aspect_ratio: str = "9:16",
+        subtitle_size: Optional[str] = None,
     ) -> Path:
         output_path = Path(output_path)
         output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -283,7 +316,17 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         use_emoji = bool(include_emojis and s["allow_emoji"] and emoji_font_available())
         total = max(0.0, clip_end - clip_start)
         font_name, _ = resolve_font(s["font"])
-        base_size = custom_fontsize or s["size"]
+        base_size = custom_fontsize
+        if base_size is None and subtitle_size:
+            sz_str = str(subtitle_size).lower().strip()
+            if sz_str in ("small", "pequeno", "pequeño", "chico"):
+                base_size = max(42, int(s["size"] * 0.72))
+            elif sz_str in ("large", "grande", "big"):
+                base_size = min(110, int(s["size"] * 1.25))
+            elif sz_str.isdigit():
+                base_size = max(32, min(int(sz_str), 120))
+        if base_size is None:
+            base_size = s["size"]
         _, _, margin_lr = self._margins(position, res)
 
         events: List[str] = []
@@ -363,6 +406,6 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
                             parts.append(f"{sep}{render_word(w)}")
                     events.append(f"Dialogue: 0,{self._format_time(w_start)},{self._format_time(w_end)},Default,,0,0,0,,{fs_tag}{''.join(parts)}")
 
-        ass = self._get_header(style_name, position, res, custom_fontsize, custom_highlight) + "\n".join(events) + "\n"
+        ass = self._get_header(style_name, position, res, base_size, custom_highlight) + "\n".join(events) + "\n"
         output_path.write_text(ass, encoding="utf-8")
         return output_path

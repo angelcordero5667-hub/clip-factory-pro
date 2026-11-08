@@ -1,3 +1,4 @@
+import re
 import subprocess
 import logging
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -79,6 +80,31 @@ class VerticalClipMaker:
         except Exception as e:
             logger.debug(f"Scene detection fallback: {e}")
         return cuts
+
+    def detect_scene_cuts_near(self, video_path: str, times: List[float], margin: float = 2.5,
+                               threshold: float = 0.3, timeout: int = 90) -> List[float]:
+        """Cortes de escena SOLO alrededor de `times` (±margin s), sin recorrer el video entero.
+
+        El ajuste a cortes (snap_to_natural_boundary) solo mira ±1.2-1.5 s del inicio/fin de cada clip,
+        así que basta analizar esas ventanas: en un video de una hora pasa de decenas de minutos a segundos.
+        Usa el filtro `scene` de FFmpeg con búsqueda directa (-ss antes de -i). Si algo falla devuelve [].
+        """
+        cuts = set()
+        for t in sorted({round(float(x), 1) for x in times if x is not None}):
+            t0 = max(0.0, t - margin)
+            cmd = [
+                settings.ffmpeg_exe, "-hide_banner", "-nostats", "-ss", f"{t0:.3f}", "-t", f"{2 * margin:.3f}",
+                "-i", str(video_path), "-an", "-vf", f"select='gt(scene,{threshold})',showinfo", "-f", "null", "-",
+            ]
+            try:
+                proc = subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True,
+                                      timeout=timeout)
+            except Exception as e:
+                logger.debug(f"Cortes de escena cerca de {t:.1f}s: {e}")
+                continue
+            for m in re.finditer(r"pts_time:\s*([0-9]+(?:\.[0-9]+)?)", proc.stderr or ""):
+                cuts.add(round(t0 + float(m.group(1)), 2))
+        return sorted(cuts)
 
     def snap_to_natural_boundary(self, time_point: float, scene_cuts: List[float], tolerance: float = 1.5) -> float:
         for cut in scene_cuts:
@@ -270,6 +296,7 @@ class VerticalClipMaker:
         layout_mode: Optional[str] = None,
         speed_mode: Optional[str] = None,
         hook_zoom: Optional[bool] = None,
+        subtitle_size: Optional[str] = None,
     ) -> Path:
         input_p = Path(video_path)
         if not input_p.exists():
@@ -307,7 +334,7 @@ class VerticalClipMaker:
                 sub_start, sub_end = 0.0, new_total
         cut_expr = select_expr(keep_ranges, start_time) if keep_ranges else None
 
-        actual_sub_pos = "middle" if (layout_mode == "gaming" and subtitle_position == "bottom") else subtitle_position
+        actual_sub_pos = "middle" if (layout_mode == "gaming" and subtitle_position in ("bottom", "bottom_low", "lower")) else subtitle_position
 
         ass_path = None
         if with_subtitles and sub_segments:
@@ -326,6 +353,7 @@ class VerticalClipMaker:
                 add_watermark=add_watermark,
                 watermark_text=watermark_text,
                 aspect_ratio=aspect_ratio,
+                subtitle_size=subtitle_size,
             )
 
         framing = Framing()

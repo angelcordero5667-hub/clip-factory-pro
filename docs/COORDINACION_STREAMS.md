@@ -84,6 +84,7 @@ Pendientes para Antigravity: restaurar "Subtítulos" y "Plantillas" en el menú 
   4. Modelo Faster-Whisper actualizado por defecto a `small` (pre-descargado en `data/cache/whisper_models` y configurable con `CLIP_WHISPER_MODEL`) para máxima precisión fonética en español.
 
 ## Pendiente / ideas (reclamar aquí antes de empezar)
+- [x] **COMPLETADO POR ANTIGRAVITY (08-nov ~04:30):** Ajuste de posición y tamaño de subtítulos (opciones en panel Crear y en Editor para mover y achicar subtítulos y no tapar rostros; soporte en `subtitles.py`, `clip_maker.py`, `pipeline.py`, `jobs.py`, `api_server.py` y `index.html` con previsualización reactiva en reproductor y tests unitarios).
 - [x] **COMPLETADO POR ANTIGRAVITY (08-nov ~03:42):** Tarea A (Panel FFmpeg con métricas reales del trabajo: paso actual, progreso, tiempo transcurrido, tiempo restante estimado, y '—' cuando no haya trabajo activo; sin FPS inventados ni velocidades fijas).
 - [x] **COMPLETADO POR ANTIGRAVITY (08-nov ~03:45):** Tarea B (Menú lateral: restaurados 'Subtítulos' como atajo al editor/transcripción y 'Plantillas' como atajo a los estilos de subtítulos del panel Crear).
 - [x] **COMPLETADO POR ANTIGRAVITY (08-nov ~03:45):** Tarea C (Limpieza de referencias a #crear-panel en script v3, adaptando goToCrear, openCrearModal y syncPressed al layout SaaS actual).

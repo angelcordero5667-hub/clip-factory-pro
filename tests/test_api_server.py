@@ -101,10 +101,13 @@ def test_editar_solo_titulo_no_marca_dirty(tdb):
 
 
 def test_rerender_crea_trabajo_en_cola(tdb):
-    r = client.post("/api/clips/v1_clip_1/rerender?style=limpio&aspect=1:1")
+    r = client.post("/api/clips/v1_clip_1/rerender?style=limpio&aspect=1:1&position=bottom_low&size=small")
     assert r.status_code == 200
     job = tdb.get_job(r.json()["job_id"])
-    assert job["kind"] == "rerender" and job["status"] == "queued" and job["options"]["subtitle_style"] == "limpio"
+    assert job["kind"] == "rerender" and job["status"] == "queued"
+    assert job["options"]["subtitle_style"] == "limpio"
+    assert job["options"]["subtitle_position"] == "bottom_low"
+    assert job["options"]["subtitle_size"] == "small"
     assert client.post("/api/clips/v1_clip_1/rerender?style=zzz").status_code == 400
 
 

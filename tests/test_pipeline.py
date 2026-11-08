@@ -50,7 +50,7 @@ class TestPipeline(unittest.TestCase):
             status="pending"
         )
         self.mock_detector.detect_moments.return_value = [cand]
-        self.mock_clip_maker.detect_scene_cuts.return_value = [1.0, 2.0]
+        self.mock_clip_maker.detect_scene_cuts_near.return_value = [1.0, 2.0]
         self.mock_clip_maker.generate_clips_parallel.side_effect = lambda *a, **k: {c.id: Path("dummy_rendered_clip.mp4") for c in k.get("candidates", a[1])}
 
         # Create dummy file to satisfy existence check
@@ -78,7 +78,8 @@ class TestPipeline(unittest.TestCase):
             self.mock_transcriber.transcribe.assert_called_once()
             self.mock_detector.detect_moments.assert_called_once()
             # cortes de escena una sola vez por video, render en lote
-            self.mock_clip_maker.detect_scene_cuts.assert_called_once()
+            self.mock_clip_maker.detect_scene_cuts_near.assert_called_once()
+            self.mock_clip_maker.detect_scene_cuts.assert_not_called()
             self.mock_clip_maker.generate_clips_parallel.assert_called_once()
             self.assertEqual(
                 self.mock_clip_maker.generate_clips_parallel.call_args.kwargs["scene_cuts"], [1.0, 2.0])
@@ -105,6 +106,7 @@ class TestPipeline(unittest.TestCase):
             dummy_video.unlink(missing_ok=True)
 
         self.mock_clip_maker.detect_scene_cuts.assert_not_called()
+        self.mock_clip_maker.detect_scene_cuts_near.assert_not_called()
         self.assertEqual(self.mock_clip_maker.generate_clips_parallel.call_args.kwargs["scene_cuts"], [])
 
     @patch("src.agents.agent5_qa_optimizer.pipeline.download_youtube_audio")
@@ -132,7 +134,7 @@ class TestPipeline(unittest.TestCase):
         c2 = ViralMomentCandidate(id="c2", start_time=15.0, end_time=30.0, duration=15.0,
                                   hook_text="Hook 2", context_text="Ctx 2", virality_score=85.0, category="humor", reasoning="R2")
         self.mock_detector.detect_moments.return_value = [c1, c2]
-        self.mock_clip_maker.detect_scene_cuts.return_value = [5.0]
+        self.mock_clip_maker.detect_scene_cuts_near.return_value = [5.0]
         self.mock_clip_maker.generate_clips_parallel.side_effect = lambda *a, **k: {c.id: Path("clip.mp4") for c in k.get("candidates", a[1])}
 
         try:
@@ -147,8 +149,10 @@ class TestPipeline(unittest.TestCase):
             mock_dl_audio.assert_called_once_with("https://www.youtube.com/watch?v=dQw4w9WgXcQ", progress=ANY)
             # Validar que el video 720p se descargó exactamente 1 vez para TODOS los clips
             mock_dl_video.assert_called_once_with("https://www.youtube.com/watch?v=dQw4w9WgXcQ", progress=ANY)
-            # Scene cuts calculado 1 sola vez
-            self.mock_clip_maker.detect_scene_cuts.assert_called_once_with(str(dummy_video))
+            # Cortes de escena: 1 sola vez, solo alrededor del inicio y fin de los clips (no el video entero)
+            self.mock_clip_maker.detect_scene_cuts_near.assert_called_once_with(
+                str(dummy_video), [0.0, 15.0, 15.0, 30.0])
+            self.mock_clip_maker.detect_scene_cuts.assert_not_called()
             # Ambos clips renderizados en lote desde la misma fuente 720p local
             self.assertEqual(len(candidates), 2)
             self.assertEqual(self.mock_clip_maker.generate_clips_parallel.call_args[0][0], str(dummy_video))

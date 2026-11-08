@@ -163,3 +163,28 @@ def test_segmentos_sin_palabras_se_reparten(tmp_path):
     seg = [TranscriptSegment(id=0, start=0.0, end=4.0, text="una frase sin timestamps por palabra")]
     out = SubtitleGenerator().generate_ass(0.0, 4.0, seg, tmp_path / "n.ass", style_preset="limpio")
     assert dialogues(out)
+
+
+def test_subtitle_position_bottom_low_and_numeric():
+    g = SubtitleGenerator()
+    align_low, margin_v_low, _ = g._margins("bottom_low", (1080, 1920))
+    assert align_low == 2
+    assert margin_v_low == 280
+
+    align_num, margin_v_num, _ = g._margins("320", (1080, 1920))
+    assert align_num == 2
+    assert margin_v_num == 320
+
+
+def test_subtitle_size_presets_in_generate_ass(tmp_path):
+    g = SubtitleGenerator()
+    seg = [TranscriptSegment(id=0, start=0.0, end=4.0, text="probando tamano pequeno")]
+    out_small = g.generate_ass(0.0, 4.0, seg, tmp_path / "small.ass", style_preset="hormozi", subtitle_size="small")
+    content_small = out_small.read_text(encoding="utf-8")
+    assert "Style: Default" in content_small
+    assert ",51," in content_small
+
+    out_large = g.generate_ass(0.0, 4.0, seg, tmp_path / "large.ass", style_preset="hormozi", subtitle_size="large")
+    content_large = out_large.read_text(encoding="utf-8")
+    assert ",90," in content_large
+

@@ -3345,6 +3345,43 @@
     fill: currentColor !important;
   }
 
+  /* Controles de tamaño y posición de subtítulos para no tapar rostros */
+  .sub-adjust-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-top: 12px;
+    padding: 10px 14px;
+    background: rgba(0, 0, 0, 0.28);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    flex-wrap: wrap;
+  }
+  .sub-pill-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: var(--text-secondary);
+    font-size: 11.5px;
+    padding: 5px 11px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+  }
+  .sub-pill-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+  .sub-pill-btn.active {
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.4), rgba(59, 130, 246, 0.4));
+    border-color: var(--neon-purple);
+    color: #fff;
+    box-shadow: 0 0 10px rgba(168, 85, 247, 0.35);
+    font-weight: 600;
+  }
+
 </style>
 </head>
 <body>
@@ -3697,6 +3734,34 @@
               <div class="sub-name-label">Minimal</div>
             </div>
           </div>
+
+          <!-- Ajuste de Posición y Tamaño de subtítulos para evitar tapar caras -->
+          <div class="sub-adjust-bar" id="sub-adjust-bar">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="font-size:12px; font-weight:600; color:var(--text-secondary); display:flex; align-items:center; gap:5px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+                Tamaño:
+              </span>
+              <div style="display:flex; gap:5px;">
+                <button type="button" class="sub-pill-btn sub-size-pill" data-size="small" onclick="selectSubSize(this, 'small')" title="Texto pequeño y discreto para dejar libre la pantalla">Pequeño</button>
+                <button type="button" class="sub-pill-btn sub-size-pill active" data-size="medium" onclick="selectSubSize(this, 'medium')" title="Tamaño estándar">Normal</button>
+                <button type="button" class="sub-pill-btn sub-size-pill" data-size="large" onclick="selectSubSize(this, 'large')" title="Texto grande e impactante">Grande</button>
+              </div>
+            </div>
+
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="font-size:12px; font-weight:600; color:var(--text-secondary); display:flex; align-items:center; gap:5px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="7 10 12 15 17 10"/><polyline points="17 14 12 9 7 14"/></svg>
+                Posición:
+              </span>
+              <div style="display:flex; gap:5px;">
+                <button type="button" class="sub-pill-btn sub-pos-pill" data-pos="bottom_low" onclick="selectSubPos(this, 'bottom_low')" title="Abajo bajo: libre de rostros y torsos de hablantes">Abajo bajo (Libre de caras)</button>
+                <button type="button" class="sub-pill-btn sub-pos-pill active" data-pos="bottom" onclick="selectSubPos(this, 'bottom')" title="Posición inferior clásica">Estándar</button>
+                <button type="button" class="sub-pill-btn sub-pos-pill" data-pos="middle" onclick="selectSubPos(this, 'middle')" title="Centro de la pantalla">Centro</button>
+                <button type="button" class="sub-pill-btn sub-pos-pill" data-pos="top" onclick="selectSubPos(this, 'top')" title="Superior">Arriba</button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -3803,6 +3868,34 @@
             <button class="btn-outline btn-ico" id="btn-reject" onclick="setClipStatus('rejected')"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Descartar</button>
             <button class="btn-outline btn-ico" onclick="downloadActiveClip()"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Descargar</button>
             <button class="btn-outline btn-ico" onclick="copyActiveClipCopy()"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copiar copy</button>
+
+            <!-- Control de Tamaño y Posición para Re-renderizar -->
+            <div style="grid-column:span 2; display:flex; flex-direction:column; gap:6px; background:rgba(0,0,0,0.35); padding:8px 10px; border-radius:6px; border:1px solid rgba(255,255,255,0.06); margin-top:2px;">
+              <span style="font-size:11.5px; font-weight:600; color:var(--text-secondary); display:flex; align-items:center; gap:5px;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg>
+                Ajuste de Subtítulos (No tapar cara)
+              </span>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
+                <div>
+                  <label for="editor-sub-size" style="font-size:10.5px; color:var(--text-muted); display:block; margin-bottom:2px;">Tamaño:</label>
+                  <select id="editor-sub-size" class="studio-select-dropdown" style="width:100%; font-size:11.5px; padding:3px 6px;" onchange="updateSubOverlayPreview()">
+                    <option value="small">Pequeño (Discreto)</option>
+                    <option value="medium" selected>Normal (Estándar)</option>
+                    <option value="large">Grande (Impacto)</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="editor-sub-pos" style="font-size:10.5px; color:var(--text-muted); display:block; margin-bottom:2px;">Posición:</label>
+                  <select id="editor-sub-pos" class="studio-select-dropdown" style="width:100%; font-size:11.5px; padding:3px 6px;" onchange="updateSubOverlayPreview()">
+                    <option value="bottom_low">Abajo bajo (Libre de cara)</option>
+                    <option value="bottom" selected>Abajo estándar</option>
+                    <option value="middle">Centro</option>
+                    <option value="top">Arriba</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
             <button class="btn-outline btn-ico" onclick="rerenderActiveClip()" style="grid-column:span 2;" title="Vuelve a renderizar el clip con el estilo de subtítulos elegido"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>Re-renderizar con este estilo</button>
           </div>
           <div id="clip-status-line" style="font-size:12px; color:var(--text-muted); margin-bottom:12px;">Selecciona un clip para ver sus acciones.</div>
@@ -4505,6 +4598,55 @@
     }
   }
 
+  let activeSubSize = 'medium';
+  let activeSubPos = 'bottom';
+
+  function selectSubSize(el, sz) {
+    activeSubSize = sz;
+    document.querySelectorAll('.sub-size-pill').forEach(b => b.classList.toggle('active', b.getAttribute('data-size') === sz));
+    const sel = document.getElementById('editor-sub-size');
+    if (sel) sel.value = sz;
+    updateSubOverlayPreview();
+  }
+
+  function selectSubPos(el, pos) {
+    activeSubPos = pos;
+    document.querySelectorAll('.sub-pos-pill').forEach(b => b.classList.toggle('active', b.getAttribute('data-pos') === pos));
+    const sel = document.getElementById('editor-sub-pos');
+    if (sel) sel.value = pos;
+    updateSubOverlayPreview();
+  }
+
+  function updateSubOverlayPreview() {
+    const box = document.getElementById('sub-overlay-box');
+    if (!box) return;
+    const sizeVal = document.getElementById('editor-sub-size')?.value || activeSubSize || 'medium';
+    const posVal = document.getElementById('editor-sub-pos')?.value || activeSubPos || 'bottom';
+
+    if (sizeVal === 'small') {
+      box.style.fontSize = '13px';
+      box.style.transform = 'scale(0.85)';
+    } else if (sizeVal === 'large') {
+      box.style.fontSize = '22px';
+      box.style.transform = 'scale(1.15)';
+    } else {
+      box.style.fontSize = '17px';
+      box.style.transform = 'scale(1.0)';
+    }
+
+    box.style.top = '';
+    box.style.bottom = '';
+    if (posVal === 'bottom_low') {
+      box.style.bottom = '8%';
+    } else if (posVal === 'bottom') {
+      box.style.bottom = '22%';
+    } else if (posVal === 'middle') {
+      box.style.bottom = '46%';
+    } else if (posVal === 'top') {
+      box.style.top = '12%';
+    }
+  }
+
   // ENVÍO DE PROCESO REAL
   async function submitCreation() {
     const url = document.getElementById('yt-url-input').value.trim();
@@ -4534,7 +4676,9 @@
       speed_mode: activeSpeedMode || 'turbo',
       hook_zoom: !!document.getElementById('hook-zoom-check')?.checked,
       watermark_text: document.getElementById('watermark-input')?.value.trim() || null,
-      focus_prompt: document.getElementById('focus-prompt-input')?.value.trim() || null
+      focus_prompt: document.getElementById('focus-prompt-input')?.value.trim() || null,
+      subtitle_position: activeSubPos || 'bottom',
+      subtitle_size: activeSubSize || 'medium'
     };
 
     const btn = document.getElementById('btn-submit-process');
@@ -5282,9 +5426,11 @@
     const c = currentActiveClip;
     if (!c) { showToast('Primero selecciona un clip'); return; }
     const style = activeSubStyle || 'hormozi';
+    const size = document.getElementById('editor-sub-size')?.value || activeSubSize || 'medium';
+    const pos = document.getElementById('editor-sub-pos')?.value || activeSubPos || 'bottom';
     try {
-      const data = await apiJson(`/api/clips/${encodeURIComponent(c.id)}/rerender?style=${encodeURIComponent(style)}&aspect=${encodeURIComponent(activeFormat || '9:16')}`, { method: 'POST' });
-      showToast(`Re-renderizando en la cola (trabajo #${data.job_id})`);
+      const data = await apiJson(`/api/clips/${encodeURIComponent(c.id)}/rerender?style=${encodeURIComponent(style)}&aspect=${encodeURIComponent(activeFormat || '9:16')}&position=${encodeURIComponent(pos)}&size=${encodeURIComponent(size)}`, { method: 'POST' });
+      showToast(`Re-renderizando con tamaño y posición elegidos (trabajo #${data.job_id})`);
       activeJobId = data.job_id;
       trackJobProgress(data.job_id);
     } catch (e) {

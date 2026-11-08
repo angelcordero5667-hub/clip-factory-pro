@@ -81,6 +81,9 @@ class JobWorker:
                     job["candidate_id"],
                     subtitle_style=opts.get("subtitle_style", "hormozi"),
                     aspect_ratio=opts.get("aspect_ratio", "9:16"),
+                    subtitle_position=opts.get("subtitle_position", "bottom"),
+                    custom_fontsize=opts.get("custom_fontsize"),
+                    subtitle_size=opts.get("subtitle_size"),
                 )
                 self.db.update_job(job_id, status="done", progress=1.0, message="Clip actualizado.")
                 return
@@ -115,6 +118,9 @@ class JobWorker:
                 focus_prompt=focus_prompt,
                 time_range=time_range,
                 step_callback=on_step,
+                subtitle_position=opts.get("subtitle_position", "bottom"),
+                custom_fontsize=opts.get("custom_fontsize"),
+                subtitle_size=opts.get("subtitle_size"),
             )
             self.db.update_job(job_id, status="done", progress=1.0, video_id=video_id,
                                step_index=len(STEPS) - 1, step_label=STEPS[-1],

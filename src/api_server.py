@@ -356,12 +356,25 @@ def edit_clip(clip_id: str, body: EditBody):
 
 
 @app.post("/api/clips/{clip_id}/rerender")
-def rerender_clip(clip_id: str, style: str = "hormozi", aspect: str = "9:16"):
+def rerender_clip(
+    clip_id: str,
+    style: str = "hormozi",
+    aspect: str = "9:16",
+    position: str = "bottom",
+    size: str = "medium",
+    fontsize: Optional[int] = None,
+):
     _get_clip_or_404(clip_id)
     if style not in SUBTITLE_STYLES or aspect not in ASPECT_RATIOS:
         raise HTTPException(status_code=400, detail="Estilo o formato inválido.")
     job_id = db.create_job(source=clip_id, kind="rerender", candidate_id=clip_id,
-                           options={"subtitle_style": style, "aspect_ratio": aspect})
+                           options={
+                               "subtitle_style": style,
+                               "aspect_ratio": aspect,
+                               "subtitle_position": position,
+                               "subtitle_size": size,
+                               "custom_fontsize": fontsize,
+                           })
     return {"job_id": job_id}
 
 
@@ -581,6 +594,9 @@ class JobBody(BaseModel):
     hook_zoom: Optional[bool] = True
     watermark_text: Optional[str] = Field(default=None, max_length=50)
     focus_prompt: Optional[str] = Field(default=None, max_length=200)
+    subtitle_position: Optional[str] = "bottom"
+    subtitle_size: Optional[str] = "medium"
+    custom_fontsize: Optional[int] = None
 
 
 def _is_public_url(url: str) -> bool:
