@@ -105,3 +105,26 @@ def test_subtitles_bounce_and_watermark(tmp_path):
     assert "@mi_canal" in content
     assert "\\t(0,70,\\fscx125\\fscy125)" in content
 
+
+def test_focus_prompt_heuristic():
+    from src.common.models import TranscriptResult, TranscriptSegment
+    from src.agents.agent2_viral_detector.detector import ViralMomentDetector
+
+    segs = [
+        TranscriptSegment(id=0, start=0.0, end=15.0, text="Hablamos sobre cómo ganar dinero y hacer negocios rentables."),
+        TranscriptSegment(id=1, start=15.0, end=30.0, text="Luego fuimos a comer una hamburguesa deliciosa en el parque.")
+    ]
+    transcript = TranscriptResult(
+        video_path="dummy.mp4",
+        text="Hablamos sobre ganar dinero y luego comimos una hamburguesa.",
+        duration=30.0,
+        language="es",
+        segments=segs
+    )
+    detector = ViralMomentDetector(min_duration=10.0, max_duration=20.0)
+
+    cands_focused = detector._detect_heuristic(transcript, focus_prompt="negocios e inversiones de dinero")
+    assert any("Alineado con el tema solicitado" in c.reasoning for c in cands_focused)
+    cand_focused = next(c for c in cands_focused if "Alineado con el tema solicitado" in c.reasoning)
+    assert cand_focused.virality_score >= 80
+

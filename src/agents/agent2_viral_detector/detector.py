@@ -134,7 +134,14 @@ class ViralMomentDetector:
             c.reasoning = f"{c.reasoning} Energía de audio {int(e * 100)}/100 ({sign}{bonus} pts).".strip()
         return candidates
 
-    def detect_moments(self, transcript: TranscriptResult, use_llm: bool = True, energy=None, include_hype: bool = True) -> List[ViralMomentCandidate]:
+    def detect_moments(
+        self,
+        transcript: TranscriptResult,
+        use_llm: bool = True,
+        energy=None,
+        include_hype: bool = True,
+        focus_prompt: Optional[str] = None,
+    ) -> List[ViralMomentCandidate]:
         if transcript.duration < self.min_duration:
             logger.warning(f"Duración ({transcript.duration}s) menor al mínimo requerido.")
             return []
@@ -142,12 +149,12 @@ class ViralMomentDetector:
         candidates: List[ViralMomentCandidate] = []
         if use_llm:
             try:
-                candidates = self._detect_with_ollama(transcript)
+                candidates = self._detect_with_ollama(transcript, focus_prompt=focus_prompt)
             except Exception as e:
                 logger.warning(f"Ollama no respondió: {e}. Activando motor heurístico.")
 
         if not candidates:
-            candidates = self._detect_heuristic(transcript)
+            candidates = self._detect_heuristic(transcript, focus_prompt=focus_prompt)
 
         if energy is not None and include_hype:
             try:
@@ -192,7 +199,7 @@ class ViralMomentDetector:
         validated = self._validate_and_adjust_boundaries(candidates, transcript)
         if not validated and candidates and candidates[0].engine == "llm":
             logger.warning("Ningún candidato del LLM cumplió las duraciones; se usa el motor heurístico.")
-            validated = self._validate_and_adjust_boundaries(self._detect_heuristic(transcript), transcript)
+            validated = self._validate_and_adjust_boundaries(self._detect_heuristic(transcript, focus_prompt=focus_prompt), transcript)
         aligned = self._align_to_pauses(validated, transcript)
         aligned = self._apply_energy(aligned, energy)
         deduped = self.deduplicate_candidates(aligned)
@@ -202,7 +209,7 @@ class ViralMomentDetector:
     # ------------------------------------------------------------------
     # Motor LLM por ventanas
     # ------------------------------------------------------------------
-    def _detect_with_ollama(self, transcript: TranscriptResult) -> List[ViralMomentCandidate]:
+    def _detect_with_ollama(self, transcript: TranscriptResult, focus_prompt: Optional[str] = None) -> List[ViralMomentCandidate]:
         windows = build_windows(transcript.segments, self.window_sec, self.window_overlap_sec)
         if not windows:
             return []
@@ -213,7 +220,10 @@ class ViralMomentDetector:
         last_error: Optional[Exception] = None
         for n, window in enumerate(windows, 1):
             try:
-                found = self._query_window(window, per_window, id_offset=len(candidates))
+                if focus_prompt:
+                    found = self._query_window(window, per_window, id_offset=len(candidates), focus_prompt=focus_prompt)
+                else:
+                    found = self._query_window(window, per_window, id_offset=len(candidates))
                 logger.info(f"Ventana {n}/{len(windows)} "
                             f"({window[0].start:.0f}s-{window[-1].end:.0f}s): {len(found)} candidatos")
                 candidates.extend(found)
@@ -226,13 +236,25 @@ class ViralMomentDetector:
         # Une resultados y elimina duplicados por solape temporal entre ventanas
         return self.deduplicate_candidates(candidates)
 
-    def _query_window(self, segments: List[TranscriptSegment], max_clips: int, id_offset: int = 0) -> List[ViralMomentCandidate]:
+    def _query_window(
+        self,
+        segments: List[TranscriptSegment],
+        max_clips: int,
+        id_offset: int = 0,
+        focus_prompt: Optional[str] = None,
+    ) -> List[ViralMomentCandidate]:
         prompt = OPUS_PROMPT_TEMPLATE.format(
             min_duration=int(self.min_duration),
             max_duration=int(self.max_duration),
             max_clips=max_clips,
             transcript_text=self.format_transcript_for_llm(segments),
         )
+        if focus_prompt and focus_prompt.strip():
+            focus_instruction = (
+                f"\nREGLA PRIORITARIA DE ENFOQUE TEMÁTICO (INSTRUCCIÓN DEL USUARIO):\n"
+                f"Prioriza y extrae momentos enfocados en: \"{focus_prompt.strip()}\".\n"
+            )
+            prompt = prompt.replace("REGLAS OBLIGATORIAS:\n", "REGLAS OBLIGATORIAS:\n" + focus_instruction)
         payload = {
             "model": self.model_name,
             "prompt": prompt,
@@ -320,10 +342,18 @@ class ViralMomentDetector:
     # ------------------------------------------------------------------
     # Motor heurístico: ventana deslizante con paso fijo + texto sin acentos
     # ------------------------------------------------------------------
-    def _detect_heuristic(self, transcript: TranscriptResult) -> List[ViralMomentCandidate]:
+    def _detect_heuristic(self, transcript: TranscriptResult, focus_prompt: Optional[str] = None) -> List[ViralMomentCandidate]:
         segments = transcript.segments
         normalized = [normalize_text(s.text) for s in segments]
         spans = sliding_windows(segments, self.min_duration, self.max_duration, step_sec=self.heuristic_step_sec)
+
+        focus_patterns = None
+        if focus_prompt and focus_prompt.strip():
+            norm_focus = normalize_text(focus_prompt)
+            stopwords = {"para", "como", "sobre", "este", "esta", "estos", "estas", "unos", "unas", "todo", "toda", "pero", "porque", "cuando", "donde", "quien"}
+            focus_words = [w for w in re.findall(r"\b[a-z0-9áéíóúüñ]{3,}\b", norm_focus) if w not in stopwords]
+            if focus_words:
+                focus_patterns = compile_keyword_patterns(focus_words)
 
         candidates: List[ViralMomentCandidate] = []
         for i, j in spans:
@@ -341,12 +371,18 @@ class ViralMomentDetector:
                     if matches >= best_hits:  # la categoría con más coincidencias da nombre al clip
                         matched_category, best_hits = cat, matches
 
+            focus_hits = 0
+            if focus_patterns:
+                focus_hits = count_keyword_hits(block_text, focus_patterns)
+                if focus_hits > 0:
+                    score += min(focus_hits * 8, 20)
+
             first_sentence = start_seg.text
             if "?" in first_sentence or "¿" in first_sentence:
                 score += 5
             if "!" in first_sentence or "¡" in first_sentence:
                 score += 4
-            score = min(98, score)
+            score = min(99, score)
 
             clean_hook = re.sub(r"[¿?¡!\"'.,;:()]", "", first_sentence).strip()
             words_hook = clean_hook.split()
@@ -355,6 +391,10 @@ class ViralMomentDetector:
                 cand_title = f"{' '.join(words_hook[:6]).title()} {emoji}"
             else:
                 cand_title = CATEGORY_TITLES.get(matched_category, f"Momento Viral {emoji}")  # ya incluye su emoji
+
+            reasoning = f"Detectado gancho de alto impacto y patrones semánticos de {matched_category}."
+            if focus_hits > 0 and focus_prompt:
+                reasoning = f"Alineado con el tema solicitado ('{focus_prompt.strip()}'). {reasoning}"
 
             candidates.append(ViralMomentCandidate(
                 id=f"clip_h_{len(candidates)+1}",
@@ -371,7 +411,7 @@ class ViralMomentDetector:
                     trend_score=min(100, score + 1),
                 ),
                 category=matched_category,
-                reasoning=f"Detectado gancho de alto impacto y patrones semánticos de {matched_category}.",
+                reasoning=reasoning,
                 social_description=f"Mira este momento increíble sobre {matched_category}. ¿Estás de acuerdo? Comenta abajo 👇",
                 hashtags=[f"#{matched_category}", "#viral", "#fyp", "#shorts", "#podcast"],
                 status="pending",

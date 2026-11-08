@@ -61,6 +61,7 @@ class ClipFactoryPipeline:
         layout_mode: Optional[str] = None,
         speed_mode: Optional[str] = None,
         hook_zoom: Optional[bool] = None,
+        focus_prompt: Optional[str] = None,
         time_range: Optional[Tuple[float, float]] = None,
         progress_callback: Optional[Callable[[str], None]] = None,
         step_callback: Optional[StepCallback] = None,
@@ -161,7 +162,7 @@ class ClipFactoryPipeline:
                 log_step("🔊 Energía del audio medida: se usará para puntuar los momentos.")
         except Exception as e:  # la energía es un extra: nunca debe romper el análisis
             logger.warning(f"Sin energía de audio: {e}")
-        candidates = self.detector.detect_moments(transcript, use_llm=not fast, energy=energy)
+        candidates = self.detector.detect_moments(transcript, use_llm=not fast, energy=energy, focus_prompt=focus_prompt)
         # IDs únicos por video: evita que INSERT OR REPLACE pise clips de otros videos
         for cand in candidates:
             cand.id = f"{video_id}_{cand.id}"

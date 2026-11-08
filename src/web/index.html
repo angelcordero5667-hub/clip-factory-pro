@@ -2398,6 +2398,14 @@
       </div>
 
       <div class="form-group">
+        <label class="form-label" style="display:flex; justify-content:space-between; align-items:center;">
+          <span>🎯 Enfoque IA del Clip (Opcional)</span>
+          <span style="font-size:10.5px; color:var(--text-muted);">Instrucción o temática</span>
+        </label>
+        <input type="text" id="focus-prompt-input" class="input-glow" placeholder="Ej: Momentos divertidos, dinero y negocios, historias..." style="font-size:12px; width:100%; box-sizing:border-box;">
+      </div>
+
+      <div class="form-group">
         <div class="slider-header">
           <span>Cantidad de clips a generar</span>
           <span id="clips-count-val" style="font-weight:700; color:#fff;">5</span>
@@ -2702,7 +2710,8 @@
       layout: activeLayoutMode || 'auto',
       speed_mode: activeSpeedMode || 'turbo',
       hook_zoom: !!document.getElementById('hook-zoom-check')?.checked,
-      watermark_text: document.getElementById('watermark-input')?.value.trim() || null
+      watermark_text: document.getElementById('watermark-input')?.value.trim() || null,
+      focus_prompt: document.getElementById('focus-prompt-input')?.value.trim() || null
     };
 
     const btn = document.getElementById('btn-submit-process');

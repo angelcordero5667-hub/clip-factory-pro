@@ -386,6 +386,7 @@ class JobBody(BaseModel):
     speed_mode: Optional[str] = "turbo"
     hook_zoom: Optional[bool] = True
     watermark_text: Optional[str] = Field(default=None, max_length=50)
+    focus_prompt: Optional[str] = Field(default=None, max_length=200)
 
 
 def _is_public_url(url: str) -> bool:
