@@ -11,6 +11,7 @@ from src.common.youtube_downloader import download_youtube_video, download_youtu
 from src.agents.agent1_transcription.transcriber import AudioTranscriber
 from src.agents.agent2_viral_detector.detector import ViralMomentDetector
 from src.agents.agent2_viral_detector.audio_energy import compute_energy_profile
+from src.agents.agent2_viral_detector.chat_activity import parse_chat_messages, build_chat_profile
 from src.agents.agent3_clip_generator.clip_maker import VerticalClipMaker
 from src.agents.agent5_qa_optimizer.optimizer import MemoryOptimizer
 
@@ -169,7 +170,29 @@ class ClipFactoryPipeline:
                 log_step("🔊 Energía del audio medida: se usará para puntuar los momentos.")
         except Exception as e:  # la energía es un extra: nunca debe romper el análisis
             logger.warning(f"Sin energía de audio: {e}")
-        candidates = self.detector.detect_moments(transcript, use_llm=not fast, energy=energy, layout=layout_mode, focus_prompt=focus_prompt)
+
+        chat_profile = None
+        try:
+            cand_chat_paths = [
+                Path(path).with_suffix(".live_chat.json"),
+                Path(path).with_suffix(".chat.json"),
+                Path(path).with_name(f"{Path(path).stem}_chat.json"),
+            ]
+            for cp in cand_chat_paths:
+                if cp.exists():
+                    msgs = parse_chat_messages(cp)
+                    if msgs:
+                        chat_profile = build_chat_profile(msgs, duration=transcript.duration)
+                        if chat_profile:
+                            log_step(f"💬 Chat analizado ({len(msgs)} mensajes): señal de viralidad activada.")
+                            break
+        except Exception as e:
+            logger.warning(f"Sin análisis de chat: {e}")
+
+        candidates = self.detector.detect_moments(
+            transcript, use_llm=not fast, energy=energy, layout=layout_mode,
+            focus_prompt=focus_prompt, chat_profile=chat_profile,
+        )
         # IDs únicos por video: evita que INSERT OR REPLACE pise clips de otros videos
         for cand in candidates:
             cand.id = f"{video_id}_{cand.id}"

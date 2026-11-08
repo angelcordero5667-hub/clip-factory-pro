@@ -84,6 +84,7 @@ Pendientes para Antigravity: restaurar "Subtítulos" y "Plantillas" en el menú 
   4. Modelo Faster-Whisper actualizado por defecto a `small` (pre-descargado en `data/cache/whisper_models` y configurable con `CLIP_WHISPER_MODEL`) para máxima precisión fonética en español.
 
 ## Pendiente / ideas (reclamar aquí antes de empezar)
+- [x] **COMPLETADO POR ANTIGRAVITY (08-nov ~08:08):** Tarea 12: Marcadores de chat de Twitch / YouTube Live (analizador de velocidad de chat, picos de mensajes por segundo y emotes de hype 'LUL/OMG/????/KEKW/CLIP' como señal de viralidad en momentos candidatos).
 - [x] **COMPLETADO POR ANTIGRAVITY (08-nov ~07:55):** Tarea 11: Modo B-Roll / Video secundario inferior (Estilo TikTok Gameplay: opción de metraje inferior en bucle de data/broll o generador procedural dinámico de retención en FFmpeg bajo el hablante centrado).
 - [x] **COMPLETADO POR ANTIGRAVITY (08-nov ~07:45):** Tarea 10: Detección y badges visuales de directos en vivo (/api/validate_url informa is_live e is_upcoming, y la tarjeta de previsualización muestra badge pulsante rojo '🔴 EN VIVO' y aviso amigable).
 - [x] **COMPLETADO POR ANTIGRAVITY (08-nov ~07:23):** Tarea 9: Modo Split-Screen / Pantalla dividida Podcast 2 caras (soporte de layout 'split' en panel Crear, api_server, choose_framing y clip_maker con auto-detección de 2 hablantes).

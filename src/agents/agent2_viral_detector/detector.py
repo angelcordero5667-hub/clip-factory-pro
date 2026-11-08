@@ -8,6 +8,11 @@ import requests
 from src.common.config import settings
 from src.common.models import TranscriptResult, TranscriptSegment, ViralMomentCandidate, ViralityBreakdown
 from src.agents.agent2_viral_detector.audio_energy import energy_bonus, find_hype_moments
+from src.agents.agent2_viral_detector.chat_activity import (
+    ChatActivityProfile,
+    chat_bonus,
+    find_chat_hype_peaks,
+)
 from src.agents.agent2_viral_detector.analysis import (
     build_windows,
     compile_keyword_patterns,
@@ -142,6 +147,7 @@ class ViralMomentDetector:
         include_hype: Optional[bool] = None,
         layout: Optional[str] = None,
         focus_prompt: Optional[str] = None,
+        chat_profile: Optional[ChatActivityProfile] = None,
     ) -> List[ViralMomentCandidate]:
         if transcript.duration < self.min_duration:
             logger.warning(f"Duración ({transcript.duration}s) menor al mínimo requerido.")
@@ -234,6 +240,65 @@ class ViralMomentDetector:
                     ))
             except Exception as e:
                 logger.debug(f"Hype moments scan fallback: {e}")
+
+        # Chat Activity Hype: refuerzo de momentos y extracción de picos de chat
+        if chat_profile is not None:
+            try:
+                for cand in candidates:
+                    c_score = chat_profile.window_score(cand.start_time, cand.end_time)
+                    if c_score > 0.5:
+                        c_bonus = chat_bonus(c_score, max_points=6.0)
+                        cand.virality_score = min(99.0, max(50.0, cand.virality_score + c_bonus))
+                        if "chat" not in cand.reasoning.lower():
+                            cand.reasoning += f" Alta actividad en el chat de directo ({int(c_score * 100)}%)."
+                chat_peaks = find_chat_hype_peaks(
+                    chat_profile,
+                    min_duration=self.min_duration,
+                    max_duration=self.max_duration,
+                    top_n=max(2, self.max_candidates // 2),
+                )
+                for idx, (cp_start, cp_end, cp_score) in enumerate(chat_peaks, 1):
+                    overlapping_any = False
+                    peak_dur = max(1.0, (cp_end - cp_start))
+                    for existing in candidates:
+                        inter_start = max(cp_start, existing.start_time)
+                        inter_end = min(cp_end, existing.end_time)
+                        inter_len = max(0.0, inter_end - inter_start)
+                        if inter_len >= 10.0 or (inter_len / peak_dur) >= 0.4:
+                            overlapping_any = True
+                            break
+                    if overlapping_any:
+                        continue
+
+                    matching_segs = [s for s in transcript.segments if s.end >= cp_start and s.start <= cp_end]
+                    text_snippet = " ".join(s.text for s in matching_segs).strip()
+                    first_text = matching_segs[0].text.strip() if matching_segs else ""
+
+                    vir_score = round(min(98.0, max(76.0, 78.0 + cp_score * 18.0)), 1)
+                    title_text = f"Reacción del Chat ({int(cp_score * 100)}%) 💬🔥"
+                    hook_txt = first_text[:120] if first_text else "¡El chat enloqueció en este momento!"
+                    social_desc = "¡El chat reaccionó con todo a esta escena! 💬🔥 ¿Qué opinas tú?"
+                    ctx = f"Pico de ráfaga y reacciones en el chat ({int(cp_score * 100)}/100)."
+
+                    candidates.append(ViralMomentCandidate(
+                        id=f"clip_chat_{idx}",
+                        start_time=round(cp_start, 2),
+                        end_time=round(min(transcript.duration, cp_end), 2),
+                        duration=round(cp_end - cp_start, 2),
+                        title=title_text,
+                        hook_text=hook_txt,
+                        context_text=ctx,
+                        virality_score=vir_score,
+                        reasoning=f"Momento impulsado por ráfagas de mensajes y emotes del chat ({int(cp_score * 100)}%).",
+                        social_description=social_desc,
+                        hashtags=["#streamer", "#twitch", "#chat", "#clip", "#viral"],
+                        status="pending",
+                        engine="chat_activity",
+                        pause_aligned=False,
+                        category="humor" if cp_score > 0.65 else "epico",
+                    ))
+            except Exception as e:
+                logger.debug(f"Chat activity scan fallback: {e}")
 
         validated = self._validate_and_adjust_boundaries(candidates, transcript)
         if not validated and candidates and candidates[0].engine == "llm":
