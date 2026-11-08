@@ -3411,6 +3411,18 @@
           Editor de Video
         </button>
       </li>
+      <li class="nav-item" id="nav-subtitulos">
+        <button onclick="goToSubtitulos()">
+          <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M7 15h4M15 15h2M7 11h2M13 11h4"/></svg>
+          Subtítulos
+        </button>
+      </li>
+      <li class="nav-item" id="nav-plantillas">
+        <button onclick="goToPlantillas()">
+          <svg viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+          Plantillas
+        </button>
+      </li>
       <li class="nav-item" id="nav-analytics">
         <button onclick="showAnalytics()">
           <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
@@ -3656,7 +3668,7 @@
         </div>
 
         <!-- Estilos de subtítulos -->
-        <div class="studio-card-box">
+        <div class="studio-card-box" id="sec-subtitle-styles">
           <div class="studio-card-header-row">
             <div class="studio-card-title-neon">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ec4899" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M7 15h4M15 15h2M7 11h2M13 11h4"/></svg>
@@ -5499,25 +5511,37 @@
   loadClips();   // la primera carga (hecha antes de este bloque) no actualizaba las tarjetas
 })();
 </script>
-<!-- DISEÑO v3: el panel Crear ya no es una ventana; estas funciones mantienen vivos todos los botones que la llamaban -->
+<!-- NAVEGACIÓN Y ACCESIBILIDAD -->
 <script>
 (function () {
   const $ = (id) => document.getElementById(id);
 
-  // Todos los botones "Crear" (≈20) llaman a openCrearModal(): ahora llevan al panel y enfocan la URL
+  // Navegación a secciones del panel Crear y editor
   window.openCrearModal = function () {
     switchView('inicio');
-    const panel = $('crear-panel');
+    const panel = $('view-inicio');
     if (panel) panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    setTimeout(() => { const u = $('yt-url-input'); if (u) u.focus({ preventScroll: true }); }, 250);
+    setTimeout(() => { const u = $('yt-url-input'); if (u) u.focus({ preventScroll: true }); }, 150);
   };
-  window.closeCrearModal = function () { /* el panel es parte de la página: no hay nada que cerrar */ };
-  window.switchModalTab = function () { /* las pestañas URL/archivo se sustituyeron por el botón "Subir archivo" */ };
+  window.closeCrearModal = function () { /* el panel vive en la vista de Inicio */ };
+  window.switchModalTab = function () { /* se sustituyó por el botón 'Subir MP4' */ };
 
   window.goToCrear = function (section) {
     switchView('inicio');
-    const target = $(section === 'estilos' ? 'cp-estilos' : 'crear-panel');
-    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const target = (section === 'estilos' ? $('sec-subtitle-styles') : $('view-inicio'));
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: section === 'estilos' ? 'center' : 'start' });
+  };
+
+  window.goToSubtitulos = function () {
+    switchView('editor');
+    setTimeout(() => {
+      const el = $('editor-transcript-card');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 150);
+  };
+
+  window.goToPlantillas = function () {
+    goToCrear('estilos');
   };
 
   window.showProInfo = function () {
@@ -5531,38 +5555,24 @@
   const url = $('yt-url-input');
   if (url) url.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); submitCreation(); } });
 
-  // Resumen en vivo con los valores reales que se enviarán
-  const STYLE_NAMES = { hormozi: 'Hormozi Neón', beast: 'MrBeast Lime', bounce: 'Pop Bouncing', glow: 'Cyber Glow', minimal: 'Minimal' };
-  const LAYOUT_NAMES = { auto: 'Automático (IA)', gaming: 'Gaming / Streamer', blur: 'Desenfoque' };
-  const SPEED_NAMES = { turbo: 'Turbo (3x)', studio: 'Calidad Studio' };
-  function renderSummary() {
-    const set = (id, txt) => { const el = $(id); if (el) el.textContent = txt; };
-    const a = ($('stream-start-time') || {}).value, b = ($('stream-end-time') || {}).value;
-    set('sum-format', typeof activeFormat !== 'undefined' ? activeFormat : '9:16');
-    set('sum-style', STYLE_NAMES[typeof activeSubStyle !== 'undefined' ? activeSubStyle : 'hormozi'] || '—');
-    set('sum-layout', LAYOUT_NAMES[typeof activeLayoutMode !== 'undefined' ? activeLayoutMode : 'auto'] || '—');
-    const speed = SPEED_NAMES[typeof activeSpeedMode !== 'undefined' ? activeSpeedMode : 'turbo'] || '—';
-    set('sum-speed', speed + ($('hook-zoom-check') && $('hook-zoom-check').checked ? ' + Hook Zoom' : ''));
-    set('sum-range', (a && a.trim()) || (b && b.trim()) ? `${(a || '').trim() || '00:00:00'} → ${(b || '').trim() || '…'}` : 'Video completo');
-    set('sum-clips', ($('clips-count-val') || {}).textContent || '5');
-  }
-  ['selectFormat', 'selectLayoutMode', 'selectSpeedMode', 'selectSubStyle'].forEach((name) => {
-    const original = window[name];
-    if (typeof original !== 'function') return;
-    window[name] = function (...args) { const r = original.apply(this, args); renderSummary(); syncPressed(); return r; };
-  });
-  ['stream-start-time', 'stream-end-time', 'clips-range', 'hook-zoom-check', 'fast-mode-check'].forEach((id) => {
-    const el = $(id); if (el) el.addEventListener('input', renderSummary);
-  });
-
-  // Estado seleccionado también para lectores de pantalla (aria-pressed sigue a la clase .active)
+  // Estado seleccionado para accesibilidad (aria-pressed sincronizado con .active)
   function syncPressed() {
-    document.querySelectorAll('.crear-panel .layout-card, .crear-panel .format-card, .crear-panel .sub-style-card').forEach((el) => {
+    document.querySelectorAll('.layout-mode-card, .speed-toggle-card, .format-card, .sub-style-card').forEach((el) => {
       el.setAttribute('aria-pressed', el.classList.contains('active') ? 'true' : 'false');
     });
   }
-  new MutationObserver(syncPressed).observe($('crear-panel') || document.body, { attributes: true, attributeFilter: ['class'], subtree: true });
-  renderSummary(); syncPressed();
+
+  ['selectFormat', 'selectLayoutMode', 'selectSpeedMode', 'selectSubStyle'].forEach((name) => {
+    const original = window[name];
+    if (typeof original !== 'function') return;
+    window[name] = function (...args) { const r = original.apply(this, args); syncPressed(); return r; };
+  });
+
+  const obsTarget = $('view-inicio') || document.body;
+  if (obsTarget) {
+    new MutationObserver(syncPressed).observe(obsTarget, { attributes: true, attributeFilter: ['class'], subtree: true });
+  }
+  syncPressed();
 })();
 </script>
 </body>
