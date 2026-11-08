@@ -41,7 +41,7 @@ SUBTITLE_STYLES = (
     "bounce", "glow", "pop", "bouncing"
 )
 ASPECT_RATIOS = ("9:16", "1:1", "16:9")
-LAYOUT_MODES = ("auto", "gaming", "blur", "split")
+LAYOUT_MODES = ("auto", "gaming", "blur", "split", "broll")
 SPEED_MODES = ("turbo", "fast", "studio")
 VALID_STATUS = ("pending", "approved", "rejected")
 MIN_CLIP_SEC, MAX_CLIP_SEC = 5.0, 180.0

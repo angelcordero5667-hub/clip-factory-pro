@@ -102,8 +102,17 @@ def test_filtros_por_modo():
     assert "crop=w=404:h=ih:x='if(lt(t,2.00),10.0,50.0)':y=0,scale=1080:1920" in f_crop
     f_split, label = maker.build_filter_complex(1080, 1920, framing=Framing("split", 810, "", (100, 300)))
     assert "vstack=inputs=2" in f_split and "scale=1080:960" in f_split and label == "[combined]"
+    f_broll, b_label = maker.build_filter_complex(1080, 1920, framing=Framing("broll", 810, "", (100, 0)))
+    assert "vstack=inputs=2" in f_broll and "cam_top" in f_broll and "broll_bot" in f_broll and b_label == "[combined]"
     f_blur, _ = maker.build_filter_complex(1080, 1920, framing=Framing("blur"))
     assert "boxblur" in f_blur
+
+
+def test_choose_framing_broll():
+    s = samples([[0.40]] * 6)
+    f = choose_framing(s, 1280, 720, 1080, 1920, layout_mode="broll")
+    assert f.mode == "broll"
+    assert "b-roll" in f.reason.lower()
 
 
 def _synthetic(tmp_path: Path) -> Path:

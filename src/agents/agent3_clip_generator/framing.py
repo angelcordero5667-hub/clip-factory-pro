@@ -169,6 +169,17 @@ def choose_framing(
                 cam_x = int(_clamp(avg_x * src_w - crop_w / 2, 0, src_w - crop_w))
         return Framing(mode="gaming", crop_w=crop_w, split_xs=(cam_x, 0), reason="layout streamer: cámara arriba, juego abajo")
 
+    if layout_mode == "broll" and out_h > out_w and src_w > 0 and src_h > 0:
+        top_h = int(out_h * 0.50) // 2 * 2
+        crop_w = min(src_w, int(round(src_h * out_w / top_h)) // 2 * 2)
+        cam_x = int((src_w - crop_w) / 2)
+        if samples:
+            with_faces = [s for s in samples if s.xs]
+            if with_faces:
+                avg_x = sum(s.xs[0] for s in with_faces) / len(with_faces)
+                cam_x = int(_clamp(avg_x * src_w - crop_w / 2, 0, src_w - crop_w))
+        return Framing(mode="broll", crop_w=crop_w, split_xs=(cam_x, 0), reason="layout b-roll gameplay: hablante arriba, metraje de retención abajo")
+
     if src_w <= 0 or src_h <= 0 or not samples:
         return Framing(mode="blur", reason="sin datos de video")
 

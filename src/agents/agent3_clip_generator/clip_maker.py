@@ -176,6 +176,29 @@ class VerticalClipMaker:
                 f"[game_src]scale=-1:{bot_h}:flags=bicubic,crop={w}:{bot_h}:(iw-{w})/2:0[game_bot];",
                 "[cam_top][game_bot]vstack=inputs=2[combined]",
             ]
+        elif framing.mode == "broll":
+            top_h = int(h * 0.50) // 2 * 2
+            bot_h = h - top_h
+            cw = framing.crop_w if framing.crop_w > 0 else int(w * 0.8)
+            cx = framing.split_xs[0] if framing.split_xs else 0
+            broll_dir = settings.base_dir / "data" / "broll"
+            broll_files = []
+            if broll_dir.exists():
+                broll_files = [f for f in broll_dir.iterdir() if f.is_file() and f.suffix.lower() in (".mp4", ".mov", ".mkv", ".webm")]
+            if broll_files:
+                broll_path = self._escape_filter_path(broll_files[0])
+                parts = [
+                    f"[0:v]crop=w={cw}:h=ih:x={cx}:y=0,scale={w}:{top_h}:flags=bicubic[cam_top];",
+                    f"movie='{broll_path}':loop=0[broll_raw];",
+                    f"[broll_raw]scale=-1:{bot_h}:flags=bicubic,crop={w}:{bot_h}:(iw-{w})/2:0[broll_bot];",
+                    "[cam_top][broll_bot]vstack=inputs=2[combined]",
+                ]
+            else:
+                parts = [
+                    f"[0:v]crop=w={cw}:h=ih:x={cx}:y=0,scale={w}:{top_h}:flags=bicubic[cam_top];",
+                    f"mandelbrot=s={w}x{bot_h}:r=30,format=yuv420p[broll_bot];",
+                    "[cam_top][broll_bot]vstack=inputs=2[combined]",
+                ]
         else:
             div = max(1, settings.render.bg_scale_div)
             bw, bh = max(2, (w // div) // 2 * 2), max(2, (h // div) // 2 * 2)
@@ -334,7 +357,7 @@ class VerticalClipMaker:
                 sub_start, sub_end = 0.0, new_total
         cut_expr = select_expr(keep_ranges, start_time) if keep_ranges else None
 
-        actual_sub_pos = "middle" if (layout_mode == "gaming" and subtitle_position in ("bottom", "bottom_low", "lower")) else subtitle_position
+        actual_sub_pos = "middle" if (layout_mode in ("gaming", "broll") and subtitle_position in ("bottom", "bottom_low", "lower")) else subtitle_position
 
         ass_path = None
         if with_subtitles and sub_segments:
@@ -362,7 +385,7 @@ class VerticalClipMaker:
         else:
             if smart_framing is None:
                 smart_framing = settings.render.smart_framing
-            if (smart_framing or layout_mode in ("gaming", "split")) and self.face_tracker.available:
+            if (smart_framing or layout_mode in ("gaming", "split", "broll")) and self.face_tracker.available:
                 seek_for_face = 0.0 if is_pretrimmed else start_time
                 samples, src_w, src_h = self.face_tracker.sample(str(input_p), seek_for_face, duration)
                 framing = choose_framing(samples, src_w, src_h, w, h, allow_split=(aspect_ratio == "9:16"), layout_mode=layout_mode)
@@ -371,6 +394,8 @@ class VerticalClipMaker:
                 framing = choose_framing([], 1920, 1080, w, h, allow_split=False, layout_mode="gaming")
             elif layout_mode == "split":
                 framing = choose_framing([], 1920, 1080, w, h, allow_split=True, layout_mode="split")
+            elif layout_mode == "broll":
+                framing = choose_framing([], 1920, 1080, w, h, allow_split=False, layout_mode="broll")
 
         if hook_zoom is None:
             hook_zoom = settings.render.hook_zoom

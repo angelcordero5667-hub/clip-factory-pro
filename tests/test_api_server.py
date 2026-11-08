@@ -409,4 +409,18 @@ def test_trim_clip_workflow(tdb):
     assert job["options"]["subtitle_style"] == "hormozi"
 
 
+def test_create_job_layout_broll(tdb):
+    r = client.post("/api/jobs", json={
+        "source": "https://www.youtube.com/watch?v=broll12345",
+        "aspect_ratio": "9:16",
+        "layout": "broll",
+        "max_clips": 3
+    })
+    assert r.status_code == 200
+    job_id = r.json()["job_id"]
+    job = tdb.get_job(job_id)
+    assert job["options"]["layout"] == "broll"
+
+
+
 

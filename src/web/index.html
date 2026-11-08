@@ -3943,6 +3943,10 @@
               <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="12" x2="21" y2="12"/></svg>
               Podcast Split
             </div>
+            <div class="layout-card" id="layout-card-broll" onclick="selectLayoutMode('broll')">
+              <svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="9" rx="1"/><rect x="2" y="13" width="20" height="9" rx="1"/><polygon points="10,16 15,17.5 10,19" fill="currentColor"/></svg>
+              B-Roll / Gameplay
+            </div>
             <div class="layout-card" id="layout-card-blur" onclick="selectLayoutMode('blur')">
               <svg viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
               Desenfoque
@@ -5081,7 +5085,7 @@
   let activeLayoutMode = 'auto';
   function selectLayoutMode(mode) {
     activeLayoutMode = mode;
-    ['auto', 'gaming', 'split', 'blur'].forEach(m => {
+    ['auto', 'gaming', 'split', 'broll', 'blur'].forEach(m => {
       const el = document.getElementById('layout-card-' + m);
       if (el) el.classList.toggle('active', m === mode);
     });
@@ -5089,6 +5093,7 @@
       'auto': 'Automático (IA)',
       'gaming': 'Gaming / Streamer (Cámara arriba + Juego abajo)',
       'split': 'Podcast Split (2 participantes arriba y abajo)',
+      'broll': 'B-Roll / Gameplay (Hablante arriba + Metraje de retención abajo)',
       'blur': 'Fondo desenfoque (Original)'
     };
     saveLastSettings();
