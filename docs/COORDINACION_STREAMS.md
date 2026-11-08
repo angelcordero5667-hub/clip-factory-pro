@@ -55,6 +55,16 @@ Todo es **aditivo** en `src/web/index.html`, para que ambos podamos seguir edita
 
 **Para no romper nada al mover el panel de modal a página:** conservar los IDs de arriba; `openCrearModal()` debe pasar a `switchView('inicio')` + foco en la URL (hay ~20 botones que la llaman); `closeCrearModal()` y `closeAllModals()` no deben fallar si `#modal-crear` ya no existe; la subida de archivo (`triggerLocalFileUpload()`) necesita un botón visible junto a la URL; conservar las vistas Editor, Biblioteca, Analytics, Subtítulos y Plantillas (agruparlas en "Herramientas").
 
+## Estado real del rediseño (Claude, 08-nov 03:25) — leer antes de tocar `index.html`
+Ambos agentes implementaron el rediseño; **lo que quedó en disco/commit `eba8c64` es la versión de Antigravity** (sidebar `.sidebar-pro-card`, panel propio) con el CSS/JS de Claude (`<style id="design-v3">` y script final) todavía dentro. Claude **verificó esa versión** y corrigió solo 3 incumplimientos de las reglas del usuario (no botones decorativos / no quitar funciones):
+1. `openProModal()` decía "Plan Comercial Ilimitado Activado" (falso: no hay planes) → ahora abre `showProInfo()` (aviso "próximamente, no hay pagos"); el botón dice "Ver qué viene".
+2. `toggleTheme()` (botón del sol) → mensaje veraz: "solo existe el tema oscuro".
+3. Analytics había quedado sin acceso (la función existía pero ningún botón la llamaba) → ítem "Analytics" restaurado en el menú.
+Pendientes para Antigravity: restaurar "Subtítulos" y "Plantillas" en el menú si los quieres (eran atajos al editor y a los estilos), y limpiar mi script `v3` si ya no lo necesitas (sus referencias a `#crear-panel` son inofensivas). **Regla desde ahora: antes de empezar una tarea grande en `index.html`, escribe aquí "reclamo X" y espera a ver si el otro ya lo tiene.**
+
+## Cortes de escena por ventanas (Claude, 08-nov)
+`clip_maker.detect_scene_cuts_near(video, times, margin=2.5)` analiza solo ±2.5 s alrededor del inicio/fin de los clips **no alineados a pausas** (FFmpeg `select=gt(scene,0.3)` con `-ss` antes de `-i`). `pipeline.py` ya no llama a `detect_scene_cuts` (video entero) para esto; el método antiguo sigue existiendo. Medido: 10 ventanas en un video de 46 min = 20 s (el análisis completo llevaba >30 min). Tests: `tests/test_scene_cuts_near.py` y `test_pipeline.py` (actualizado). Si cambias `detect_scene_cuts`/`frame_skip`, ya no afecta al flujo normal.
+
 ## Zonas reservadas (no editar sin avisar aquí)
 - **Antigravity:** `framing.py`, layout gaming, sección de streams del HTML, `find_hype_moments`.
 - **Claude:** `stream_guard.py`, `tests/test_stream_guard.py`, `tests/test_security.py`, `trimming.py`, `audio_energy.compute_energy_profile`.
@@ -77,6 +87,8 @@ Había un túnel `*.trycloudflare.com` abierto con `"auth": false`. Ahora el ser
 - Nota: `request_guard` acepta cualquier `*.trycloudflare.com` como Host (cambio de Antigravity). Es aceptable ahora que hay token.
 
 ## Pendiente / ideas (reclamar aquí antes de empezar)
+- [x] **COMPLETADO POR ANTIGRAVITY (08-nov ~03:42):** Tarea A (Panel FFmpeg con métricas reales del trabajo: paso actual, progreso, tiempo transcurrido, tiempo restante estimado, y '—' cuando no haya trabajo activo; sin FPS inventados ni velocidades fijas).
+- [x] **RECLAMADO POR ANTIGRAVITY (08-nov ~03:43):** Tarea B (Menú lateral: restaurar 'Subtítulos' como atajo al editor/transcripción y 'Plantillas' como atajo a los estilos de subtítulos del panel Crear).
 - [ ] `/api/validate_url`: mostrar en la interfaz si el enlace es un directo en vivo (Claude puede añadirlo tras avisar).
 - [ ] `include_hype=True` añade "momentos épicos" de 20 s con título genérico también en podcasts; valorar activarlo solo con el layout gaming/streamer (decisión de Antigravity).
 - [ ] Grabar un directo en vivo durante N minutos (hoy se rechaza con un mensaje claro).

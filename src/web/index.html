@@ -3411,6 +3411,12 @@
           Editor de Video
         </button>
       </li>
+      <li class="nav-item" id="nav-analytics">
+        <button onclick="showAnalytics()">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          Analytics
+        </button>
+      </li>
     </ul>
 
     <div class="sidebar-pro-card">
@@ -3418,10 +3424,10 @@
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
       </div>
       <div class="pro-card-title">Actualiza a Pro</div>
-      <div class="pro-card-sub">Desbloquea todas las funciones premium</div>
+      <div class="pro-card-sub">Cuentas, planes y más límites (próximamente)</div>
       <button type="button" class="pro-card-btn" onclick="openProModal()">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M2 4l3 12h14l3-12-5 6-5-6-5 6z"/></svg>
-        Actualizar Ahora
+        Ver qué viene
       </button>
     </div>
   </aside>
@@ -3991,16 +3997,18 @@
             </div>
 
             <div class="ffmpeg-metrics-grid">
-              <div><span class="metric-label">FPS: </span><span class="metric-val-green" id="fps-val">120</span></div>
-              <div><span class="metric-label">Progreso: </span><span id="prog-val" style="color:#fff;">100%</span></div>
-              <div><span class="metric-label">Tiempo rest: </span><span id="eta-val" style="color:#fff;">00:00</span></div>
-              <div><span class="metric-label">Velocidad: </span><span id="speed-val" style="color:#fff;">4.2x</span></div>
+              <div><span class="metric-label">Paso actual: </span><span id="ffmpeg-step-val" class="metric-val-green">—</span></div>
+              <div><span class="metric-label">Progreso: </span><span id="prog-val" style="color:#fff;">—</span></div>
+              <div><span class="metric-label">Transcurrido: </span><span id="elapsed-val" style="color:#fff;">—</span></div>
+              <div><span class="metric-label">Tiempo rest: </span><span id="eta-val" style="color:#fff;">—</span></div>
+              <span id="fps-val" style="display:none;"></span>
+              <span id="speed-val" style="display:none;"></span>
             </div>
 
             <div style="margin-top:12px; display:flex; justify-content:space-between; align-items:center;">
               <div style="flex:1; margin-right:12px;">
                 <div style="height:6px; background:rgba(255,255,255,0.08); border-radius:3px; overflow:hidden;">
-                  <div id="ffmpeg-progress-bar-fill" style="width:100%; height:100%; background:linear-gradient(90deg, var(--neon-purple), var(--neon-cyan)); border-radius:3px; transition:width 0.3s;"></div>
+                  <div id="ffmpeg-progress-bar-fill" style="width:0%; height:100%; background:linear-gradient(90deg, var(--neon-purple), var(--neon-cyan)); border-radius:3px; transition:width 0.3s;"></div>
                 </div>
               </div>
               <button class="btn-cancel-job" id="btn-cancel-ffmpeg" onclick="cancelCurrentJob()" style="display:none; font-size:11px; padding:4px 10px;">
@@ -4110,12 +4118,14 @@
   
   // Pro Modal Handler
   function openProModal() {
-    showToast('👑 Clip Factory Pro: Plan Comercial Ilimitado Activado');
+    // Antes mostraba "Plan Comercial Ilimitado Activado": no hay planes ni pagos, así que se explica la verdad.
+    if (typeof showProInfo === 'function') showProInfo();
+    else showToast('Clip Factory Pro: planes y cuentas en preparación (todavía no hay pagos).');
   }
 
-  // Theme Toggle Handler
+  // Theme Toggle Handler (solo existe el tema oscuro)
   function toggleTheme() {
-    showToast('Modo Oscuro Neón optimizado para máxima fidelidad visual');
+    showToast('Por ahora solo existe el tema oscuro.');
   }
 
   function switchView(viewName) {
@@ -4444,7 +4454,9 @@
 
     // FFmpeg View Elements
     const ffmpegStatus = document.getElementById('ffmpeg-status-text');
+    const ffmpegStep = document.getElementById('ffmpeg-step-val');
     const ffmpegProg = document.getElementById('prog-val');
+    const ffmpegElapsed = document.getElementById('elapsed-val');
     const ffmpegEta = document.getElementById('eta-val');
     const ffmpegFps = document.getElementById('fps-val');
     const ffmpegSpeed = document.getElementById('speed-val');
@@ -4461,12 +4473,12 @@
 
     let etaStr = 'Calculando...';
     let speedStr = '1.0x';
-    let fpsStr = '60';
+    let stepLabel = job.step_label || job.step || 'Procesando';
 
     if (job.status === 'queued') {
       etaStr = 'En cola';
       speedStr = 'Espera';
-      fpsStr = '0';
+      stepLabel = 'En cola';
     } else if (job.status === 'running') {
       if (pct > 3 && pct < 100) {
         if (!window._lastEstimatedTotal || Math.abs(pct - (window._lastPct || 0)) >= 2) {
@@ -4478,21 +4490,18 @@
         etaStr = formatTimeMinSec(remainingSec);
         speedStr = ((pct / Math.max(1, elapsedSec))).toFixed(1) + 'x';
       }
-      if (job.step_label === 'Renderizado') {
-        fpsStr = '120';
-      } else if (job.step_label === 'Transcripción') {
-        fpsStr = 'Whisper IA';
-      } else if (job.step_label === 'Descarga') {
-        fpsStr = 'Red 100%';
-      } else {
-        fpsStr = '60';
-      }
     } else if (job.status === 'done') {
       window._lastEstimatedTotal = null;
       window._lastPct = null;
       etaStr = '00:00';
       speedStr = 'Completado';
-      fpsStr = 'Listo';
+      stepLabel = 'Completado';
+    } else if (job.status === 'error' || job.status === 'cancelled') {
+      window._lastEstimatedTotal = null;
+      window._lastPct = null;
+      etaStr = '—';
+      speedStr = '—';
+      stepLabel = job.status === 'error' ? 'Error' : 'Cancelado';
     }
 
     if (banner) {
@@ -4525,15 +4534,19 @@
       }
     }
 
-    if (ffmpegProg) ffmpegProg.innerText = `${pct}%`;
+    if (ffmpegStep) ffmpegStep.innerText = stepLabel;
+    if (ffmpegProg) ffmpegProg.innerText = job.status === 'done' ? '100%' : `${pct}%`;
+    if (ffmpegElapsed) ffmpegElapsed.innerText = elapsedStr;
     if (ffmpegEta) ffmpegEta.innerText = etaStr;
-    if (ffmpegFps) ffmpegFps.innerText = fpsStr;
+    if (ffmpegFps) ffmpegFps.innerText = '';
     if (ffmpegSpeed) ffmpegSpeed.innerText = speedStr;
-    if (ffmpegFill) ffmpegFill.style.width = `${pct}%`;
+    if (ffmpegFill) ffmpegFill.style.width = job.status === 'done' ? '100%' : `${pct}%`;
     if (ffmpegStatus) {
       if (job.status === 'queued') ffmpegStatus.innerText = 'En cola, esperando turno...';
       else if (job.status === 'running') ffmpegStatus.innerText = job.message || job.step_label || 'Procesando video con IA...';
       else if (job.status === 'done') ffmpegStatus.innerText = job.message || 'Generación completada';
+      else if (job.status === 'error') ffmpegStatus.innerText = 'Error: ' + (job.error || job.message || 'Fallo en procesamiento');
+      else if (job.status === 'cancelled') ffmpegStatus.innerText = 'Trabajo cancelado';
     }
     if (ffmpegCancelBtn) {
       ffmpegCancelBtn.style.display = (job.status === 'running' || job.status === 'queued') ? 'inline-flex' : 'none';
@@ -5312,6 +5325,24 @@
     checkForActiveJobs();
   }
 
+  function resetFFmpegUI() {
+    if (activeJobId) return;
+    const stepEl = document.getElementById('ffmpeg-step-val');
+    if (stepEl) stepEl.innerText = '—';
+    const progEl = document.getElementById('prog-val');
+    if (progEl) progEl.innerText = '—';
+    const elapsedEl = document.getElementById('elapsed-val');
+    if (elapsedEl) elapsedEl.innerText = '—';
+    const etaEl = document.getElementById('eta-val');
+    if (etaEl) etaEl.innerText = '—';
+    const fillEl = document.getElementById('ffmpeg-progress-bar-fill');
+    if (fillEl) fillEl.style.width = '0%';
+    const cancelBtn = document.getElementById('btn-cancel-ffmpeg');
+    if (cancelBtn) cancelBtn.style.display = 'none';
+    const frames = document.querySelectorAll('.filmstrip-frame');
+    frames.forEach(f => f.classList.remove('active-rendering'));
+  }
+
   async function checkForActiveJobs() {
     if (activeJobId && jobPollInterval) return;
     try {
@@ -5321,6 +5352,8 @@
         const active = jobs.find(j => j.status === 'running' || j.status === 'queued');
         if (active) {
           trackJobProgress(active.id);
+        } else {
+          resetFFmpegUI();
         }
       }
     } catch (e) {}
