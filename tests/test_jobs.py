@@ -93,3 +93,18 @@ def test_migracion_agrega_columnas(tmp_path):
     d = Database(db_path=p)
     d.save_video("v", "f.mp4", "/f.mp4", 10, "es", source="https://x", transcript_path="/t.json")
     assert d.get_video("v")["transcript_path"] == "/t.json"
+
+
+def test_trabajo_duracion_e_idioma_se_pasan_al_pipeline(tmp_path):
+    d, fp, w = make(tmp_path)
+    jid = d.create_job("https://a", {
+        "language": "pt",
+        "target_duration": "short",
+    })
+    w.run_job(d.claim_next_job())
+    assert d.get_job(jid)["status"] == "done"
+    kw = fp.calls[0][1]
+    assert kw["language"] == "pt"
+    assert kw["min_clip_duration"] == 15.0
+    assert kw["max_clip_duration"] == 30.0
+

@@ -44,6 +44,12 @@ LAYOUT_MODES = ("auto", "gaming", "blur")
 SPEED_MODES = ("turbo", "fast", "studio")
 VALID_STATUS = ("pending", "approved", "rejected")
 MIN_CLIP_SEC, MAX_CLIP_SEC = 5.0, 180.0
+TARGET_DURATIONS = {
+    "short": (15.0, 30.0),
+    "medium": (30.0, 60.0),
+    "long": (60.0, 90.0),
+}
+VALID_LANGUAGES = ("es", "en", "pt")
 
 worker = JobWorker()
 
@@ -584,6 +590,9 @@ class JobBody(BaseModel):
     max_clips: int = Field(default=5, ge=1, le=20)
     fast: bool = False
     language: Optional[str] = Field(default=None, max_length=8)
+    target_duration: Optional[str] = "medium"
+    min_clip_duration: Optional[float] = None
+    max_clip_duration: Optional[float] = None
     subtitle_style: str = "hormozi"
     aspect_ratio: str = "9:16"
     include_emojis: bool = True
@@ -646,8 +655,41 @@ def create_job(body: JobBody):
         raise HTTPException(status_code=400, detail=f"Diseño inválido. Opciones: {', '.join(LAYOUT_MODES)}.")
     if body.speed_mode and body.speed_mode not in SPEED_MODES:
         raise HTTPException(status_code=400, detail=f"Modo de velocidad inválido. Opciones: {', '.join(SPEED_MODES)}.")
+
+    # Validación y normalización de idioma
+    lang = body.language
+    if lang is not None:
+        lang = lang.strip().lower()
+        if lang in ("auto", "", "null", "none"):
+            lang = None
+        elif lang not in VALID_LANGUAGES:
+            raise HTTPException(status_code=400, detail="Idioma no soportado. Opciones: Automático (null), es, en, pt.")
+
+    # Validación y cálculo de duración de clip
+    td = (body.target_duration or "medium").strip().lower()
+    min_dur = body.min_clip_duration
+    max_dur = body.max_clip_duration
+
+    if min_dur is None or max_dur is None:
+        if td not in TARGET_DURATIONS:
+            raise HTTPException(status_code=400, detail="Duración objetivo inválida. Opciones: short (15-30s), medium (30-60s), long (60-90s).")
+        def_min, def_max = TARGET_DURATIONS[td]
+        min_dur = min_dur if min_dur is not None else def_min
+        max_dur = max_dur if max_dur is not None else def_max
+
+    if not (MIN_CLIP_SEC <= min_dur < max_dur <= MAX_CLIP_SEC):
+        raise HTTPException(
+            status_code=400,
+            detail=f"Rango de duración inválido: debe estar entre {MIN_CLIP_SEC:.0f} y {MAX_CLIP_SEC:.0f} segundos (recibido min={min_dur}, max={max_dur})."
+        )
+
     source = _validate_source(body.source)
     options = body.model_dump(exclude={"source"})
+    options["language"] = lang
+    options["target_duration"] = td
+    options["min_clip_duration"] = float(min_dur)
+    options["max_clip_duration"] = float(max_dur)
+
     job_id = db.create_job(source=source, options=options)
     return {"job_id": job_id, "status": "queued"}
 

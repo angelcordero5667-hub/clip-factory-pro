@@ -3941,8 +3941,36 @@
         </div>
       </div>
 
-      <!-- FILA 4: MARCA DE AGUA, ENFOQUE IA, CANTIDAD DE CLIPS -->
+      <!-- FILA 4: MARCA DE AGUA, ENFOQUE IA, CANTIDAD DE CLIPS, IDIOMA Y DURACIÓN (TAREA 2) -->
       <div class="studio-row-4-card">
+        <!-- SELECTOR DE IDIOMA (TAREA 2) -->
+        <div class="studio-form-line">
+          <div class="studio-form-label">
+            <svg viewBox="0 0 24 24" stroke="#22d3ee"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            <span>Idioma del video / transcripción</span>
+          </div>
+          <select id="clip-language-select" class="studio-select-dropdown" aria-label="Idioma del video">
+            <option value="auto">Automático (Detección IA)</option>
+            <option value="es" selected>Español (ES)</option>
+            <option value="en">Inglés (EN)</option>
+            <option value="pt">Portugués (PT)</option>
+          </select>
+        </div>
+
+        <!-- DURACIÓN OBJETIVO DEL CLIP (TAREA 2) -->
+        <div class="studio-form-line">
+          <div class="studio-form-label">
+            <svg viewBox="0 0 24 24" stroke="#b6f23a"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span>Duración del clip</span>
+          </div>
+          <div class="clip-duration-pills" id="clip-duration-group" role="radiogroup" aria-label="Duración objetivo del clip">
+            <button type="button" class="sub-pill-btn clip-dur-pill" data-dur="short" onclick="selectClipDuration('short')" role="radio" aria-checked="false" title="15 a 30 segundos (TikTok / Shorts dinámicos)">Corto (15-30 s)</button>
+            <button type="button" class="sub-pill-btn clip-dur-pill active" data-dur="medium" onclick="selectClipDuration('medium')" role="radio" aria-checked="true" title="30 a 60 segundos (Reels / Historias completas)">Medio (30-60 s)</button>
+            <button type="button" class="sub-pill-btn clip-dur-pill" data-dur="long" onclick="selectClipDuration('long')" role="radio" aria-checked="false" title="60 a 90 segundos (Explicaciones y debates a fondo)">Largo (60-90 s)</button>
+          </div>
+          <input type="hidden" id="clip-target-duration" value="medium">
+        </div>
+
         <div class="studio-form-line">
           <div class="studio-form-label">
             <svg viewBox="0 0 24 24" stroke="#f59e0b"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
@@ -4823,6 +4851,24 @@
     showToast(`Formato seleccionado: ${fmt}`);
   }
 
+  let activeClipDuration = 'medium';
+  function selectClipDuration(dur) {
+    activeClipDuration = dur;
+    const hidden = document.getElementById('clip-target-duration');
+    if (hidden) hidden.value = dur;
+    document.querySelectorAll('.clip-dur-pill').forEach(btn => {
+      const isActive = btn.getAttribute('data-dur') === dur;
+      btn.classList.toggle('active', isActive);
+      btn.setAttribute('aria-checked', isActive ? 'true' : 'false');
+    });
+    const labels = {
+      'short': 'Corto (15-30 s)',
+      'medium': 'Medio (30-60 s)',
+      'long': 'Largo (60-90 s)'
+    };
+    showToast(`Duración objetivo: ${labels[dur] || dur}`);
+  }
+
   let activeLayoutMode = 'auto';
   function selectLayoutMode(mode) {
     activeLayoutMode = mode;
@@ -4992,6 +5038,9 @@
     const maxClips = parseInt(document.getElementById('clips-count-val')?.innerText || '5', 10);
     const startRange = document.getElementById('stream-start-time')?.value.trim();
     const endRange = document.getElementById('stream-end-time')?.value.trim();
+    const langSelect = document.getElementById('clip-language-select')?.value || 'auto';
+    const langVal = (langSelect === 'auto' || !langSelect) ? null : langSelect;
+    const targetDur = document.getElementById('clip-target-duration')?.value || activeClipDuration || 'medium';
 
     const body = {
       source: url,
@@ -4999,7 +5048,8 @@
       subtitle_style: activeSubStyle || 'hormozi',
       aspect_ratio: activeFormat || '9:16',
       fast: !!document.getElementById('fast-mode-check')?.checked,
-      language: 'es',
+      language: langVal,
+      target_duration: targetDur,
       time_range_start: startRange || null,
       time_range_end: endRange || null,
       layout: activeLayoutMode || 'auto',

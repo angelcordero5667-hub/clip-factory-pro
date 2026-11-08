@@ -232,3 +232,63 @@ def test_list_jobs_includes_video_duration(tdb):
     assert job_item is not None
     assert job_item.get("video_duration") == 600.0
 
+
+def test_create_job_language_and_duration_validation(tdb):
+    # Idioma valido 'es', 'en', 'pt' y target_duration 'short', 'medium', 'long'
+    r1 = client.post("/api/jobs", json={
+        "source": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+        "language": "es",
+        "target_duration": "short",
+    })
+    assert r1.status_code == 200
+    j1 = tdb.get_job(r1.json()["job_id"])
+    assert j1["options"]["language"] == "es"
+    assert j1["options"]["min_clip_duration"] == 15.0
+    assert j1["options"]["max_clip_duration"] == 30.0
+
+    # Idioma 'auto' se normaliza a None
+    r2 = client.post("/api/jobs", json={
+        "source": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+        "language": "auto",
+        "target_duration": "long",
+    })
+    assert r2.status_code == 200
+    j2 = tdb.get_job(r2.json()["job_id"])
+    assert j2["options"]["language"] is None
+    assert j2["options"]["min_clip_duration"] == 60.0
+    assert j2["options"]["max_clip_duration"] == 90.0
+
+    # Idioma no soportado -> 400
+    r_bad_lang = client.post("/api/jobs", json={
+        "source": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+        "language": "fr",
+    })
+    assert r_bad_lang.status_code == 400
+    assert "Idioma no soportado" in r_bad_lang.json()["detail"]
+
+    # Target duration invalida -> 400
+    r_bad_td = client.post("/api/jobs", json={
+        "source": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+        "target_duration": "gigante",
+    })
+    assert r_bad_td.status_code == 400
+    assert "Duración objetivo inválida" in r_bad_td.json()["detail"]
+
+    # Rango manual invalido (min < MIN_CLIP_SEC) -> 400
+    r_bad_range = client.post("/api/jobs", json={
+        "source": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+        "min_clip_duration": 2.0,
+        "max_clip_duration": 40.0,
+    })
+    assert r_bad_range.status_code == 400
+    assert "Rango de duración inválido" in r_bad_range.json()["detail"]
+
+    # Rango manual invalido (min >= max) -> 400
+    r_bad_order = client.post("/api/jobs", json={
+        "source": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+        "min_clip_duration": 50.0,
+        "max_clip_duration": 30.0,
+    })
+    assert r_bad_order.status_code == 400
+
+

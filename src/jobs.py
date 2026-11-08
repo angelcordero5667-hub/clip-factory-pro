@@ -103,6 +103,17 @@ class JobWorker:
             watermark_text = opts.get("watermark_text") or opts.get("watermark") or None
             focus_prompt = opts.get("focus_prompt") or None
 
+            min_clip_dur = opts.get("min_clip_duration")
+            max_clip_dur = opts.get("max_clip_duration")
+            if min_clip_dur is None or max_clip_dur is None:
+                td = (opts.get("target_duration") or "medium").lower()
+                if td == "short":
+                    min_clip_dur, max_clip_dur = 15.0, 30.0
+                elif td == "long":
+                    min_clip_dur, max_clip_dur = 60.0, 90.0
+                else:
+                    min_clip_dur, max_clip_dur = 30.0, 60.0
+
             video_id, cands = pipeline.run_pipeline(
                 video_input=job["source"],
                 max_candidates=int(opts.get("max_clips", 5)),
@@ -117,6 +128,8 @@ class JobWorker:
                 watermark_text=watermark_text,
                 focus_prompt=focus_prompt,
                 time_range=time_range,
+                min_clip_duration=float(min_clip_dur) if min_clip_dur is not None else None,
+                max_clip_duration=float(max_clip_dur) if max_clip_dur is not None else None,
                 step_callback=on_step,
                 subtitle_position=opts.get("subtitle_position", "bottom"),
                 custom_fontsize=opts.get("custom_fontsize"),

@@ -64,6 +64,8 @@ class ClipFactoryPipeline:
         hook_zoom: Optional[bool] = None,
         focus_prompt: Optional[str] = None,
         time_range: Optional[Tuple[float, float]] = None,
+        min_clip_duration: Optional[float] = None,
+        max_clip_duration: Optional[float] = None,
         progress_callback: Optional[Callable[[str], None]] = None,
         step_callback: Optional[StepCallback] = None,
     ) -> Tuple[str, List[ViralMomentCandidate]]:
@@ -156,6 +158,10 @@ class ClipFactoryPipeline:
         engine_label = "heurístico" if fast else "IA (Ollama) con respaldo heurístico"
         step(2, 0.0, f"🧠 Analizando ganchos y calculando el puntaje de viralidad (motor {engine_label})...")
         self.detector.max_candidates = max_candidates
+        if min_clip_duration is not None:
+            self.detector.min_duration = float(min_clip_duration)
+        if max_clip_duration is not None:
+            self.detector.max_duration = float(max_clip_duration)
         energy = None
         try:
             energy = compute_energy_profile(str(path), settings.ffmpeg_exe)
