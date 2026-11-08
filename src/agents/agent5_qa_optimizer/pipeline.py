@@ -162,7 +162,7 @@ class ClipFactoryPipeline:
                 log_step("🔊 Energía del audio medida: se usará para puntuar los momentos.")
         except Exception as e:  # la energía es un extra: nunca debe romper el análisis
             logger.warning(f"Sin energía de audio: {e}")
-        candidates = self.detector.detect_moments(transcript, use_llm=not fast, energy=energy, focus_prompt=focus_prompt)
+        candidates = self.detector.detect_moments(transcript, use_llm=not fast, energy=energy, layout=layout_mode, focus_prompt=focus_prompt)
         # IDs únicos por video: evita que INSERT OR REPLACE pise clips de otros videos
         for cand in candidates:
             cand.id = f"{video_id}_{cand.id}"
@@ -191,11 +191,14 @@ class ClipFactoryPipeline:
                 render_source = Path(local_video)
                 db.update_video_filepath(video_id, str(render_source.resolve()))
 
-            step(3, 0.2, "🔎 Analizando cortes de escena...")
-            # Los cortes de escena solo sirven para ajustar clips que NO se alinearon a pausas del habla.
-            # Si todos ya están alineados, se salta este paso (en videos largos tardaba más de 10 min).
-            if any(not c.pause_aligned for c in candidates):
-                scene_cuts = self.clip_maker.detect_scene_cuts(str(render_source))
+            # Los cortes de escena solo sirven para ajustar clips que NO se alinearon a pausas del habla, y solo
+            # importan cerca de su inicio y fin: se analizan esas ventanas, no el video entero (antes, en un
+            # video de una hora, este paso tardaba 10-40 min sin mostrar avance).
+            unaligned = [c for c in candidates if not c.pause_aligned]
+            if unaligned:
+                step(3, 0.2, f"🔎 Buscando cortes de escena cerca de {len(unaligned)} clip(s)...")
+                edges = [t for c in unaligned for t in (c.start_time, c.end_time)]
+                scene_cuts = self.clip_maker.detect_scene_cuts_near(str(render_source), edges)
             else:
                 scene_cuts = []
                 log_step("⏭️ Cortes de escena omitidos: los clips ya están alineados a pausas del habla.")

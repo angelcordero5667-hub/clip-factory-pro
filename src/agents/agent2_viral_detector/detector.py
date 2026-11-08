@@ -139,7 +139,8 @@ class ViralMomentDetector:
         transcript: TranscriptResult,
         use_llm: bool = True,
         energy=None,
-        include_hype: bool = True,
+        include_hype: Optional[bool] = None,
+        layout: Optional[str] = None,
         focus_prompt: Optional[str] = None,
     ) -> List[ViralMomentCandidate]:
         if transcript.duration < self.min_duration:
@@ -156,7 +157,9 @@ class ViralMomentDetector:
         if not candidates:
             candidates = self._detect_heuristic(transcript, focus_prompt=focus_prompt)
 
-        if energy is not None and include_hype:
+        # Hype peaks: solo activado en streams/gaming o con flag explícito
+        should_include_hype = include_hype if include_hype is not None else (layout in ("gaming", "streamer"))
+        if energy is not None and should_include_hype:
             try:
                 hype_peaks = find_hype_moments(
                     energy,
@@ -165,21 +168,57 @@ class ViralMomentDetector:
                     top_n=max(2, self.max_candidates // 2)
                 )
                 for idx, (p_start, p_end, p_score) in enumerate(hype_peaks, 1):
+                    # Evitar solapes: reforzar a los candidatos que cubren el pico y no duplicar
+                    overlapping_any = False
+                    peak_dur = max(1.0, (p_end - p_start))
+                    for existing in candidates:
+                        inter_start = max(p_start, existing.start_time)
+                        inter_end = min(p_end, existing.end_time)
+                        inter_len = max(0.0, inter_end - inter_start)
+                        if inter_len >= 10.0 or (inter_len / peak_dur) >= 0.4:
+                            overlapping_any = True
+                            if p_score > 0.5:
+                                existing.virality_score = min(99.0, existing.virality_score + 3.0)
+                                if "pico de energía" not in existing.reasoning.lower():
+                                    existing.reasoning += f" Coincide con pico de energía acústica ({int(p_score*100)}/100)."
+
+                    if overlapping_any:
+                        continue
+
+                    # Extraer transcripción contextual para titular y redactar copy real
                     matching_segs = [s for s in transcript.segments if s.end >= p_start and s.start <= p_end]
                     text_snippet = " ".join(s.text for s in matching_segs).strip()
-                    hook_snippet = matching_segs[0].text if matching_segs else "¡Momento épico en directo!"
+                    first_text = matching_segs[0].text.strip() if matching_segs else ""
                     
                     p_score_pct = int(p_score * 100)
-                    vir_score = round(min(99.0, max(75.0, 78.0 + p_score * 20.0)), 1)
-                    
+                    vir_score = round(min(98.0, max(75.0, 78.0 + p_score * 18.0)), 1)
+
+                    clean_words = re.findall(r"\b[\wáéíóúüñÁÉÍÓÚÜÑ]+\b", first_text) if first_text else []
+                    if len(clean_words) >= 3:
+                        title_text = f"{' '.join(clean_words[:5]).title()} 💥"
+                    elif text_snippet:
+                        snippet_words = re.findall(r"\b[\wáéíóúüñÁÉÍÓÚÜÑ]+\b", text_snippet) if text_snippet else []
+                        title_text = f"{' '.join(snippet_words[:5]).title()} 🔥" if len(snippet_words) >= 3 else f"Reacción en Directo ({p_score_pct}%) 🔥"
+                    else:
+                        title_text = f"Pico de Intensidad ({p_score_pct}%) 💥"
+
+                    if text_snippet:
+                        social_desc = f"¡Momento intenso en el directo! '{text_snippet[:90]}...' ¿Qué opinas? Comenta 👇"
+                        ctx = text_snippet[:250] + ("..." if len(text_snippet) > 250 else "")
+                    else:
+                        social_desc = "¡Reacción brutal y máxima tensión en el directo! 🔥🎮 ¿Te lo esperabas?"
+                        ctx = f"Pico de energía acústica ({p_score_pct}/100) y alta intensidad en streaming."
+
+                    hook_txt = first_text[:120] if first_text else "¡Momento cumbre de la partida!"
+
                     candidates.append(ViralMomentCandidate(
                         id=f"clip_hype_{idx}",
                         start_time=round(p_start, 2),
                         end_time=round(min(transcript.duration, p_end), 2),
                         duration=round(p_end - p_start, 2),
-                        title="Momento Épico en Directo 🔥",
-                        hook_text=hook_snippet[:120],
-                        context_text=text_snippet[:250] if text_snippet else "Pico de energía acústica y reacción en vivo.",
+                        title=title_text,
+                        hook_text=hook_txt,
+                        context_text=ctx,
                         virality_score=vir_score,
                         breakdown=ViralityBreakdown(
                             hook_score=min(100.0, vir_score + 2.0),
@@ -188,7 +227,7 @@ class ViralMomentDetector:
                         ),
                         category="reaccion",
                         reasoning=f"Pico de volumen y energía acústica ({p_score_pct}/100) característico de momentos virales en streaming.",
-                        social_description="¡No te pierdas esta reacción en el directo! 🔥",
+                        social_description=social_desc,
                         hashtags=["#streamer", "#twitch", "#gaming", "#momentoepico", "#viral"],
                         status="pending",
                         engine="audio_energy",

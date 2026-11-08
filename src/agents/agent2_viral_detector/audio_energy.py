@@ -100,7 +100,20 @@ def find_hype_moments(
     for t_start, s in scores:
         if any(abs(t_start - p_start) < min_separation for p_start, _, _ in peaks):
             continue
-        t_end = min(total_seconds, t_start + min_duration)
+        # Adaptar duración si el pico de energía se prolonga más allá del mínimo
+        dur = min_duration
+        step_dur = 5.0
+        while dur + step_dur <= max_duration:
+            next_steps = int((dur + step_dur) / profile.hop)
+            idx_start = int(t_start / profile.hop)
+            if idx_start + next_steps > len(profile.norm):
+                break
+            expanded_score = float(profile.norm[idx_start : idx_start + next_steps].mean())
+            if expanded_score >= s * 0.75:
+                dur += step_dur
+            else:
+                break
+        t_end = min(total_seconds, t_start + dur)
         peaks.append((round(t_start, 2), round(t_end, 2), round(s, 3)))
         if len(peaks) >= top_n:
             break
