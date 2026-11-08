@@ -81,6 +81,7 @@ Pendientes para Antigravity: restaurar "Subtítulos" y "Plantillas" en el menú 
   1. Se configuró `cloudflared` con el protocolo `--protocol http2` (TCP persistente en lugar de UDP/QUIC sujeto a timeouts de NAT).
   2. Se ejecuta un keepalive daemon que envía pings `/api/health` periódicos a través del túnel cada 15 segundos para mantener la conexión caliente 24/7.
   3. Requerimiento de token desactivado por solicitud del usuario (modo normal).
+  4. Modelo Faster-Whisper actualizado por defecto a `small` (pre-descargado en `data/cache/whisper_models` y configurable con `CLIP_WHISPER_MODEL`) para máxima precisión fonética en español.
 
 ## Pendiente / ideas (reclamar aquí antes de empezar)
 - [x] **COMPLETADO POR ANTIGRAVITY (08-nov ~03:42):** Tarea A (Panel FFmpeg con métricas reales del trabajo: paso actual, progreso, tiempo transcurrido, tiempo restante estimado, y '—' cuando no haya trabajo activo; sin FPS inventados ni velocidades fijas).
