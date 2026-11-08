@@ -1265,29 +1265,46 @@
   }
   .range-selection-block {
     position: absolute;
-    left: 25%;
-    width: 50%;
-    height: 34px;
-    background: rgba(59, 130, 246, 0.25);
+    left: 0%;
+    width: 100%;
+    height: 100%;
+    background: rgba(245, 158, 11, 0.22);
     border-top: 2px solid var(--neon-amber);
     border-bottom: 2px solid var(--neon-amber);
+    border-left: 2px solid var(--neon-amber);
+    border-right: 2px solid var(--neon-amber);
+    border-radius: 4px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     cursor: grab;
+    user-select: none;
+    box-sizing: border-box;
+    transition: background 0.15s ease;
+  }
+  .range-selection-block:active {
+    cursor: grabbing;
+    background: rgba(245, 158, 11, 0.32);
   }
   .range-handle {
-    width: 12px;
+    width: 16px;
     height: 100%;
     background: var(--neon-amber);
     cursor: ew-resize;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 9px;
-    font-weight: 700;
-    color: #000;
+    font-size: 11px;
+    font-weight: 900;
+    color: #0f172a;
     user-select: none;
+    touch-action: none;
+    transition: background 0.15s ease, filter 0.15s ease;
+    z-index: 2;
+  }
+  .range-handle:hover {
+    background: #fde047;
+    filter: drop-shadow(0 0 4px rgba(245, 158, 11, 0.8));
   }
   .sub-block {
     height: 28px;
@@ -4256,6 +4273,29 @@
               </div>
             </div>
 
+            <!-- Barra de control de recorte real -->
+            <div id="trim-controls-bar" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; padding:6px 12px; background:rgba(20,24,39,0.85); border:1px solid rgba(245,158,11,0.3); border-radius:6px; flex-wrap:wrap; gap:8px;">
+              <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                <span style="font-size:11.5px; font-weight:700; color:var(--neon-amber); display:flex; align-items:center; gap:4px;">
+                  ✂️ Recorte de Clip:
+                </span>
+                <span style="font-size:11.5px; color:#fff; font-family:'JetBrains Mono', monospace;" id="trim-range-info">
+                  00:00.0 → 00:30.0 (30.0 s)
+                </span>
+                <span id="trim-warning-badge" style="display:none; font-size:10.5px; color:#f87171; background:rgba(239,68,68,0.2); border:1px solid rgba(239,68,68,0.4); padding:2px 7px; border-radius:4px; font-weight:600;">
+                  Mínimo 5.0 s
+                </span>
+              </div>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <button type="button" class="btn-outline" id="btn-reset-trim" onclick="resetClipTrimming()" style="font-size:11px; padding:4px 10px; border-radius:4px; cursor:pointer;" title="Restablecer tiradores al clip original">
+                  ↺ Restablecer
+                </button>
+                <button type="button" class="btn-gradient" id="btn-apply-trim" onclick="applyClipTrimming()" style="font-size:11.5px; padding:5px 14px; border-radius:4px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:5px; background:linear-gradient(135deg, #f59e0b, #d97706); box-shadow:0 0 10px rgba(245,158,11,0.35);">
+                  ✂️ Aplicar Recorte
+                </button>
+              </div>
+            </div>
+
             <div class="timeline-ruler" onclick="seekRuler(event)">
               <span>00:00:00</span>
               <span>00:00:05</span>
@@ -4279,12 +4319,14 @@
               </div>
 
               <!-- Pista 2: Rango [  ] -->
-              <div class="timeline-track" id="range-track">
-                <span style="font-size: 10px; color: var(--text-muted); width: 60px;">Rango</span>
-                <div class="range-selection-block" id="range-block">
-                  <div class="range-handle" id="handle-left" title="Arrastra para ajustar inicio">[</div>
-                  <span style="font-size: 10px; color: #fff; font-weight: 700;" id="range-duration-label">15.0 s</span>
-                  <div class="range-handle" id="handle-right" title="Arrastra para ajustar fin">]</div>
+              <div class="timeline-track" id="range-track" style="position:relative;">
+                <span style="font-size: 10px; color: var(--text-muted); width: 60px; flex-shrink: 0;">Rango [ ]</span>
+                <div id="range-track-bar" style="flex-grow: 1; height: 100%; position: relative; overflow: hidden; background: rgba(245, 158, 11, 0.06); border-radius: 4px;">
+                  <div class="range-selection-block" id="range-block" style="left:0%; width:100%;">
+                    <div class="range-handle" id="handle-left" title="Arrastra para ajustar inicio del recorte">[</div>
+                    <span style="font-size: 11px; color: #fff; font-weight: 700; user-select: none;" id="range-duration-label">-- s</span>
+                    <div class="range-handle" id="handle-right" title="Arrastra para ajustar fin del recorte">]</div>
+                  </div>
                 </div>
               </div>
 
@@ -6040,6 +6082,7 @@
     refreshActionBar();
     updateEditorCopyDisplay();
     loadActiveClipTranscript(c.id);
+    initClipTrimming(c);
     switchView('editor');
   }
 
@@ -6550,32 +6593,224 @@
   setInterval(pollMetrics, 3500);
   pollMetrics();
 
-  // ARRASTRE DE RANGO [  ]
-  const rangeBlock = document.getElementById('range-block');
-  const track = document.getElementById('range-track');
-  let isDragging = false;
-  let startX = 0;
+  // =========================================================================
+  // RECORTE REAL DE CLIPS EN EL EDITOR (Timeline [ ] Handles + Rerender)
+  // =========================================================================
+  let trimClipDuration = 30.0;
+  let trimStartRel = 0.0;
+  let trimEndRel = 30.0;
+  let activeTrimDrag = null; // 'start' | 'end' | 'body'
+  let trimDragStartX = 0;
+  let trimDragStartRelL = 0;
+  let trimDragStartRelR = 0;
 
-  if (rangeBlock && track) {
-    rangeBlock.addEventListener('mousedown', (e) => {
-      isDragging = true;
-      startX = e.clientX;
-    });
-    window.addEventListener('mousemove', (e) => {
-      if (!isDragging) return;
-      const dx = e.clientX - startX;
-      startX = e.clientX;
-      const curLeft = parseFloat(rangeBlock.style.left || '25');
-      const newLeft = Math.max(0, Math.min(60, curLeft + (dx / 5)));
-      rangeBlock.style.left = newLeft + '%';
-      const durationLbl = document.getElementById('range-duration-label');
-      if (durationLbl) {
-        const dur = Math.round(10 + newLeft / 5);
-        durationLbl.innerText = `${dur}.0 s`;
-      }
-    });
-    window.addEventListener('mouseup', () => { isDragging = false; });
+  function initClipTrimming(c) {
+    if (!c) return;
+    const origDur = (c.end !== undefined && c.start !== undefined && (c.end > c.start))
+      ? (c.end - c.start)
+      : (videoEl && !isNaN(videoEl.duration) && videoEl.duration > 0 ? videoEl.duration : 30.0);
+    trimClipDuration = Math.max(5.0, origDur);
+    trimStartRel = 0.0;
+    trimEndRel = trimClipDuration;
+    renderTrimUI();
   }
+
+  function renderTrimUI() {
+    const rangeBlock = document.getElementById('range-block');
+    const durationLbl = document.getElementById('range-duration-label');
+    const infoLbl = document.getElementById('trim-range-info');
+    const warnBadge = document.getElementById('trim-warning-badge');
+    const btnApply = document.getElementById('btn-apply-trim');
+    if (!rangeBlock) return;
+
+    const dur = Math.max(0, trimEndRel - trimStartRel);
+    const leftPct = Math.max(0, Math.min(100, (trimStartRel / trimClipDuration) * 100));
+    const widthPct = Math.max(0, Math.min(100 - leftPct, (dur / trimClipDuration) * 100));
+
+    rangeBlock.style.left = leftPct.toFixed(2) + '%';
+    rangeBlock.style.width = widthPct.toFixed(2) + '%';
+
+    if (durationLbl) {
+      durationLbl.innerText = `${dur.toFixed(1)} s`;
+    }
+
+    const baseStart = currentActiveClip?.start || 0;
+    const absStart = baseStart + trimStartRel;
+    const absEnd = baseStart + trimEndRel;
+
+    if (infoLbl) {
+      infoLbl.innerText = `${clock(absStart)} → ${clock(absEnd)} (${dur.toFixed(1)} s)`;
+    }
+
+    const isValid = dur >= 5.0 && dur <= 180.0;
+    if (warnBadge) {
+      if (dur < 5.0) {
+        warnBadge.innerText = 'Mínimo 5.0 s';
+        warnBadge.style.display = 'inline-block';
+      } else if (dur > 180.0) {
+        warnBadge.innerText = 'Máximo 180.0 s';
+        warnBadge.style.display = 'inline-block';
+      } else {
+        warnBadge.style.display = 'none';
+      }
+    }
+    if (durationLbl) {
+      durationLbl.style.color = isValid ? '#fff' : '#f87171';
+    }
+    if (btnApply) {
+      btnApply.disabled = !isValid;
+      btnApply.style.opacity = isValid ? '1' : '0.5';
+    }
+  }
+
+  function resetClipTrimming() {
+    if (!currentActiveClip) {
+      showToast('No hay clip seleccionado');
+      return;
+    }
+    initClipTrimming(currentActiveClip);
+    if (videoEl) videoEl.currentTime = 0;
+    showToast('Tiradores restablecidos al clip completo');
+  }
+
+  async function applyClipTrimming() {
+    const c = currentActiveClip;
+    if (!c) { showToast('Primero selecciona un clip'); return; }
+    const newStart = Math.max(0, Number((c.start + trimStartRel).toFixed(2)));
+    const newEnd = Math.max(newStart + 5.0, Number((c.start + trimEndRel).toFixed(2)));
+    const dur = newEnd - newStart;
+
+    if (dur < 5.0 || dur > 180.0) {
+      showToast('La duración debe estar entre 5 y 180 segundos');
+      return;
+    }
+
+    if (Math.abs(newStart - c.start) < 0.25 && Math.abs(newEnd - c.end) < 0.25) {
+      showToast('Ajusta los tiradores [ ] para definir un nuevo recorte antes de aplicar');
+      return;
+    }
+
+    const btn = document.getElementById('btn-apply-trim');
+    const prevHtml = btn ? btn.innerHTML : '';
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '⏳ Aplicando...';
+    }
+
+    try {
+      // 1. PATCH /api/clips/{id}
+      const updated = await apiJson(`/api/clips/${encodeURIComponent(c.id)}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ start_time: newStart, end_time: newEnd })
+      });
+
+      c.start = updated.start;
+      c.end = updated.end;
+      c.dur = updated.dur;
+      c.ts = updated.ts;
+      c.dirty = updated.dirty;
+
+      showToast(`Recorte guardado (${dur.toFixed(1)} s). Re-renderizando clip...`);
+
+      // 2. POST /api/clips/{id}/rerender
+      const style = activeSubStyle || 'hormozi';
+      const size = document.getElementById('editor-sub-size')?.value || activeSubSize || 'medium';
+      const pos = document.getElementById('editor-sub-pos')?.value || activeSubPos || 'bottom';
+      const aspect = activeFormat || '9:16';
+
+      const data = await apiJson(`/api/clips/${encodeURIComponent(c.id)}/rerender?style=${encodeURIComponent(style)}&aspect=${encodeURIComponent(aspect)}&position=${encodeURIComponent(pos)}&size=${encodeURIComponent(size)}`, {
+        method: 'POST'
+      });
+
+      activeJobId = data.job_id;
+      trackJobProgress(data.job_id);
+      refreshActionBar();
+    } catch (e) {
+      showToast('Error al aplicar recorte: ' + e.message);
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = prevHtml;
+      }
+    }
+  }
+
+  function setupTrimHandleEvents() {
+    const handleL = document.getElementById('handle-left');
+    const handleR = document.getElementById('handle-right');
+    const rangeBlock = document.getElementById('range-block');
+    const trackBar = document.getElementById('range-track-bar');
+    if (!handleL || !handleR || !rangeBlock || !trackBar) return;
+
+    const onPointerMove = (e) => {
+      if (!activeTrimDrag) return;
+      const rect = trackBar.getBoundingClientRect();
+      if (rect.width <= 0) return;
+
+      if (activeTrimDrag === 'start') {
+        const clientRelX = Math.max(0, Math.min(rect.width, e.clientX - rect.left));
+        const posSec = (clientRelX / rect.width) * trimClipDuration;
+        trimStartRel = Math.max(0, Math.min(trimEndRel - 5.0, posSec));
+        if (videoEl && !isNaN(trimStartRel)) videoEl.currentTime = trimStartRel;
+      } else if (activeTrimDrag === 'end') {
+        const clientRelX = Math.max(0, Math.min(rect.width, e.clientX - rect.left));
+        const posSec = (clientRelX / rect.width) * trimClipDuration;
+        trimEndRel = Math.max(trimStartRel + 5.0, Math.min(trimClipDuration, posSec));
+        if (videoEl && !isNaN(trimEndRel)) videoEl.currentTime = trimEndRel;
+      } else if (activeTrimDrag === 'body') {
+        const dx = e.clientX - trimDragStartX;
+        const dxSec = (dx / rect.width) * trimClipDuration;
+        const dur = trimDragStartRelR - trimDragStartRelL;
+        let s = trimDragStartRelL + dxSec;
+        let end = trimDragStartRelR + dxSec;
+        if (s < 0) { s = 0; end = dur; }
+        if (end > trimClipDuration) { end = trimClipDuration; s = trimClipDuration - dur; }
+        trimStartRel = s;
+        trimEndRel = end;
+        if (videoEl && !isNaN(trimStartRel)) videoEl.currentTime = trimStartRel;
+      }
+      renderTrimUI();
+    };
+
+    const onPointerUp = (e) => {
+      if (!activeTrimDrag) return;
+      try {
+        if (e.target && e.target.releasePointerCapture) {
+          e.target.releasePointerCapture(e.pointerId);
+        }
+      } catch (err) {}
+      activeTrimDrag = null;
+    };
+
+    handleL.addEventListener('pointerdown', (e) => {
+      e.stopPropagation();
+      activeTrimDrag = 'start';
+      try { handleL.setPointerCapture(e.pointerId); } catch (err) {}
+    });
+
+    handleR.addEventListener('pointerdown', (e) => {
+      e.stopPropagation();
+      activeTrimDrag = 'end';
+      try { handleR.setPointerCapture(e.pointerId); } catch (err) {}
+    });
+
+    rangeBlock.addEventListener('pointerdown', (e) => {
+      if (e.target === handleL || e.target === handleR) return;
+      e.stopPropagation();
+      activeTrimDrag = 'body';
+      trimDragStartX = e.clientX;
+      trimDragStartRelL = trimStartRel;
+      trimDragStartRelR = trimEndRel;
+      try { rangeBlock.setPointerCapture(e.pointerId); } catch (err) {}
+    });
+
+    window.addEventListener('pointermove', onPointerMove);
+    window.addEventListener('pointerup', onPointerUp);
+    window.addEventListener('pointercancel', onPointerUp);
+  }
+
+  setupTrimHandleEvents();
 
   // TECLADO ACCESIBLE
   window.addEventListener('keydown', (e) => {

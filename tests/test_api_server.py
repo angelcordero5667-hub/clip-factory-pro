@@ -349,4 +349,24 @@ def test_health_deps_mocked_ollama_and_ffmpeg(monkeypatch, tmp_path):
     assert "cargado" in data2["ollama"]["message"]
 
 
+def test_trim_clip_workflow(tdb):
+    # 1. Recortar clip a 15s - 35s (duración 20s)
+    r = client.patch("/api/clips/v1_clip_1", json={"start_time": 15.0, "end_time": 35.0})
+    assert r.status_code == 200
+    clip = r.json()
+    assert clip["start"] == 15.0
+    assert clip["end"] == 35.0
+    assert clip["dur"] == "0:20"
+    assert clip["dirty"] is True
+
+    # 2. Re-renderizar con el nuevo recorte
+    r_re = client.post("/api/clips/v1_clip_1/rerender?style=hormozi&aspect=9:16&position=bottom&size=medium")
+    assert r_re.status_code == 200
+    job_id = r_re.json()["job_id"]
+    job = tdb.get_job(job_id)
+    assert job["kind"] == "rerender"
+    assert job["candidate_id"] == "v1_clip_1"
+    assert job["options"]["subtitle_style"] == "hormozi"
+
+
 
