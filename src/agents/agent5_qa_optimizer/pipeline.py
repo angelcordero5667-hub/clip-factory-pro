@@ -266,9 +266,17 @@ class ClipFactoryPipeline:
             raise FileNotFoundError("El archivo de video original ya no está disponible.")
 
         segments = []
-        tpath = video.get("transcript_path")
-        if tpath and Path(tpath).exists():
-            segments = TranscriptResult.model_validate_json(Path(tpath).read_text(encoding="utf-8")).segments
+        custom_tpath = settings.cache_dir / "transcripts" / f"{candidate_id}_edited.json"
+        if custom_tpath.is_file():
+            try:
+                segments = TranscriptResult.model_validate_json(custom_tpath.read_text(encoding="utf-8")).segments
+                logger.info(f"Usando transcripción personalizada editada para clip {candidate_id}")
+            except Exception as e:
+                logger.warning(f"Error leyendo transcripción personalizada: {e}")
+        if not segments:
+            tpath = video.get("transcript_path")
+            if tpath and Path(tpath).exists():
+                segments = TranscriptResult.model_validate_json(Path(tpath).read_text(encoding="utf-8")).segments
 
         cand = ViralMomentCandidate(
             id=cand_row["id"], start_time=cand_row["start_time"], end_time=cand_row["end_time"],

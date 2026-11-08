@@ -128,3 +128,79 @@ def test_focus_prompt_heuristic():
     cand_focused = next(c for c in cands_focused if "Alineado con el tema solicitado" in c.reasoning)
     assert cand_focused.virality_score >= 80
 
+
+def test_clip_transcript_and_srt_export(tmp_path, monkeypatch):
+    from src import api_server
+    from src.common.database import db
+    from src.common.models import TranscriptResult, TranscriptSegment, WordTimestamp, ViralMomentCandidate, ViralityBreakdown
+    monkeypatch.setattr(api_server, "_expected_token", lambda: "")
+    client = TestClient(app)
+
+    vid_id = "test_vid_transcript"
+    t_file = tmp_path / "trans.json"
+    t_res = TranscriptResult(
+        video_path="dummy.mp4",
+        language="es",
+        duration=60.0,
+        segments=[
+            TranscriptSegment(
+                id=0, start=10.0, end=15.0, text="Prueba de transcripción",
+                words=[
+                    WordTimestamp(word="Prueba", start=10.0, end=11.0),
+                    WordTimestamp(word="de", start=11.1, end=12.0),
+                    WordTimestamp(word="transcripción", start=12.1, end=15.0),
+                ]
+            )
+        ]
+    )
+    t_file.write_text(t_res.model_dump_json(), encoding="utf-8")
+
+    dummy_clip = tmp_path / "dummy_clip.mp4"
+    dummy_clip.write_bytes(b"dummy")
+    db.save_video(vid_id, "test.mp4", str(tmp_path / "test.mp4"), 60.0, "es", "local", transcript_path=str(t_file))
+    c = ViralMomentCandidate(
+        id="test_clip_trans_1",
+        start_time=10.0,
+        end_time=15.0,
+        duration=5.0,
+        title="Clip Trans",
+        hook_text="Prueba de transcripción",
+        context_text="Ctx",
+        virality_score=85.0,
+        breakdown=ViralityBreakdown(),
+        category="sorpresa",
+        reasoning="r",
+        social_description="desc",
+        hashtags=["#test"],
+        status="pending",
+        engine="heuristic"
+    )
+    db.save_candidates(vid_id, [c], {"test_clip_trans_1": str(dummy_clip)})
+
+    # Limpiar cualquier cache previo
+    edited_cache = settings.cache_dir / "transcripts" / "test_clip_trans_1_edited.json"
+    if edited_cache.exists():
+        edited_cache.unlink()
+
+    # 1. GET /api/clips/{id}/transcript
+    r = client.get("/api/clips/test_clip_trans_1/transcript")
+    assert r.status_code == 200
+    data = r.json()
+    assert len(data["segments"]) == 1
+    assert data["segments"][0]["words"][0]["rel_start"] == 0.0
+    assert data["segments"][0]["words"][0]["word"] == "Prueba"
+
+    # 2. PUT /api/clips/{id}/transcript (edit word to "Demostración")
+    seg_data = data["segments"][0]
+    seg_data["words"][0]["word"] = "Demostración"
+    seg_data["text"] = "Demostración de transcripción"
+    r_put = client.put("/api/clips/test_clip_trans_1/transcript", json={"segments": [seg_data]})
+    assert r_put.status_code == 200
+    assert r_put.json()["ok"] is True
+
+    # 3. GET /api/clips/{id}/export_srt
+    r_srt = client.get("/api/clips/test_clip_trans_1/export_srt")
+    assert r_srt.status_code == 200
+    assert "00:00:00,000 --> 00:00:05,000" in r_srt.text
+    assert "Demostración de transcripción" in r_srt.text
+

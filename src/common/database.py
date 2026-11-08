@@ -172,9 +172,15 @@ class Database:
                          (clip_path, 1 if dirty else 0, candidate_id))
             conn.commit()
 
-    def update_candidate_fields(self, candidate_id: str, title: Optional[str] = None,
-                                start_time: Optional[float] = None, end_time: Optional[float] = None):
-        """Edita título y/o tiempos. Si cambian los tiempos, marca el clip como desactualizado."""
+    def update_candidate_fields(
+        self,
+        candidate_id: str,
+        title: Optional[str] = None,
+        start_time: Optional[float] = None,
+        end_time: Optional[float] = None,
+        dirty: Optional[bool] = None,
+    ):
+        """Edita título y/o tiempos. Si cambian los tiempos o se especifica dirty, marca el clip."""
         cand = self.get_candidate(candidate_id)
         if not cand:
             return None
@@ -182,11 +188,15 @@ class Database:
         new_start = cand["start_time"] if start_time is None else start_time
         new_end = cand["end_time"] if end_time is None else end_time
         times_changed = (new_start != cand["start_time"]) or (new_end != cand["end_time"])
+        if dirty is not None:
+            dirty_flag = 1 if dirty else 0
+        else:
+            dirty_flag = 1 if (times_changed or cand.get("dirty")) else 0
         with closing(self.get_connection()) as conn:
             conn.execute(
                 "UPDATE candidates SET title = ?, start_time = ?, end_time = ?, duration = ?, dirty = ? WHERE id = ?",
-                (new_title, new_start, new_end, round(new_end - new_start, 2),
-                 1 if (times_changed or cand.get("dirty")) else 0, candidate_id))
+                (new_title, new_start, new_end, round(new_end - new_start, 2), dirty_flag, candidate_id)
+            )
             conn.commit()
         return self.get_candidate(candidate_id)
 

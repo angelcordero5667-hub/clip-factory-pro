@@ -19,12 +19,13 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from fastapi import FastAPI, File, HTTPException, Request, UploadFile
-from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, StreamingResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, PlainTextResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from src.common.config import settings
 from src.common.database import db
+from src.common.models import TranscriptResult, TranscriptSegment, WordTimestamp
 from src.jobs import JobWorker
 
 STATIC_DIR = Path(__file__).resolve().parent.parent / "static"
@@ -325,6 +326,162 @@ def rerender_clip(clip_id: str, style: str = "hormozi", aspect: str = "9:16"):
     job_id = db.create_job(source=clip_id, kind="rerender", candidate_id=clip_id,
                            options={"subtitle_style": style, "aspect_ratio": aspect})
     return {"job_id": job_id}
+
+
+def _format_srt_timestamp(seconds: float) -> str:
+    total_ms = int(round(max(0.0, seconds) * 1000))
+    hours = total_ms // 3600000
+    minutes = (total_ms % 3600000) // 60000
+    secs = (total_ms % 60000) // 1000
+    millis = total_ms % 1000
+    return f"{hours:02d}:{minutes:02d}:{secs:02d},{millis:03d}"
+
+
+def generate_clip_srt(clip_start: float, clip_end: float, segments: List[TranscriptSegment]) -> str:
+    lines = []
+    index = 1
+    for seg in segments:
+        if seg.end < clip_start or seg.start > clip_end:
+            continue
+        rel_start = max(0.0, seg.start - clip_start)
+        rel_end = min(clip_end - clip_start, seg.end - clip_start)
+        if rel_end <= rel_start:
+            continue
+        start_ts = _format_srt_timestamp(rel_start)
+        end_ts = _format_srt_timestamp(rel_end)
+        txt = seg.text.strip()
+        if txt:
+            lines.append(f"{index}\n{start_ts} --> {end_ts}\n{txt}\n")
+            index += 1
+    return "\n".join(lines)
+
+
+def _get_clip_segments(cand: Dict[str, Any]) -> List[TranscriptSegment]:
+    clip_id = cand["id"]
+    custom_path = settings.cache_dir / "transcripts" / f"{clip_id}_edited.json"
+    if custom_path.is_file():
+        try:
+            return TranscriptResult.model_validate_json(custom_path.read_text(encoding="utf-8")).segments
+        except Exception:
+            pass
+    video = db.get_video(cand["video_id"])
+    if not video:
+        return []
+    tpath = video.get("transcript_path")
+    if tpath and Path(tpath).is_file():
+        try:
+            res = TranscriptResult.model_validate_json(Path(tpath).read_text(encoding="utf-8"))
+            return res.segments
+        except Exception:
+            pass
+    return []
+
+
+class TranscriptUpdateBody(BaseModel):
+    segments: List[Dict[str, Any]]
+
+
+@app.get("/api/clips/{clip_id}/transcript")
+def get_clip_transcript(clip_id: str):
+    cand = _get_clip_or_404(clip_id)
+    clip_start = float(cand["start_time"])
+    clip_end = float(cand["end_time"])
+    all_segments = _get_clip_segments(cand)
+
+    clip_segments = []
+    for s in all_segments:
+        if s.end < clip_start or s.start > clip_end:
+            continue
+        words = []
+        for w in (s.words or []):
+            if w.end >= clip_start and w.start <= clip_end:
+                words.append({
+                    "word": w.word,
+                    "start": w.start,
+                    "end": w.end,
+                    "rel_start": round(max(0.0, w.start - clip_start), 2),
+                    "rel_end": round(max(0.0, w.end - clip_start), 2),
+                })
+        clip_segments.append({
+            "id": s.id,
+            "start": s.start,
+            "end": s.end,
+            "rel_start": round(max(0.0, s.start - clip_start), 2),
+            "rel_end": round(max(0.0, s.end - clip_start), 2),
+            "text": s.text,
+            "words": words,
+        })
+    return {
+        "clip_id": clip_id,
+        "clip_start": clip_start,
+        "clip_end": clip_end,
+        "segments": clip_segments,
+    }
+
+
+@app.put("/api/clips/{clip_id}/transcript")
+def update_clip_transcript(clip_id: str, body: TranscriptUpdateBody):
+    cand = _get_clip_or_404(clip_id)
+    clip_start = float(cand["start_time"])
+    clip_end = float(cand["end_time"])
+
+    all_segments = _get_clip_segments(cand)
+    edited_map = {int(s["id"]): s for s in body.segments if "id" in s}
+
+    new_segments = []
+    for s in all_segments:
+        if s.id in edited_map:
+            es = edited_map[s.id]
+            words = []
+            for w in es.get("words", []):
+                words.append(WordTimestamp(
+                    word=str(w.get("word", "")).strip(),
+                    start=float(w.get("start", s.start)),
+                    end=float(w.get("end", s.end)),
+                    probability=1.0,
+                ))
+            new_text = str(es.get("text") or " ".join(w.word for w in words)).strip()
+            new_segments.append(TranscriptSegment(
+                id=s.id,
+                start=s.start,
+                end=s.end,
+                text=new_text,
+                words=words,
+            ))
+        else:
+            new_segments.append(s)
+
+    video = db.get_video(cand["video_id"]) or {}
+    duration = float(video.get("duration") or clip_end)
+    language = str(video.get("language") or "es")
+    custom_res = TranscriptResult(
+        video_path=video.get("filepath") or "",
+        language=language,
+        duration=duration,
+        segments=new_segments,
+        full_text=" ".join(s.text for s in new_segments),
+    )
+    custom_path = settings.cache_dir / "transcripts" / f"{clip_id}_edited.json"
+    custom_path.parent.mkdir(parents=True, exist_ok=True)
+    custom_path.write_text(custom_res.model_dump_json(indent=2), encoding="utf-8")
+
+    db.update_candidate_fields(clip_id, dirty=1)
+    return {"ok": True, "message": "Transcripción actualizada para este clip."}
+
+
+@app.get("/api/clips/{clip_id}/export_srt")
+def export_clip_srt(clip_id: str):
+    cand = _get_clip_or_404(clip_id)
+    clip_start = float(cand["start_time"])
+    clip_end = float(cand["end_time"])
+    segments = _get_clip_segments(cand)
+    srt_text = generate_clip_srt(clip_start, clip_end, segments)
+    safe = re.sub(r"[^\w\- ]", "", cand.get("title") or "clip").strip().replace(" ", "_") or "clip"
+    return PlainTextResponse(
+        content=srt_text,
+        media_type="text/plain; charset=utf-8",
+        headers={"Content-Disposition": f'attachment; filename="{safe}.srt"'}
+    )
 
 
 @app.get("/api/clips/{clip_id}/download")

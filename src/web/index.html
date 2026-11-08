@@ -2133,6 +2133,32 @@
               </div>
             </div>
           </div>
+
+          <!-- Panel de Transcripción y Edición de Subtítulos (Estilo Descript / Subtitle Edit) -->
+          <div class="card" id="editor-transcript-card" style="margin-top:16px; padding:16px; background:#121624; border:1px solid rgba(255,255,255,0.08); border-radius:var(--radius-md);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span style="font-size:13px; font-weight:700; color:#fff; display:flex; align-items:center; gap:6px;">
+                  <span style="color:var(--neon-lime);">📝</span> Transcripción y Subtítulos
+                </span>
+                <span style="font-size:10.5px; color:var(--text-muted);">Haz clic en cualquier palabra para saltar el video o editarla</span>
+              </div>
+              <div style="display:flex; gap:8px;">
+                <button class="btn-outline btn-ico" onclick="exportActiveClipSrt()" style="font-size:11px; padding:4px 10px;" title="Exportar subtítulos SRT limpios">
+                  <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                  Exportar .SRT
+                </button>
+                <button class="btn-gradient" id="btn-save-transcript" onclick="saveClipTranscript()" style="font-size:11px; padding:4px 12px;">
+                  ⚡ Actualizar Subtítulos
+                </button>
+              </div>
+            </div>
+
+            <!-- Contenedor interactivo de bloques de texto y palabras -->
+            <div id="transcript-words-container" style="max-height:220px; overflow-y:auto; background:rgba(0,0,0,0.3); border-radius:8px; padding:12px; border:1px solid rgba(255,255,255,0.05); font-size:12.5px; line-height:1.7;">
+              <span style="color:var(--text-muted); font-size:12px;">Selecciona un clip para cargar sus palabras y tiempos...</span>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -3270,7 +3296,137 @@
     if (nameEl) nameEl.innerText = c.title || 'Clip Seleccionado';
     refreshActionBar();
     updateEditorCopyDisplay();
+    loadActiveClipTranscript(c.id);
     switchView('editor');
+  }
+
+  let activeClipTranscript = null;
+
+  async function loadActiveClipTranscript(clipId) {
+    const container = document.getElementById('transcript-words-container');
+    if (!container) return;
+    container.innerHTML = '<span style="color:var(--text-muted); font-size:12px;">Cargando palabras del clip...</span>';
+    try {
+      const data = await apiJson(`/api/clips/${encodeURIComponent(clipId)}/transcript`);
+      activeClipTranscript = data;
+      renderTranscriptEditor(data);
+    } catch (e) {
+      container.innerHTML = `<span style="color:#ff6b6b; font-size:12px;">No se pudo cargar la transcripción: ${esc(e.message)}</span>`;
+    }
+  }
+
+  function renderTranscriptEditor(data) {
+    const container = document.getElementById('transcript-words-container');
+    if (!container) return;
+    if (!data || !data.segments || !data.segments.length) {
+      container.innerHTML = '<span style="color:var(--text-muted); font-size:12px;">No hay palabras registradas en el rango de este clip.</span>';
+      return;
+    }
+
+    let html = '';
+    data.segments.forEach((seg, sIdx) => {
+      html += `<div class="transcript-seg-row" style="margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.04);">`;
+      html += `<div style="display:flex; justify-content:space-between; align-items:center; font-size:10px; color:var(--text-muted); margin-bottom:5px; font-family:'JetBrains Mono', monospace;">`;
+      html += `<span>⏱️ ${clock(seg.rel_start)} - ${clock(seg.rel_end)}</span>`;
+      html += `<button type="button" onclick="editSegmentDirectly(${sIdx})" style="background:none; border:none; color:var(--neon-cyan); cursor:pointer; font-size:10px; display:flex; align-items:center; gap:3px;">✏️ Editar frase</button>`;
+      html += `</div>`;
+      html += `<div style="display:flex; flex-wrap:wrap; gap:5px; align-items:center;" id="seg-words-${sIdx}">`;
+
+      if (seg.words && seg.words.length) {
+        seg.words.forEach((w, wIdx) => {
+          html += `<span class="word-token" onclick="jumpToClipWord(${w.rel_start})" title="${w.rel_start}s (clic para saltar)" style="display:inline-flex; align-items:center; background:rgba(255,255,255,0.07); padding:3px 7px; border-radius:4px; cursor:pointer; color:#fff; font-size:12.5px; transition:all 0.15s ease; border:1px solid transparent;" onmouseover="this.style.borderColor='var(--neon-pink)'; this.style.background='rgba(236,72,153,0.18)';" onmouseout="this.style.borderColor='transparent'; this.style.background='rgba(255,255,255,0.07)';">`;
+          html += `<span contenteditable="true" spellcheck="false" onblur="updateWordText(${sIdx}, ${wIdx}, this.innerText)" onclick="event.stopPropagation()">${esc(w.word)}</span>`;
+          html += `</span>`;
+        });
+      } else {
+        html += `<span contenteditable="true" spellcheck="false" onblur="updateSegmentTextOnly(${sIdx}, this.innerText)" style="color:#fff; padding:4px; font-size:12.5px;">${esc(seg.text)}</span>`;
+      }
+
+      html += `</div></div>`;
+    });
+
+    container.innerHTML = html;
+  }
+
+  function jumpToClipWord(relSec) {
+    if (videoEl && !isNaN(relSec)) {
+      videoEl.currentTime = relSec;
+      if (videoEl.paused) {
+        videoEl.play().catch(() => {});
+      }
+      showToast(`Saltando a ${relSec.toFixed(1)}s`);
+    }
+  }
+
+  function updateWordText(sIdx, wIdx, newText) {
+    if (!activeClipTranscript || !activeClipTranscript.segments[sIdx]) return;
+    const seg = activeClipTranscript.segments[sIdx];
+    if (seg.words && seg.words[wIdx]) {
+      seg.words[wIdx].word = (newText || '').trim();
+      seg.text = seg.words.map(w => w.word).join(' ');
+      showToast('Palabra editada (pulsa ⚡ Actualizar Subtítulos para quemar cambios)');
+    }
+  }
+
+  function updateSegmentTextOnly(sIdx, newText) {
+    if (!activeClipTranscript || !activeClipTranscript.segments[sIdx]) return;
+    activeClipTranscript.segments[sIdx].text = (newText || '').trim();
+  }
+
+  function editSegmentDirectly(sIdx) {
+    if (!activeClipTranscript || !activeClipTranscript.segments[sIdx]) return;
+    const seg = activeClipTranscript.segments[sIdx];
+    const newText = prompt('Editar texto de la frase:', seg.text);
+    if (newText !== null && newText.trim() !== '') {
+      seg.text = newText.trim();
+      const words = seg.text.split(/\s+/).filter(Boolean);
+      if (seg.words && seg.words.length === words.length) {
+        words.forEach((w, i) => { seg.words[i].word = w; });
+      } else {
+        const dur = Math.max(0.1, seg.end - seg.start);
+        const wDur = dur / words.length;
+        seg.words = words.map((w, i) => ({
+          word: w,
+          start: seg.start + i * wDur,
+          end: seg.start + (i + 1) * wDur,
+          rel_start: Math.max(0, seg.rel_start + i * wDur),
+          rel_end: Math.max(0, seg.rel_start + (i + 1) * wDur)
+        }));
+      }
+      renderTranscriptEditor(activeClipTranscript);
+      showToast('Frase actualizada');
+    }
+  }
+
+  async function saveClipTranscript() {
+    if (!currentActiveClip || !activeClipTranscript) {
+      showToast('No hay transcripción activa');
+      return;
+    }
+    const btn = document.getElementById('btn-save-transcript');
+    if (btn) btn.disabled = true;
+    try {
+      showToast('Guardando palabras editadas...');
+      await apiJson(`/api/clips/${encodeURIComponent(currentActiveClip.id)}/transcript`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ segments: activeClipTranscript.segments })
+      });
+      showToast('✅ Subtítulos guardados. Re-renderizando clip con FFmpeg...');
+      await rerenderActiveClip();
+    } catch (e) {
+      showToast(`Error al guardar: ${e.message}`);
+    } finally {
+      if (btn) btn.disabled = false;
+    }
+  }
+
+  function exportActiveClipSrt() {
+    if (!currentActiveClip) {
+      showToast('Primero selecciona un clip');
+      return;
+    }
+    window.open(`/api/clips/${encodeURIComponent(currentActiveClip.id)}/export_srt`, '_blank');
   }
 
   // ----- acciones sobre el clip abierto -----
@@ -3321,9 +3477,9 @@
   async function rerenderActiveClip() {
     const c = currentActiveClip;
     if (!c) { showToast('Primero selecciona un clip'); return; }
-    const style = ({ beast: 'beast', minimal: 'minimal' })[activeSubStyle] || 'hormozi';
+    const style = activeSubStyle || 'hormozi';
     try {
-      const data = await apiJson(`/api/clips/${encodeURIComponent(c.id)}/rerender?style=${style}&aspect=${encodeURIComponent(activeFormat || '9:16')}`, { method: 'POST' });
+      const data = await apiJson(`/api/clips/${encodeURIComponent(c.id)}/rerender?style=${encodeURIComponent(style)}&aspect=${encodeURIComponent(activeFormat || '9:16')}`, { method: 'POST' });
       showToast(`Re-renderizando en la cola (trabajo #${data.job_id})`);
       activeJobId = data.job_id;
       trackJobProgress(data.job_id);
