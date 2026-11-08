@@ -224,6 +224,12 @@ def format_clip(c: Dict[str, Any]) -> Dict[str, Any]:
     tags_str = " ".join(tags) if isinstance(tags, list) else str(tags)
     social = c.get("social_description") or ""
 
+    clean_hook = hook.strip().strip('"').strip("'")
+    clean_title = title.strip()
+    hook_a = f"\"{clean_hook}\"" if clean_hook else f"¿Sabías esto sobre {clean_title}?"
+    hook_b = f"El error más común con {clean_title}: {clean_hook}" if clean_hook else f"Nadie te cuenta la verdad de {clean_title}..."
+    hook_c = f"Esto te cambiará la perspectiva: {clean_title}"
+
     video_url = thumb_url = download_url = ""
     c_path = c.get("clip_path")
     if c_path and Path(c_path).exists():
@@ -252,6 +258,11 @@ def format_clip(c: Dict[str, Any]) -> Dict[str, Any]:
         "category": c.get("category") or "",
         "dirty": bool(c.get("dirty")),
         "breakdown": {"hook": c.get("hook_score"), "flow": c.get("flow_score"), "trend": c.get("trend_score")},
+        "hooks": [
+            {"label": "Gancho A (Directo)", "text": hook_a},
+            {"label": "Gancho B (Controversia)", "text": hook_b},
+            {"label": "Gancho C (Curiosidad)", "text": hook_c},
+        ],
         "copy": {
             "TikTok": [f"{title}\n\n\"{hook}\"\n\n¿Estás de acuerdo? Comenta abajo 👇", tags_str],
             "Shorts": [f"{title} | Momento imperdible\n\n{social or 'Suscríbete para más contenido diario.'}", f"#Shorts {tags_str}"],
@@ -575,6 +586,12 @@ def download_video_zip(video_id: str, only: str = "all"):
             thumb = clip.with_suffix(".jpg")
             if thumb.is_file():
                 zf.write(thumb, arcname=f"{base}.jpg")
+            # Incluir subtítulos .srt si hay segmentos disponibles
+            segments = _get_clip_segments(c)
+            if segments:
+                srt_content = generate_clip_srt(float(c["start_time"]), float(c["end_time"]), segments)
+                if srt_content:
+                    zf.writestr(f"{base}.srt", srt_content)
             fc = format_clip(c)
             copys.append(f"## {c.get('title')}  (puntaje {fc['score']}/100)\n" +
                          "\n\n".join(f"[{net}]\n{txt}\n{tags}" for net, (txt, tags) in fc["copy"].items()))

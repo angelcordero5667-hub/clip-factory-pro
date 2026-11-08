@@ -4233,10 +4233,17 @@
               <span class="pill-tag" id="editor-clip-score" style="font-size:10px;">-- % Viral</span>
             </div>
             
-            <div style="display:flex; gap:6px; margin-bottom:8px;">
-              <button class="pill-tag active" id="tab-copy-tiktok" onclick="switchCopyTab('TikTok')" style="cursor:pointer; font-size:11px;">TikTok</button>
-              <button class="pill-tag" id="tab-copy-reels" onclick="switchCopyTab('Reels')" style="cursor:pointer; font-size:11px;">Reels</button>
-              <button class="pill-tag" id="tab-copy-shorts" onclick="switchCopyTab('Shorts')" style="cursor:pointer; font-size:11px;">Shorts</button>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; gap:6px; flex-wrap:wrap;">
+              <div style="display:flex; gap:6px;">
+                <button class="pill-tag active" id="tab-copy-tiktok" onclick="switchCopyTab('TikTok')" style="cursor:pointer; font-size:11px;">TikTok</button>
+                <button class="pill-tag" id="tab-copy-reels" onclick="switchCopyTab('Reels')" style="cursor:pointer; font-size:11px;">Reels</button>
+                <button class="pill-tag" id="tab-copy-shorts" onclick="switchCopyTab('Shorts')" style="cursor:pointer; font-size:11px;">Shorts</button>
+              </div>
+              <div style="display:flex; gap:4px;" title="Variante de Gancho / Hook Inicial">
+                <button class="pill-tag active" id="tab-hook-0" onclick="switchHookVariant(0)" style="cursor:pointer; font-size:10px; padding:2px 7px;">Hook A</button>
+                <button class="pill-tag" id="tab-hook-1" onclick="switchHookVariant(1)" style="cursor:pointer; font-size:10px; padding:2px 7px;">Hook B</button>
+                <button class="pill-tag" id="tab-hook-2" onclick="switchHookVariant(2)" style="cursor:pointer; font-size:10px; padding:2px 7px;">Hook C</button>
+              </div>
             </div>
 
             <div id="editor-copy-preview" style="font-size:11.5px; color:var(--text-secondary); background:rgba(0,0,0,0.3); border-radius:6px; padding:8px; line-height:1.4; max-height:85px; overflow-y:auto; white-space:pre-wrap; border:1px solid rgba(255,255,255,0.05);">Selecciona un clip para ver el copy...</div>
@@ -6033,6 +6040,35 @@
     updateEditorCopyDisplay();
   }
 
+  let activeHookIndex = 0;
+
+  function switchHookVariant(idx) {
+    activeHookIndex = idx;
+    [0, 1, 2].forEach(i => {
+      const el = document.getElementById(`tab-hook-${i}`);
+      if (el) el.classList.toggle('active', i === idx);
+    });
+    updateEditorCopyDisplay();
+    showToast(`Gancho ${String.fromCharCode(65 + idx)} seleccionado`);
+  }
+
+  function getGeneratedCopyText(c, net, hookIdx) {
+    if (!c) return '';
+    const hookObj = (c.hooks && c.hooks[hookIdx]) ? c.hooks[hookIdx] : null;
+    const hookText = hookObj ? hookObj.text : (c.hook_text || '');
+    const title = c.title || 'Clip sin título';
+    const copyData = c.copy && c.copy[net];
+    const tags = copyData ? copyData[1] : '#viral #shorts #podcast';
+
+    if (net === 'TikTok') {
+      return `${title}\n\n${hookText}\n\n¿Estás de acuerdo? Comenta abajo 👇\n\n${tags}`;
+    } else if (net === 'Reels') {
+      return `${hookText}\n\nGuarda este clip para después.\n\n#Reels ${tags}`;
+    } else { // Shorts
+      return `${title} | ${hookText}\n\nSuscríbete para más contenido diario.\n\n#Shorts ${tags}`;
+    }
+  }
+
   function updateEditorCopyDisplay() {
     const box = document.getElementById('editor-copy-preview');
     const scoreBadge = document.getElementById('editor-clip-score');
@@ -6043,12 +6079,7 @@
       return;
     }
     if (scoreBadge) scoreBadge.innerText = `${currentActiveClip.score}% Viral`;
-    const copyData = currentActiveClip.copy && currentActiveClip.copy[activeCopyTab];
-    if (copyData) {
-      box.innerText = `${copyData[0]}\n\n${copyData[1]}`;
-    } else {
-      box.innerText = `${currentActiveClip.title}\n\n#viral #shorts #podcast`;
-    }
+    box.innerText = getGeneratedCopyText(currentActiveClip, activeCopyTab, activeHookIndex);
   }
 
   function copyCurrentTabCopy() {
@@ -6056,9 +6087,8 @@
       showToast('No hay un clip seleccionado');
       return;
     }
-    const copyData = currentActiveClip.copy && currentActiveClip.copy[activeCopyTab];
-    const text = copyData ? `${copyData[0]}\n\n${copyData[1]}` : `${currentActiveClip.title}\n\n#viral #shorts #podcast`;
-    copyText(text, `Copy de ${activeCopyTab} copiado`);
+    const text = getGeneratedCopyText(currentActiveClip, activeCopyTab, activeHookIndex);
+    copyText(text, `Copy de ${activeCopyTab} (Hook ${String.fromCharCode(65 + activeHookIndex)}) copiado`);
   }
 
   function selectClipForEditorById(clipId) {

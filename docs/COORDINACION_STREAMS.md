@@ -84,6 +84,7 @@ Pendientes para Antigravity: restaurar "Subtítulos" y "Plantillas" en el menú 
   4. Modelo Faster-Whisper actualizado por defecto a `small` (pre-descargado en `data/cache/whisper_models` y configurable con `CLIP_WHISPER_MODEL`) para máxima precisión fonética en español.
 
 ## Pendiente / ideas (reclamar aquí antes de empezar)
+- [x] **COMPLETADO POR ANTIGRAVITY (08-nov ~07:12):** Tarea 7: Generador de Hooks A/B/C interactivo en editor de copys y empaquetado masivo en ZIP con subtítulos .SRT individuales por clip.
 - [x] **COMPLETADO POR ANTIGRAVITY (08-nov ~07:05):** Tarea 6 (EXTRA): Recorte real del clip en el editor (conectar los manejadores `[ ]` de inicio/fin a `PATCH /api/clips/{id}` y botón de aplicar recorte re-renderizando con feedback de duración y validación).
 - [x] **COMPLETADO POR ANTIGRAVITY (08-nov ~06:05):** Tarea 1: Vista previa del enlace + tiempo estimado (miniatura yt-dlp en /api/validate_url, cálculo tiempo estimado con historial real de jobs y video_duration, tarjeta visual con miniatura, canal, duración, sugerencia no bloqueante de Desde/Hasta si > 30 min, protección SSRF y tests unitarios).
 - [x] **COMPLETADO POR ANTIGRAVITY (08-nov ~06:16):** Tarea 2: Selector de idioma y duración del clip (selectores en panel Crear: Auto/ES/EN/PT y Corto 15-30s / Medio 30-60s [default] / Largo 60-90s, JobBody -> jobs.py -> pipeline -> detector con min/max duration, validación contra MIN_CLIP_SEC/MAX_CLIP_SEC y tests unitarios).

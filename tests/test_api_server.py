@@ -1,4 +1,5 @@
 import io
+import json
 import zipfile
 
 import pytest
@@ -41,6 +42,8 @@ def test_clips_con_datos(monkeypatch, tmp_path):
     assert c["video_url"] == f"/clips_media/{clip.name}"
     assert c["engine"] == "llm"
     assert c["download_url"] == "/api/clips/clip_1/download"
+    assert "hooks" in c and len(c["hooks"]) == 3
+    assert "Gancho A" in c["hooks"][0]["label"]
 
 
 # ---------------------------------------------------------------- token
@@ -118,10 +121,21 @@ def test_descarga_de_clip(tdb):
 
 
 def test_zip_por_video(tdb):
+    # Simular transcripción para que genere subtítulos .srt en el zip
+    tpath = api_server.settings.cache_dir / "transcripts" / "v1_clip_1_edited.json"
+    tpath.parent.mkdir(parents=True, exist_ok=True)
+    tdata = {
+        "video_path": "vid.mp4", "language": "es", "duration": 100.0,
+        "segments": [{"id": 0, "start": 12.0, "end": 20.0, "text": "Hola mundo", "words": []}],
+        "full_text": "Hola mundo"
+    }
+    tpath.write_text(json.dumps(tdata), encoding="utf-8")
+
     r = client.get("/api/videos/v1/zip")
     assert r.status_code == 200
     names = zipfile.ZipFile(io.BytesIO(r.content)).namelist()
     assert any(n.endswith(".mp4") for n in names) and any(n.endswith(".jpg") for n in names) and "copys.txt" in names
+    assert any(n.endswith(".srt") for n in names)
     # solo aprobados: ninguno aprobado -> 404
     assert client.get("/api/videos/v1/zip?only=approved").status_code == 404
     tdb.update_candidate_status("v1_clip_1", "approved")
