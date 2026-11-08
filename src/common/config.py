@@ -23,7 +23,7 @@ class HardwareConfig(BaseModel):
     device: str = "cpu"
     compute_type: str = "int8"
     cpu_threads: int = 8
-    whisper_model_size: str = "base"  # Options: 'tiny', 'base', 'small', 'medium'
+    whisper_model_size: str = os.environ.get("CLIP_WHISPER_MODEL", "small")  # Options: 'tiny', 'base', 'small', 'medium'
     max_ram_usage_gb: int = 18        # Out of 24 GB RAM
 
 class OllamaConfig(BaseModel):
