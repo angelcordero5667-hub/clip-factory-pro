@@ -84,6 +84,14 @@ Pendientes para Antigravity: restaurar "Subtítulos" y "Plantillas" en el menú 
   4. Modelo Faster-Whisper actualizado por defecto a `small` (pre-descargado en `data/cache/whisper_models` y configurable con `CLIP_WHISPER_MODEL`) para máxima precisión fonética en español.
 
 ## Pendiente / ideas (reclamar aquí antes de empezar)
+- [x] **COMPLETADO POR ANTIGRAVITY (08-nov ~09:18):** Tarea 16: Optimización y experiencia móvil completa (Mobile Responsiveness & Bottom Navigation):
+  1. 📱 Cero desbordamientos horizontales (`scrollWidth == innerWidth`) en todos los tamaños móviles (Android 360px, iPhone SE 375px, iPhone 14 390px, Pixel 7 412px).
+  2. 🧭 Barra de navegación inferior móvil tipo app nativa (`.mobile-bottom-nav`) con 4 accesos rápidos ergonómicos: Crear, Editor, Monitor y Ajustes, sincronizados con `switchView`.
+  3. 📐 Layout de panel Crear optimizado: inputs adaptables al ancho completo, cards táctiles con área de toque ≥44px, barra de presets con swipe horizontal suave sin scrollbars antiestéticos.
+  4. ⏱️ Velocímetros y osciloscopio FFmpeg (`.gauges-row`) escalados limpiamente para encajar en 3 columnas sin desbordar el contenedor.
+  5. 🎛️ Modales convertidos a experiencia móvil estilo bottom-sheet táctil (`border-radius: 20px 20px 10px 10px; max-height: 85vh`).
+  6. 🖥️ Layout del editor de video en una sola columna con reproductor limitado a `48vh` para edición cómoda con una sola mano.
+  Verificado: 223 tests unitarios pasando al 100% y validación Playwright en 4 viewports móviles.
 - [x] **COMPLETADO POR ANTIGRAVITY (08-nov ~09:05):** Tarea 15: Suite de 5 mejoras para el panel de Configuración y Diagnóstico:
   1. ▶️ Arranque interactivo de Ollama (`POST /api/system/start_ollama`) y botón `↻ Actualizar` en vivo en el modal.
   2. 🧠 Selector de proveedor de IA (Ollama Local, Gemini Cloud o Heurístico Puro) persistente en base de datos (`system_kv`).
