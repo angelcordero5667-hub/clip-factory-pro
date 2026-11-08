@@ -84,6 +84,11 @@ Pendientes para Antigravity: restaurar "Subtítulos" y "Plantillas" en el menú 
   4. Modelo Faster-Whisper actualizado por defecto a `small` (pre-descargado en `data/cache/whisper_models` y configurable con `CLIP_WHISPER_MODEL`) para máxima precisión fonética en español.
 
 ## Pendiente / ideas (reclamar aquí antes de empezar)
+- [x] **COMPLETADO POR ANTIGRAVITY (08-nov ~06:05):** Tarea 1: Vista previa del enlace + tiempo estimado (miniatura yt-dlp en /api/validate_url, cálculo tiempo estimado con historial real de jobs y video_duration, tarjeta visual con miniatura, canal, duración, sugerencia no bloqueante de Desde/Hasta si > 30 min, protección SSRF y tests unitarios).
+- [ ] **EN CURSO POR ANTIGRAVITY (08-nov ~06:06):** Tarea 2: Selector de idioma y duración del clip (Auto/ES/EN/PT, Corto 15-30s / Medio 30-60s [default] / Largo 60-90s, options JobBody -> jobs.py -> detector, validación de rangos, MIN_CLIP_SEC/MAX_CLIP_SEC, tests).
+- [ ] **PENDIENTE ANTIGRAVITY:** Tarea 3: Aviso al terminar (Notification API con permiso por clic, audio opcional, progreso en título de pestaña, persistencia en localStorage).
+- [ ] **PENDIENTE ANTIGRAVITY:** Tarea 4: Recordar ajustes y presets (persistencia de ajustes en localStorage, presets nombrados Podcast/Gaming/Entrevista).
+- [ ] **PENDIENTE ANTIGRAVITY:** Tarea 5: Requisitos en Configuración (endpoint GET /api/health/deps, vista con checks claros ✓/✗ en modal de configuración).
 - [x] **COMPLETADO POR ANTIGRAVITY (08-nov ~04:30):** Ajuste de posición y tamaño de subtítulos (opciones en panel Crear y en Editor para mover y achicar subtítulos y no tapar rostros; soporte en `subtitles.py`, `clip_maker.py`, `pipeline.py`, `jobs.py`, `api_server.py` y `index.html` con previsualización reactiva en reproductor y tests unitarios).
 - [x] **COMPLETADO POR ANTIGRAVITY (08-nov ~03:42):** Tarea A (Panel FFmpeg con métricas reales del trabajo: paso actual, progreso, tiempo transcurrido, tiempo restante estimado, y '—' cuando no haya trabajo activo; sin FPS inventados ni velocidades fijas).
 - [x] **COMPLETADO POR ANTIGRAVITY (08-nov ~03:45):** Tarea B (Menú lateral: restaurados 'Subtítulos' como atajo al editor/transcripción y 'Plantillas' como atajo a los estilos de subtítulos del panel Crear).

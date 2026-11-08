@@ -184,3 +184,51 @@ def test_system_metrics_endpoint():
     assert data["status"] in ("online", "error")
     assert "cpu_percent" in data and "ram_percent" in data
     assert "encoder" in data and "gpu_status" in data
+
+
+def test_validate_url_ssrf_protection():
+    # URL privada/local rechazada
+    r = client.get("/api/validate_url", params={"url": "http://127.0.0.1:8080/secret"})
+    assert r.status_code == 200
+    data = r.json()
+    assert data["valid"] is False
+    assert "local o privada" in data["message"]
+
+
+def test_validate_url_success_with_thumbnail(monkeypatch):
+    class FakeYDL:
+        def __init__(self, *args, **kwargs):
+            pass
+        def __enter__(self):
+            return self
+        def __exit__(self, *args):
+            pass
+        def extract_info(self, url, download=False):
+            return {
+                "title": "Mi Video Asombroso",
+                "duration": 600,
+                "uploader": "Canal Pro",
+                "thumbnail": "https://img.youtube.com/vi/test/maxresdefault.jpg",
+            }
+
+    import yt_dlp
+    monkeypatch.setattr(yt_dlp, "YoutubeDL", FakeYDL)
+    r = client.get("/api/validate_url", params={"url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"})
+    assert r.status_code == 200
+    data = r.json()
+    assert data["valid"] is True
+    assert data["title"] == "Mi Video Asombroso"
+    assert data["duration"] == 600
+    assert data["uploader"] == "Canal Pro"
+    assert data["thumbnail"] == "https://img.youtube.com/vi/test/maxresdefault.jpg"
+
+
+def test_list_jobs_includes_video_duration(tdb):
+    # En tdb hay un video guardado v1 con duracion 600.0
+    jid = tdb.create_job(source="https://ejemplo.com/v", options={}, kind="process")
+    tdb.update_job(jid, video_id="v1", status="done")
+    jobs = client.get("/api/jobs").json()
+    job_item = next((j for j in jobs if j["id"] == jid), None)
+    assert job_item is not None
+    assert job_item.get("video_duration") == 600.0
+

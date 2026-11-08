@@ -758,11 +758,24 @@ def validate_url(url: str):
             low_url = url.lower()
             is_stream = dur > 1800 or any(k in low_url for k in ("twitch.tv", "kick.com", "live"))
             platform = "Twitch" if "twitch.tv" in low_url else ("Kick" if "kick.com" in low_url else "YouTube / Web")
+            raw_thumb = info.get("thumbnail")
+            if not raw_thumb and info.get("thumbnails"):
+                try:
+                    raw_thumb = info["thumbnails"][-1].get("url")
+                except Exception:
+                    raw_thumb = None
+            thumbnail = None
+            if raw_thumb and isinstance(raw_thumb, str) and raw_thumb.strip().lower().startswith(("http://", "https://")):
+                thumbnail = raw_thumb.strip()
+
+            uploader = info.get("uploader") or info.get("channel") or ""
+
             return {
                 "valid": True,
                 "title": info.get("title") or f"Directo / Video de {platform}",
                 "duration": dur,
-                "uploader": info.get("uploader") or "",
+                "uploader": uploader,
+                "thumbnail": thumbnail,
                 "is_stream": is_stream,
                 "platform": platform,
             }

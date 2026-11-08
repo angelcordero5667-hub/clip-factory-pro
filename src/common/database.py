@@ -265,7 +265,13 @@ class Database:
 
     def list_jobs(self, limit: int = 20) -> List[Dict[str, Any]]:
         with closing(self.get_connection()) as conn:
-            rows = conn.execute("SELECT * FROM jobs ORDER BY id DESC LIMIT ?", (limit,)).fetchall()
+            rows = conn.execute("""
+                SELECT j.*, v.duration AS video_duration
+                FROM jobs j
+                LEFT JOIN videos v ON j.video_id = v.id
+                ORDER BY j.id DESC
+                LIMIT ?
+            """, (limit,)).fetchall()
             return [self._parse_job(r) for r in rows]
 
     def update_job(self, job_id: int, **fields):
