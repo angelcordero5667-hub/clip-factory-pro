@@ -362,13 +362,15 @@ class VerticalClipMaker:
         else:
             if smart_framing is None:
                 smart_framing = settings.render.smart_framing
-            if (smart_framing or layout_mode == "gaming") and self.face_tracker.available:
+            if (smart_framing or layout_mode in ("gaming", "split")) and self.face_tracker.available:
                 seek_for_face = 0.0 if is_pretrimmed else start_time
                 samples, src_w, src_h = self.face_tracker.sample(str(input_p), seek_for_face, duration)
                 framing = choose_framing(samples, src_w, src_h, w, h, allow_split=(aspect_ratio == "9:16"), layout_mode=layout_mode)
                 logger.info(f"Encuadre de {candidate.id}: {framing.mode} ({framing.reason})")
             elif layout_mode == "gaming":
                 framing = choose_framing([], 1920, 1080, w, h, allow_split=False, layout_mode="gaming")
+            elif layout_mode == "split":
+                framing = choose_framing([], 1920, 1080, w, h, allow_split=True, layout_mode="split")
 
         if hook_zoom is None:
             hook_zoom = settings.render.hook_zoom

@@ -168,6 +168,8 @@ def test_crear_listar_y_cancelar_trabajos(tdb):
 def test_trabajos_validan_entrada(tdb):
     assert client.post("/api/jobs", json={"source": "C:/Windows/system.ini"}).status_code == 400
     assert client.post("/api/jobs", json={"source": "https://x.com/v", "subtitle_style": "feo"}).status_code == 400
+    assert client.post("/api/jobs", json={"source": "https://www.youtube.com/watch?v=abc", "layout": "split"}).status_code == 200
+    assert client.post("/api/jobs", json={"source": "https://www.youtube.com/watch?v=abc", "layout": "invalido"}).status_code == 400
     assert client.post("/api/jobs", json={"source": "https://x.com/v", "aspect_ratio": "4:3"}).status_code == 400
     assert client.post("/api/jobs", json={"source": "../../etc/passwd"}).status_code == 400
 

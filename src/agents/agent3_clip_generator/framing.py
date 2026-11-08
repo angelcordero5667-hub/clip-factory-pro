@@ -149,6 +149,15 @@ def choose_framing(
     if layout_mode == "blur":
         return Framing(mode="blur", reason="layout desenfoque solicitado")
 
+    if layout_mode == "split" and out_h > out_w and src_w > 0 and src_h > 0:
+        half_h = out_h // 2
+        crop_w = min(src_w, int(round(src_h * out_w / half_h)) // 2 * 2)
+        pair = detect_two_speakers(samples) if samples else None
+        if not pair:
+            pair = (0.25, 0.75)
+        xs = tuple(int(_clamp(p * src_w - crop_w / 2, 0, src_w - crop_w)) for p in pair)
+        return Framing(mode="split", crop_w=crop_w, split_xs=xs, reason="layout podcast split: 2 participantes divididos arriba/abajo")
+
     if layout_mode == "gaming" and out_h > out_w and src_w > 0 and src_h > 0:
         top_h = int(out_h * 0.38) // 2 * 2
         crop_w = min(src_w, int(round(src_h * out_w / top_h)) // 2 * 2)
