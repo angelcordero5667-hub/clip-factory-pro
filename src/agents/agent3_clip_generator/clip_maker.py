@@ -263,6 +263,7 @@ class VerticalClipMaker:
         custom_highlight: Optional[str] = None,
         uppercase: Optional[bool] = None,   # None = lo define el estilo
         add_watermark: bool = False,
+        watermark_text: Optional[str] = None,
         scene_cuts: Optional[List[float]] = None,
         smart_framing: Optional[bool] = None,
         trim_silences: Optional[bool] = None,
@@ -323,6 +324,7 @@ class VerticalClipMaker:
                 custom_highlight=custom_highlight,
                 uppercase=uppercase,
                 add_watermark=add_watermark,
+                watermark_text=watermark_text,
                 aspect_ratio=aspect_ratio,
             )
 

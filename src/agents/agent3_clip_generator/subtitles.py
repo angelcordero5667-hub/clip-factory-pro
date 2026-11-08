@@ -71,6 +71,10 @@ STYLES: Dict[str, Dict] = {
                    mode="karaoke", primary="&H00EED322", highlight="&H00EED322", allow_emoji=True),
     "podcast": dict(font="Poppins SemiBold", size=62, outline=5, shadow=3, bold=0, uppercase=False,
                     mode="highlight", primary="&H00FFFFFF", highlight="&H00F755A8", allow_emoji=False),
+    "bounce": dict(font="Anton", size=80, outline=6, shadow=4, bold=0, uppercase=True,
+                   mode="bounce", primary="&H00FFFFFF", highlight="&H003AF2B6", allow_emoji=True),
+    "glow": dict(font="Montserrat ExtraBold", size=72, outline=6, shadow=5, bold=0, uppercase=True,
+                 mode="highlight", primary="&H00FFFFFF", highlight="&H00F755A8", allow_emoji=True),
 }
 # Nombres alternativos -> estilos actuales
 STYLE_ALIASES = {
@@ -80,6 +84,8 @@ STYLE_ALIASES = {
     "classic": "hormozi_classic",
     "neon": "hormozi_neon",
     "minimal_white": "minimal",
+    "pop": "bounce",
+    "bouncing": "bounce",
 }
 # Compatibilidad con código que lea SubtitleGenerator.ASS_STYLES
 ASS_STYLES = STYLES
@@ -264,6 +270,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         custom_highlight: Optional[str] = None,
         uppercase: Optional[bool] = None,
         add_watermark: bool = False,
+        watermark_text: Optional[str] = None,
         aspect_ratio: str = "9:16",
     ) -> Path:
         output_path = Path(output_path)
@@ -280,10 +287,11 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         _, _, margin_lr = self._margins(position, res)
 
         events: List[str] = []
-        if add_watermark:
+        if add_watermark or watermark_text:
+            wm = _ass_escape((watermark_text or "Clip Factory").strip())
             events.append(
                 f"Dialogue: 1,0:00:00.00,{self._format_time(total)},Default,,0,0,0,,"
-                f"{{\\an9\\pos({res[0] - 60},70)\\fs32\\c&H00FFFFFF&\\3c&H80000000&\\bord3}}Clip Factory")
+                f"{{\\an9\\pos({res[0] - 60},70)\\fs30\\c&H00FFFFFF&\\3c&H80000000&\\bord3}}{wm}")
 
         def render_word(w: WordTimestamp) -> str:
             text = _ass_escape(w.word.strip())
@@ -324,6 +332,21 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
                     sep = "\\N" if i in breaks else (" " if i else "")
                     parts.append(f"{sep}{{\\kf{cs}}}{render_word(w)}")
                 events.append(f"Dialogue: 0,{self._format_time(b_start)},{self._format_time(b_end)},Default,,0,0,0,,{fs_tag}{''.join(parts)}")
+
+            elif s["mode"] == "bounce":
+                for a, active in enumerate(block):
+                    w_start = max(0.0, active.start - clip_start)
+                    w_end = min(total, (block[a + 1].start if a + 1 < len(block) else active.end) - clip_start)
+                    if w_end <= w_start:
+                        continue
+                    parts = []
+                    for i, w in enumerate(block):
+                        sep = "\\N" if i in breaks else (" " if i else "")
+                        if i == a:
+                            parts.append(f"{sep}{{\\c{hl}\\t(0,70,\\fscx125\\fscy125)\\t(70,140,\\fscx112\\fscy112)}}{render_word(w)}{{\\c{s['primary']}\\fscx100\\fscy100}}")
+                        else:
+                            parts.append(f"{sep}{render_word(w)}")
+                    events.append(f"Dialogue: 0,{self._format_time(w_start)},{self._format_time(w_end)},Default,,0,0,0,,{fs_tag}{''.join(parts)}")
 
             else:  # highlight (hormozi): un evento por palabra activa con todo el bloque visible
                 for a, active in enumerate(block):

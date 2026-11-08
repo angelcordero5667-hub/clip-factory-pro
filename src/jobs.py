@@ -97,6 +97,7 @@ class JobWorker:
             layout_mode = opts.get("layout") or opts.get("layout_mode") or "auto"
             speed_mode = opts.get("speed_mode") or "turbo"
             hook_zoom = bool(opts.get("hook_zoom", True)) if "hook_zoom" in opts else True
+            watermark_text = opts.get("watermark_text") or opts.get("watermark") or None
 
             video_id, cands = pipeline.run_pipeline(
                 video_input=job["source"],
@@ -109,6 +110,7 @@ class JobWorker:
                 layout_mode=layout_mode,
                 speed_mode=speed_mode,
                 hook_zoom=hook_zoom,
+                watermark_text=watermark_text,
                 time_range=time_range,
                 step_callback=on_step,
             )

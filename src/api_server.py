@@ -35,7 +35,8 @@ OUTPUTS_DIR.mkdir(parents=True, exist_ok=True)
 SUBTITLE_STYLES = (
     "hormozi", "limpio", "karaoke", "minimal",
     "hormozi_classic", "hormozi_neon", "beast", "mrbeast",
-    "gaming", "podcast", "clean", "classic", "neon", "minimal_white"
+    "gaming", "podcast", "clean", "classic", "neon", "minimal_white",
+    "bounce", "glow", "pop", "bouncing"
 )
 ASPECT_RATIOS = ("9:16", "1:1", "16:9")
 LAYOUT_MODES = ("auto", "gaming", "blur")
@@ -384,6 +385,7 @@ class JobBody(BaseModel):
     layout: Optional[str] = "auto"
     speed_mode: Optional[str] = "turbo"
     hook_zoom: Optional[bool] = True
+    watermark_text: Optional[str] = Field(default=None, max_length=50)
 
 
 def _is_public_url(url: str) -> bool:

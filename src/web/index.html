@@ -960,14 +960,14 @@
   }
   .subtitle-cards {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
+    grid-template-columns: repeat(auto-fit, minmax(95px, 1fr));
+    gap: 10px;
   }
   .sub-style-card {
     background: #151928;
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-md);
-    padding: 18px 8px;
+    padding: 14px 6px;
     text-align: center;
     cursor: pointer;
     transition: all 0.18s ease;
@@ -979,7 +979,7 @@
   .sub-preview-neon {
     font-family: 'Sora', sans-serif;
     font-weight: 700;
-    font-size: 14px;
+    font-size: 13px;
     color: #ec4899;
     text-shadow: 0 0 8px rgba(236, 72, 153, 0.8);
     margin-bottom: 6px;
@@ -987,15 +987,31 @@
   .sub-preview-lime {
     font-family: 'Sora', sans-serif;
     font-weight: 700;
-    font-size: 14px;
+    font-size: 13px;
     color: var(--neon-lime-accent);
     text-shadow: 0 0 8px rgba(182, 242, 58, 0.8);
+    margin-bottom: 6px;
+  }
+  .sub-preview-bounce {
+    font-family: 'Sora', sans-serif;
+    font-weight: 800;
+    font-size: 13px;
+    color: #facc15;
+    text-shadow: 0 0 10px rgba(250, 204, 21, 0.9);
+    margin-bottom: 6px;
+  }
+  .sub-preview-glow {
+    font-family: 'Sora', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    color: #38bdf8;
+    text-shadow: 0 0 10px rgba(56, 189, 248, 0.95), 0 0 18px rgba(56, 189, 248, 0.6);
     margin-bottom: 6px;
   }
   .sub-preview-minimal {
     font-family: 'Inter', sans-serif;
     font-weight: 600;
-    font-size: 14px;
+    font-size: 13px;
     color: #fff;
     margin-bottom: 6px;
   }
@@ -2358,11 +2374,27 @@
             <div class="sub-preview-lime">MrBeast<br>Lime</div>
             <div style="font-size:10px; color:var(--text-muted);">MrBeast Lime</div>
           </div>
+          <div class="sub-style-card" onclick="selectSubStyle(this, 'bounce')">
+            <div class="sub-preview-bounce">Pop<br>Bounce</div>
+            <div style="font-size:10px; color:var(--text-muted);">Pop Bouncing</div>
+          </div>
+          <div class="sub-style-card" onclick="selectSubStyle(this, 'glow')">
+            <div class="sub-preview-glow">Cyber<br>Glow</div>
+            <div style="font-size:10px; color:var(--text-muted);">Cyber Glow</div>
+          </div>
           <div class="sub-style-card" onclick="selectSubStyle(this, 'minimal')">
             <div class="sub-preview-minimal">Minimal<br>&nbsp;</div>
             <div style="font-size:10px; color:var(--text-muted);">Minimal</div>
           </div>
         </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" style="display:flex; justify-content:space-between; align-items:center;">
+          <span>🏷️ Marca de agua / Creador (Opcional)</span>
+          <span style="font-size:10.5px; color:var(--text-muted);">Esquina superior</span>
+        </label>
+        <input type="text" id="watermark-input" class="input-glow" placeholder="@tu_canal o marca..." style="font-size:12px; width:100%; box-sizing:border-box;">
       </div>
 
       <div class="form-group">
@@ -2589,6 +2621,20 @@
       hlt.style.background = '#10b981';
       hlt.style.color = '#000';
       box.style.textShadow = '0 0 10px rgba(182, 242, 58, 0.9), 0 2px 4px #000';
+    } else if (st === 'bounce') {
+      pfx.innerText = 'Pop Bouncing';
+      pfx.style.color = '#ffffff';
+      hlt.innerText = 'BOOM!';
+      hlt.style.background = '#facc15';
+      hlt.style.color = '#000';
+      box.style.textShadow = '0 0 12px rgba(250, 204, 21, 0.9), 0 2px 4px #000';
+    } else if (st === 'glow') {
+      pfx.innerText = 'Cyber Glow';
+      pfx.style.color = '#38bdf8';
+      hlt.innerText = 'NEON';
+      hlt.style.background = '#0ea5e9';
+      hlt.style.color = '#fff';
+      box.style.textShadow = '0 0 14px rgba(56, 189, 248, 0.95), 0 2px 4px #000';
     } else {
       pfx.innerText = 'Minimal';
       pfx.style.color = '#ffffff';
@@ -2655,7 +2701,8 @@
       time_range_end: endRange || null,
       layout: activeLayoutMode || 'auto',
       speed_mode: activeSpeedMode || 'turbo',
-      hook_zoom: !!document.getElementById('hook-zoom-check')?.checked
+      hook_zoom: !!document.getElementById('hook-zoom-check')?.checked,
+      watermark_text: document.getElementById('watermark-input')?.value.trim() || null
     };
 
     const btn = document.getElementById('btn-submit-process');

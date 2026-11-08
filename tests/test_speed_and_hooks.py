@@ -85,3 +85,23 @@ def test_api_speed_mode_validation(monkeypatch):
     })
     assert r3.status_code == 400
     assert "Modo de velocidad inválido" in r3.json()["detail"]
+
+
+def test_subtitles_bounce_and_watermark(tmp_path):
+    from src.common.models import TranscriptSegment, WordTimestamp
+    from src.agents.agent3_clip_generator.subtitles import SubtitleGenerator
+
+    words = [
+        WordTimestamp(word="Hola", start=0.0, end=0.5),
+        WordTimestamp(word="mundo", start=0.6, end=1.0)
+    ]
+    segs = [TranscriptSegment(id=0, start=0.0, end=1.0, text="Hola mundo", words=words)]
+    gen = SubtitleGenerator()
+    out = gen.generate_ass(
+        0.0, 1.0, segs, tmp_path / "bounce.ass",
+        style_preset="bounce", watermark_text="@mi_canal"
+    )
+    content = out.read_text(encoding="utf-8")
+    assert "@mi_canal" in content
+    assert "\\t(0,70,\\fscx125\\fscy125)" in content
+
