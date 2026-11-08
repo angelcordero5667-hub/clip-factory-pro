@@ -125,16 +125,53 @@ async def token_guard(request: Request, call_next):
     )
     token_ok = provided is not None and secrets.compare_digest(provided, expected)
 
-    if (path.startswith("/api") or path.startswith("/clips_media")) and path != "/api/health" and not token_ok:
+    public_paths = ("/api/health", "/api/auth/login", "/api/auth/verify")
+    if (path.startswith("/api") or path.startswith("/clips_media")) and path not in public_paths and not token_ok:
         return JSONResponse({"detail": "Token inválido o ausente."}, status_code=401)
 
     response = await call_next(request)
     if path == "/" and request.query_params.get("token") and token_ok:
-        # `secure` cuando se entra por HTTPS (túnel de Cloudflare); en local (http) no se puede exigir
         secure = request.headers.get("x-forwarded-proto", request.url.scheme) == "https"
-        response.set_cookie("clip_token", expected, httponly=True, samesite="strict", secure=secure,
+        response.set_cookie("clip_token", expected, httponly=True, samesite="lax", secure=secure,
                             max_age=60 * 60 * 24 * 30)
     return response
+
+
+@app.post("/api/auth/login")
+async def auth_login(request: Request):
+    """Permite autenticarse enviando el token en JSON {'token': '...'} o como cabecera."""
+    expected = _expected_token()
+    if not expected:
+        return {"status": "ok", "auth_required": False}
+    body = {}
+    try:
+        body = await request.json()
+    except Exception:
+        pass
+    token = (body.get("token") or request.headers.get("x-api-token") or request.query_params.get("token") or "").strip()
+    if not token or not secrets.compare_digest(token, expected):
+        raise HTTPException(status_code=401, detail="Token de acceso incorrecto.")
+    secure = request.headers.get("x-forwarded-proto", request.url.scheme) == "https"
+    resp = JSONResponse({"status": "ok", "message": "Autenticación exitosa."})
+    resp.set_cookie("clip_token", expected, httponly=True, samesite="lax", secure=secure, max_age=60 * 60 * 24 * 30)
+    return resp
+
+
+@app.get("/api/auth/verify")
+async def auth_verify(request: Request):
+    """Comprueba si la sesión o cabecera actual está autenticada."""
+    expected = _expected_token()
+    if not expected:
+        return {"valid": True, "auth_required": False}
+    provided = (
+        request.headers.get("x-api-token")
+        or request.headers.get("authorization", "").removeprefix("Bearer ").strip()
+        or request.cookies.get("clip_token")
+        or request.query_params.get("token")
+    )
+    if not provided or not secrets.compare_digest(provided.strip(), expected):
+        raise HTTPException(status_code=401, detail="Token no válido o ausente.")
+    return {"valid": True, "auth_required": True}
 
 
 if STATIC_DIR.exists():
