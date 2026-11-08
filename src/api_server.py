@@ -13,6 +13,7 @@ import secrets
 import shutil
 import socket
 import subprocess
+import time
 import zipfile
 from datetime import datetime, timezone
 from urllib.parse import urlparse
@@ -1069,23 +1070,26 @@ def check_dependencies() -> Dict[str, Any]:
 
     # 3. Ollama
     ollama_url = getattr(settings.ollama, "base_url", "http://127.0.0.1:11434")
-    target_model = getattr(settings.ollama, "model", "llama3.2:3b")
+    target_model = db.get_setting("ollama_model", getattr(settings.ollama, "model", "llama3.2:3b"))
     ollama_info = {
         "accessible": False,
         "model_loaded": False,
         "model_name": target_model,
+        "installed_models": [],
         "message": "Ollama no responde: se usará el motor heurístico"
     }
     try:
         r = requests.get(f"{ollama_url}/api/tags", timeout=1.5)
         if r.status_code == 200:
             models = [m.get("name") for m in r.json().get("models", [])]
+            ollama_info["installed_models"] = models
             loaded = any(target_model in m for m in models)
             if loaded:
                 ollama_info = {
                     "accessible": True,
                     "model_loaded": True,
                     "model_name": target_model,
+                    "installed_models": models,
                     "message": f"Ollama accesible y modelo {target_model} cargado"
                 }
             else:
@@ -1093,6 +1097,7 @@ def check_dependencies() -> Dict[str, Any]:
                     "accessible": True,
                     "model_loaded": False,
                     "model_name": target_model,
+                    "installed_models": models,
                     "message": f"Ollama responde pero modelo {target_model} no encontrado: se usará el motor heurístico"
                 }
     except Exception:
@@ -1120,12 +1125,37 @@ def check_dependencies() -> Dict[str, Any]:
         "message": "Modelo de rostros YuNet presente" if yunet_present else "Modelo YuNet no presente: se usará encuadre central de respaldo"
     }
 
+    # 6. Hardware info
+    hw_info = {}
+    try:
+        vm = psutil.virtual_memory()
+        hw_info = {
+            "cpu_cores": psutil.cpu_count(logical=True),
+            "ram_used_gb": round(vm.used / (1024 ** 3), 1),
+            "ram_total_gb": round(vm.total / (1024 ** 3), 1),
+            "ram_percent": round(vm.percent, 1),
+            "encoder": enc,
+            "gpu_accelerated": is_amf
+        }
+    except Exception:
+        pass
+
+    # 7. AI Config
+    ai_cfg = {
+        "provider": db.get_setting("ai_provider", "ollama"),
+        "ollama_model": target_model,
+        "gemini_model": db.get_setting("gemini_model", "gemini-2.5-flash"),
+        "has_gemini_key": bool(db.get_setting("gemini_api_key") or os.environ.get("GEMINI_API_KEY")),
+    }
+
     return {
         "ffmpeg": ffmpeg_info,
         "encoder": encoder_info,
         "ollama": ollama_info,
         "whisper": whisper_info,
-        "yunet": yunet_info
+        "yunet": yunet_info,
+        "hardware": hw_info,
+        "ai_config": ai_cfg
     }
 
 
@@ -1133,6 +1163,206 @@ def check_dependencies() -> Dict[str, Any]:
 def get_health_deps():
     """Informe de estado de dependencias del sistema (solo lectura, sin rutas sensibles ni tokens)."""
     return check_dependencies()
+
+
+@app.post("/api/system/start_ollama")
+def start_ollama():
+    """Inicia el servicio Ollama en segundo plano si está detenido."""
+    ollama_url = getattr(settings.ollama, "base_url", "http://127.0.0.1:11434")
+    try:
+        r = requests.get(f"{ollama_url}/api/tags", timeout=1.0)
+        if r.status_code == 200:
+            return {"status": "already_running", "message": "Ollama ya está activo y respondiendo."}
+    except Exception:
+        pass
+
+    user_appdata = os.environ.get("LOCALAPPDATA", "")
+    candidates = [
+        Path(user_appdata) / "Programs" / "Ollama" / "ollama.exe",
+        Path(os.path.expanduser(r"~\AppData\Local\Programs\Ollama\ollama.exe")),
+    ]
+    which_ollama = shutil.which("ollama")
+    if which_ollama:
+        candidates.insert(0, Path(which_ollama))
+
+    ollama_exe = None
+    for c in candidates:
+        if c.is_file():
+            ollama_exe = c
+            break
+
+    if not ollama_exe:
+        raise HTTPException(
+            status_code=404,
+            detail="No se encontró ollama.exe en el sistema. Asegúrate de tener Ollama instalado."
+        )
+
+    try:
+        env = os.environ.copy()
+        env["OLLAMA_HOST"] = "127.0.0.1:11434"
+        DETACHED_FLAGS = 0x00000008 | 0x00000200 if os.name == "nt" else 0
+        subprocess.Popen(
+            [str(ollama_exe), "serve"],
+            env=env,
+            creationflags=DETACHED_FLAGS,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"No se pudo iniciar el proceso de Ollama: {e}")
+
+    for _ in range(8):
+        time.sleep(0.5)
+        try:
+            r = requests.get(f"{ollama_url}/api/tags", timeout=0.8)
+            if r.status_code == 200:
+                return {"status": "started", "message": "Ollama iniciado correctamente y listo para usar."}
+        except Exception:
+            continue
+
+    return {"status": "starting", "message": "Ollama está arrancando en segundo plano."}
+
+
+@app.get("/api/system/ollama_models")
+def get_ollama_models():
+    """Lista de modelos instalados en Ollama local."""
+    ollama_url = getattr(settings.ollama, "base_url", "http://127.0.0.1:11434")
+    try:
+        r = requests.get(f"{ollama_url}/api/tags", timeout=2.0)
+        if r.status_code == 200:
+            models_data = []
+            for m in r.json().get("models", []):
+                size_b = m.get("size", 0)
+                models_data.append({
+                    "name": m.get("name"),
+                    "size_gb": round(size_b / (1024 ** 3), 1),
+                    "digest": m.get("digest", "")[:12]
+                })
+            return {"available": True, "models": models_data}
+    except Exception:
+        pass
+    return {"available": False, "models": []}
+
+
+class AIConfigBody(BaseModel):
+    provider: Optional[str] = None
+    ollama_model: Optional[str] = None
+    gemini_api_key: Optional[str] = None
+    gemini_model: Optional[str] = None
+
+
+@app.get("/api/system/ai_config")
+def get_ai_config():
+    """Configuración actual del motor de IA."""
+    ollama_url = getattr(settings.ollama, "base_url", "http://127.0.0.1:11434")
+    ollama_online = False
+    try:
+        ollama_online = (requests.get(f"{ollama_url}/api/tags", timeout=1.0).status_code == 200)
+    except Exception:
+        pass
+
+    gemini_key = db.get_setting("gemini_api_key") or os.environ.get("GEMINI_API_KEY") or ""
+    masked_key = f"{gemini_key[:4]}...{gemini_key[-4:]}" if len(gemini_key) > 8 else ("Configurada" if gemini_key else "")
+
+    return {
+        "provider": db.get_setting("ai_provider", "ollama"),
+        "ollama_model": db.get_setting("ollama_model", settings.ollama.model),
+        "gemini_model": db.get_setting("gemini_model", "gemini-2.5-flash"),
+        "has_gemini_key": bool(gemini_key),
+        "gemini_key_masked": masked_key,
+        "ollama_online": ollama_online,
+    }
+
+
+@app.post("/api/system/ai_config")
+def update_ai_config(body: AIConfigBody):
+    """Actualiza proveedor de IA, modelo o claves API."""
+    if body.provider is not None:
+        if body.provider not in ("ollama", "gemini", "heuristic"):
+            raise HTTPException(status_code=400, detail="Proveedor no válido (usa 'ollama', 'gemini' o 'heuristic').")
+        db.set_setting("ai_provider", body.provider)
+
+    if body.ollama_model:
+        db.set_setting("ollama_model", body.ollama_model.strip())
+
+    if body.gemini_model:
+        db.set_setting("gemini_model", body.gemini_model.strip())
+
+    if body.gemini_api_key is not None:
+        db.set_setting("gemini_api_key", body.gemini_api_key.strip())
+
+    return {"status": "ok", "message": "Configuración de IA guardada.", "config": get_ai_config()}
+
+
+@app.post("/api/system/test_ai")
+def test_ai_connection():
+    """Prueba la latencia y funcionamiento del motor de IA activo (Ping IA)."""
+    provider = db.get_setting("ai_provider", "ollama")
+    t0 = time.perf_counter()
+
+    if provider == "heuristic":
+        return {
+            "status": "ok",
+            "provider": "heuristic",
+            "model": "Motor de energía y reglas",
+            "latency_ms": 1,
+            "message": "Motor heurístico local en memoria (ultra-rápido, sin IA)."
+        }
+
+    if provider == "gemini":
+        gemini_key = db.get_setting("gemini_api_key") or os.environ.get("GEMINI_API_KEY")
+        if not gemini_key:
+            return {
+                "status": "error",
+                "provider": "gemini",
+                "error": "No has configurado una API Key de Gemini."
+            }
+        g_model = db.get_setting("gemini_model", "gemini-2.5-flash")
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{g_model}:generateContent?key={gemini_key}"
+        try:
+            res = requests.post(
+                url,
+                json={"contents": [{"parts": [{"text": "Responde únicamente 'OK'"}]}]},
+                timeout=10
+            )
+            lat_ms = int((time.perf_counter() - t0) * 1000)
+            if res.status_code == 200:
+                return {
+                    "status": "ok",
+                    "provider": "gemini",
+                    "model": g_model,
+                    "latency_ms": lat_ms,
+                    "message": f"Gemini Cloud respondió en {lat_ms} ms."
+                }
+            return {
+                "status": "error",
+                "provider": "gemini",
+                "error": f"Error {res.status_code}: {res.text[:120]}"
+            }
+        except Exception as e:
+            return {"status": "error", "provider": "gemini", "error": str(e)}
+
+    # Ollama
+    ollama_url = getattr(settings.ollama, "base_url", "http://127.0.0.1:11434")
+    o_model = db.get_setting("ollama_model", settings.ollama.model)
+    try:
+        res = requests.post(
+            f"{ollama_url}/api/generate",
+            json={"model": o_model, "prompt": "Responde 'OK'", "stream": False, "options": {"num_predict": 4}},
+            timeout=8
+        )
+        lat_ms = int((time.perf_counter() - t0) * 1000)
+        if res.status_code == 200:
+            return {
+                "status": "ok",
+                "provider": "ollama",
+                "model": o_model,
+                "latency_ms": lat_ms,
+                "message": f"Ollama local respondió en {lat_ms} ms."
+            }
+        return {"status": "error", "provider": "ollama", "error": f"Error {res.status_code}"}
+    except Exception as e:
+        return {"status": "error", "provider": "ollama", "error": f"Ollama no responde: {e}"}
 
 
 if __name__ == "__main__":

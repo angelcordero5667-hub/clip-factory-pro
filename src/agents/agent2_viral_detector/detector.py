@@ -1,6 +1,7 @@
 import json
 import logging
 import math
+import os
 import re
 from typing import List, Optional
 import requests
@@ -110,9 +111,24 @@ class ViralMomentDetector:
         window_overlap_sec: float = 30.0,
         heuristic_step_sec: float = 10.0,
         pause_tolerance_sec: float = 3.0,
+        ai_provider: Optional[str] = None,
+        gemini_api_key: Optional[str] = None,
+        gemini_model: Optional[str] = None,
     ):
+        try:
+            from src.common.database import db
+            self.ai_provider = ai_provider or db.get_setting("ai_provider", "ollama")
+            saved_model = db.get_setting("ollama_model")
+            self.model_name = model_name or saved_model or settings.ollama.model
+            self.gemini_api_key = gemini_api_key or db.get_setting("gemini_api_key") or os.environ.get("GEMINI_API_KEY")
+            self.gemini_model = gemini_model or db.get_setting("gemini_model", "gemini-2.5-flash")
+        except Exception:
+            self.ai_provider = ai_provider or "ollama"
+            self.model_name = model_name or settings.ollama.model
+            self.gemini_api_key = gemini_api_key or os.environ.get("GEMINI_API_KEY")
+            self.gemini_model = gemini_model or "gemini-2.5-flash"
+
         self.ollama_url = ollama_url or settings.ollama.base_url
-        self.model_name = model_name or settings.ollama.model
         self.min_duration = min_duration
         self.max_duration = max_duration
         self.max_candidates = max_candidates
@@ -155,10 +171,22 @@ class ViralMomentDetector:
 
         candidates: List[ViralMomentCandidate] = []
         if use_llm:
-            try:
-                candidates = self._detect_with_ollama(transcript, focus_prompt=focus_prompt)
-            except Exception as e:
-                logger.warning(f"Ollama no respondió: {e}. Activando motor heurístico.")
+            if self.ai_provider == "gemini":
+                try:
+                    candidates = self._detect_with_gemini(transcript, focus_prompt=focus_prompt)
+                except Exception as e:
+                    logger.warning(f"Gemini API no respondió: {e}. Probando Ollama / Heurístico.")
+                    try:
+                        candidates = self._detect_with_ollama(transcript, focus_prompt=focus_prompt)
+                    except Exception:
+                        pass
+            elif self.ai_provider == "ollama":
+                try:
+                    candidates = self._detect_with_ollama(transcript, focus_prompt=focus_prompt)
+                except Exception as e:
+                    logger.warning(f"Ollama no respondió: {e}. Activando motor heurístico.")
+            elif self.ai_provider == "heuristic":
+                logger.info("Proveedor configurado como heurístico. Saltando LLM.")
 
         if not candidates:
             candidates = self._detect_heuristic(transcript, focus_prompt=focus_prompt)
@@ -447,6 +475,102 @@ class ViralMomentDetector:
                 ))
             except Exception as err:
                 logger.debug(f"Error parseando clip: {err}")
+        return candidates
+
+    def _detect_with_gemini(self, transcript: TranscriptResult, focus_prompt: Optional[str] = None) -> List[ViralMomentCandidate]:
+        windows = build_windows(transcript.segments, self.window_sec, self.window_overlap_sec)
+        if not windows:
+            return []
+        per_window = max(3, math.ceil(self.max_candidates / len(windows)) + 1)
+
+        candidates: List[ViralMomentCandidate] = []
+        failures = 0
+        last_error: Optional[Exception] = None
+        for n, window in enumerate(windows, 1):
+            try:
+                found = self._query_gemini_window(window, per_window, id_offset=len(candidates), focus_prompt=focus_prompt)
+                logger.info(f"[Gemini] Ventana {n}/{len(windows)} "
+                            f"({window[0].start:.0f}s-{window[-1].end:.0f}s): {len(found)} candidatos")
+                candidates.extend(found)
+            except Exception as e:
+                failures += 1
+                last_error = e
+                logger.warning(f"[Gemini] Ventana {n}/{len(windows)} falló: {e}")
+        if failures == len(windows) and last_error is not None:
+            raise last_error
+        return self.deduplicate_candidates(candidates)
+
+    def _query_gemini_window(
+        self,
+        segments: List[TranscriptSegment],
+        max_clips: int,
+        id_offset: int = 0,
+        focus_prompt: Optional[str] = None,
+    ) -> List[ViralMomentCandidate]:
+        api_key = self.gemini_api_key
+        if not api_key:
+            raise ValueError("Clave GEMINI_API_KEY no configurada")
+
+        prompt = OPUS_PROMPT_TEMPLATE.format(
+            min_duration=int(self.min_duration),
+            max_duration=int(self.max_duration),
+            max_clips=max_clips,
+            transcript_text=self.format_transcript_for_llm(segments),
+        )
+        if focus_prompt and focus_prompt.strip():
+            focus_instruction = (
+                f"\nREGLA PRIORITARIA DE ENFOQUE TEMÁTICO (INSTRUCCIÓN DEL USUARIO):\n"
+                f"Prioriza y extrae momentos enfocados en: \"{focus_prompt.strip()}\".\n"
+            )
+            prompt = prompt.replace("REGLAS OBLIGATORIAS:\n", "REGLAS OBLIGATORIAS:\n" + focus_instruction)
+
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.gemini_model}:generateContent?key={api_key}"
+        payload = {
+            "contents": [{"parts": [{"text": prompt}]}],
+            "generationConfig": {
+                "temperature": 0.3,
+                "response_mime_type": "application/json"
+            }
+        }
+        res = requests.post(url, json=payload, timeout=30)
+        res.raise_for_status()
+        raw_json = res.json()
+        parts = raw_json.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])
+        text_content = parts[0].get("text", "[]") if parts else "[]"
+        data = self._extract_json_array(text_content)
+        candidates = []
+        for idx, item in enumerate(data):
+            try:
+                if any(m in str(item.get("hook_text", "")) + str(item.get("title", "")) for m in TEMPLATE_MARKERS):
+                    continue
+                start = float(item["start_time"])
+                end = float(item["end_time"])
+                raw_score = float(item.get("virality_score", 85.0))
+                score = raw_score * 10.0 if (0.0 < raw_score <= 10.0) else raw_score
+                score = round(min(100.0, max(0.0, score)), 1)
+                hook_s = float(item.get("hook_score", min(100.0, score + 2.0)))
+                flow_s = float(item.get("flow_score", max(0.0, score - 1.0)))
+                trend_s = float(item.get("trend_score", score))
+
+                candidates.append(ViralMomentCandidate(
+                    id=f"clip_{id_offset + idx + 1}",
+                    start_time=round(start, 2),
+                    end_time=round(end, 2),
+                    duration=round(end - start, 2),
+                    title=item.get("title", f"Momento Viral #{id_offset + idx + 1} 🔥"),
+                    hook_text=item.get("hook_text", "").strip(),
+                    context_text=item.get("context_text", "").strip(),
+                    virality_score=score,
+                    breakdown=ViralityBreakdown(hook_score=hook_s, flow_score=flow_s, trend_score=trend_s),
+                    category=item.get("category", "sorpresa").strip().lower(),
+                    reasoning=item.get("reasoning", "Detectado con Gemini Cloud").strip(),
+                    social_description=item.get("social_description", "").strip(),
+                    hashtags=item.get("hashtags", ["#viral", "#shorts", "#reels"]),
+                    status="pending",
+                    engine="gemini",
+                ))
+            except Exception as err:
+                logger.debug(f"Error parseando clip de Gemini: {err}")
         return candidates
 
     @staticmethod

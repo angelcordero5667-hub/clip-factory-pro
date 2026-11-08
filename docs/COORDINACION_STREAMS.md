@@ -84,6 +84,13 @@ Pendientes para Antigravity: restaurar "Subtítulos" y "Plantillas" en el menú 
   4. Modelo Faster-Whisper actualizado por defecto a `small` (pre-descargado en `data/cache/whisper_models` y configurable con `CLIP_WHISPER_MODEL`) para máxima precisión fonética en español.
 
 ## Pendiente / ideas (reclamar aquí antes de empezar)
+- [x] **COMPLETADO POR ANTIGRAVITY (08-nov ~09:05):** Tarea 15: Suite de 5 mejoras para el panel de Configuración y Diagnóstico:
+  1. ▶️ Arranque interactivo de Ollama (`POST /api/system/start_ollama`) y botón `↻ Actualizar` en vivo en el modal.
+  2. 🧠 Selector de proveedor de IA (Ollama Local, Gemini Cloud o Heurístico Puro) persistente en base de datos (`system_kv`).
+  3. 📦 Selector de modelos instalados de Ollama (`GET /api/system/ollama_models`) con selección dinámica en la UI.
+  4. 💻 Monitor de hardware en vivo en diagnóstico (CPU núcleos/%, RAM usada/total, GPU AMF acelerada).
+  5. ⚡ Test de latencia de IA ("Ping IA") (`POST /api/system/test_ai`) con medición en milisegundos y feedback visual.
+  Verificado: 223 tests unitarios pasando al 100% y captura de pantalla Playwright en `docs/captured_screenshots/screen_modal_upgraded.png`.
 - [x] **COMPLETADO POR ANTIGRAVITY (08-nov ~08:45):** Tarea 14: Paquete de 7 mejoras de productividad y refinamiento:
   1. 🔍 Búsqueda rápida y ordenación interactiva en la galería de clips (`#clip-search-input`, `#clip-sort-select` por mayor puntaje, más recientes o duración).
   2. 🎨 Selector de paleta de colores de resalte karaoke en subtítulos (`custom_highlight` en API, jobs y pipeline: amarillo, verde lima, cian eléctrico, fucsia TikTok, naranja fuego).

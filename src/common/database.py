@@ -96,6 +96,12 @@ class Database:
             # Índices de las consultas más frecuentes (clips de un video, cola por estado)
             cursor.execute("CREATE INDEX IF NOT EXISTS idx_candidates_video ON candidates(video_id)")
             cursor.execute("CREATE INDEX IF NOT EXISTS idx_jobs_status ON jobs(status, id)")
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS system_kv (
+                    key TEXT PRIMARY KEY,
+                    value TEXT NOT NULL
+                )
+            """)
             # WAL: el dashboard lee mientras el worker escribe sin bloquearse (el modo queda guardado en el archivo)
             try:
                 cursor.execute("PRAGMA journal_mode=WAL")
@@ -316,6 +322,22 @@ class Database:
                 "updated_at = CURRENT_TIMESTAMP WHERE status = 'running'")
             conn.commit()
             return cur.rowcount
+
+    def get_setting(self, key: str, default: Optional[str] = None) -> Optional[str]:
+        with closing(self.get_connection()) as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT value FROM system_kv WHERE key = ?", (key,))
+            row = cursor.fetchone()
+            return row["value"] if row else default
+
+    def set_setting(self, key: str, value: str):
+        with closing(self.get_connection()) as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                "INSERT INTO system_kv (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value",
+                (key, value)
+            )
+            conn.commit()
 
 
 db = Database()

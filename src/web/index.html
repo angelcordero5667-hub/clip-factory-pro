@@ -6662,14 +6662,74 @@
 
       const item = (label, val) => `<div style="display:flex; justify-content:space-between; gap:12px; padding:7px 0; border-bottom:1px solid rgba(255,255,255,0.06); font-size:12px;"><span>${label}</span><strong style="color:#fff; text-align:right; word-break:break-all;">${esc(val)}</strong></div>`;
 
+      let content = '';
+
+      // 1. Barra de Herramientas Superior del Modal (Botón de refrescar)
+      content += `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.08);">
+          <div style="font-size:11px; color:var(--text-muted);">Diagnóstico en tiempo real del motor y la IA</div>
+          <button type="button" class="btn-outline" onclick="openSettingsModal()" style="font-size:11px; padding:3px 10px; cursor:pointer;" title="Actualizar estado">↻ Actualizar</button>
+        </div>`;
+
+      // 2. Monitor de Hardware en Vivo (Mejora 4)
+      if (deps && deps.hardware) {
+        const hw = deps.hardware;
+        content += `
+          <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:8px; margin-bottom:14px;">
+            <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:8px 10px; text-align:center;">
+              <div style="font-size:10px; color:var(--text-muted); text-transform:uppercase;">CPU (${hw.cpu_cores || 8} Hilos)</div>
+              <div style="font-size:14px; font-weight:700; color:#38bdf8; margin-top:2px;">${hw.cpu_percent !== undefined ? hw.cpu_percent + '%' : 'Activo'}</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:8px 10px; text-align:center;">
+              <div style="font-size:10px; color:var(--text-muted); text-transform:uppercase;">Memoria RAM</div>
+              <div style="font-size:13.5px; font-weight:700; color:#f97316; margin-top:2px;">${hw.ram_used_gb || 0} / ${hw.ram_total_gb || 0} GB</div>
+              <div style="font-size:9.5px; color:var(--text-muted);">${hw.ram_percent || 0}% en uso</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:8px 10px; text-align:center;">
+              <div style="font-size:10px; color:var(--text-muted); text-transform:uppercase;">GPU / Video</div>
+              <div style="font-size:12px; font-weight:700; color:${hw.gpu_accelerated ? '#4ade80' : '#e2e8f0'}; margin-top:3px;">${hw.gpu_accelerated ? 'AMD AMF' : 'CPU libx264'}</div>
+              <div style="font-size:9.5px; color:var(--text-muted);">${hw.gpu_accelerated ? 'Acelerado' : 'Estándar'}</div>
+            </div>
+          </div>`;
+      }
+
+      // 3. Selector de Proveedor de IA Activo (Mejora 2)
+      const aiCfg = (deps && deps.ai_config) ? deps.ai_config : { provider: 'ollama', ollama_model: 'llama3.2:3b', has_gemini_key: false };
+      const curProv = aiCfg.provider || 'ollama';
+      content += `
+        <div style="margin-bottom:14px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:10px 12px;">
+          <div style="font-size:11px; font-weight:700; text-transform:uppercase; color:#a855f7; letter-spacing:0.5px; margin-bottom:8px;">
+            Motor de Detección & IA Activo:
+          </div>
+          <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px;">
+            <button type="button" class="preset-chip ${curProv === 'ollama' ? 'active' : ''}" onclick="changeAiProvider('ollama')" style="font-size:11px; padding:4px 10px; cursor:pointer;" title="IA offline ejecutada en tu equipo">🧠 Ollama Local</button>
+            <button type="button" class="preset-chip ${curProv === 'gemini' ? 'active' : ''}" onclick="changeAiProvider('gemini')" style="font-size:11px; padding:4px 10px; cursor:pointer;" title="IA rápida en la nube sin gastar RAM">⚡ Gemini Cloud</button>
+            <button type="button" class="preset-chip ${curProv === 'heuristic' ? 'active' : ''}" onclick="changeAiProvider('heuristic')" style="font-size:11px; padding:4px 10px; cursor:pointer;" title="Solo energía de audio y pausas">⚙️ Heurístico (Sin IA)</button>
+          </div>`;
+
+      if (curProv === 'gemini') {
+        content += `
+          <div style="margin-top:8px; padding-top:8px; border-top:1px solid rgba(255,255,255,0.06);">
+            <div style="font-size:11px; color:var(--text-muted); margin-bottom:4px;">Clave Google Gemini API:</div>
+            <div style="display:flex; gap:6px;">
+              <input type="password" id="gemini-key-input" placeholder="${aiCfg.has_gemini_key ? '•••••••••••••••• (Configurada)' : 'Pega tu clave AIzaSy...'}" class="input-glow" style="font-size:11px; padding:4px 8px; flex:1;">
+              <button type="button" class="btn-outline" onclick="saveGeminiKey()" style="font-size:11px; padding:4px 10px; cursor:pointer;">Guardar Key</button>
+            </div>
+            <div style="font-size:10px; color:var(--text-muted); margin-top:3px;">Modelo activo: <strong>${esc(aiCfg.gemini_model || 'gemini-2.5-flash')}</strong></div>
+          </div>`;
+      }
+      content += `</div>`;
+
+      // 4. Dependencias del Sistema
       let depsHtml = '';
       if (deps) {
-        const depRow = (ok, title, desc) => `
+        const depRow = (ok, title, desc, extraHtml = '') => `
           <div style="display:flex; align-items:flex-start; gap:10px; padding:8px 10px; margin-bottom:6px; background:${ok ? 'rgba(34, 197, 94, 0.08)' : 'rgba(239, 68, 68, 0.08)'}; border:1px solid ${ok ? 'rgba(34, 197, 94, 0.25)' : 'rgba(239, 68, 68, 0.25)'}; border-radius:8px;">
             <span style="font-weight:700; font-size:14px; color:${ok ? '#4ade80' : '#f87171'}; line-height:1.2;">${ok ? '✓' : '✗'}</span>
             <div style="flex:1; min-width:0;">
               <div style="font-size:12.5px; font-weight:600; color:#fff;">${esc(title)}</div>
               <div style="font-size:11.5px; color:${ok ? 'var(--text-muted)' : '#fca5a5'}; line-height:1.35; margin-top:2px;">${esc(desc)}</div>
+              ${extraHtml}
             </div>
           </div>`;
 
@@ -6689,12 +6749,31 @@
           deps.encoder?.is_hardware_accelerated ? 'Aceleración por GPU AMD AMF activa para renderizado rápido.' : 'Codificador por CPU activo (máxima compatibilidad).'
         );
 
-        // 3. Ollama
+        // 3. Ollama (con selector de modelo y botón Iniciar si está cerrado)
         const ollamaOk = !!(deps.ollama && deps.ollama.accessible && deps.ollama.model_loaded);
+        let ollamaExtra = '';
+        if (deps.ollama?.accessible && deps.ollama.installed_models && deps.ollama.installed_models.length > 1) {
+          const opts = deps.ollama.installed_models.map(m => `<option value="${esc(m)}" ${m === deps.ollama.model_name ? 'selected' : ''}>${esc(m)}</option>`).join('');
+          ollamaExtra = `
+            <div style="margin-top:6px; display:flex; align-items:center; gap:8px;">
+              <span style="font-size:11px; color:var(--text-muted);">Modelo activo:</span>
+              <select onchange="changeOllamaModel(this.value)" style="background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.2); border-radius:4px; color:#fff; font-size:11px; padding:2px 6px; cursor:pointer;">
+                ${opts}
+              </select>
+            </div>`;
+        } else if (!deps.ollama?.accessible) {
+          ollamaExtra = `
+            <div style="margin-top:8px; display:flex; gap:6px;">
+              <button type="button" class="btn-gradient" onclick="startOllamaService()" style="font-size:11px; padding:3px 10px; cursor:pointer;">▶ Iniciar Servicio Ollama</button>
+              <button type="button" class="btn-outline" onclick="openSettingsModal()" style="font-size:11px; padding:3px 8px; cursor:pointer;">↻ Reintentar</button>
+            </div>`;
+        }
+
         depsHtml += depRow(
           ollamaOk,
           `Ollama IA (${deps.ollama?.model_name || 'llama3.2:3b'})`,
-          deps.ollama?.message || (ollamaOk ? 'Ollama accesible con modelo cargado' : 'Ollama no responde: se usará el motor heurístico')
+          deps.ollama?.message || (ollamaOk ? 'Ollama accesible con modelo cargado' : 'Ollama no responde: se usará el motor heurístico'),
+          ollamaExtra
         );
 
         // 4. Whisper
@@ -6714,18 +6793,24 @@
         );
       }
 
-      let content = '';
       if (depsHtml) {
         content += `<div style="margin-bottom:14px;"><div style="font-size:11px; font-weight:700; text-transform:uppercase; color:#c084fc; letter-spacing:0.5px; margin-bottom:8px;">Estado de Requisitos y Dependencias:</div>${depsHtml}</div>`;
       }
-      content += `<div style="font-size:11px; font-weight:700; text-transform:uppercase; color:var(--text-muted); letter-spacing:0.5px; margin-bottom:6px;">Parámetros del Sistema:</div>`;
-      content += item('Modelo Whisper', c.whisper_model || 'small');
-      content += item('Dispositivo', c.device || 'CPU');
-      content += item('Precisión', c.compute_type || 'int8');
-      content += item('Hilos de CPU', c.cpu_threads || '8');
-      content += item('Codificador de video', c.encoder || 'libx264');
-      content += item('RAM máxima', (c.max_ram_gb || 18) + ' GB');
-      content += item('Carpeta de salida', 'data/outputs');
+
+      // 5. Prueba de Latencia / Ping de IA (Mejora 5)
+      content += `
+        <div style="margin-bottom:14px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:10px 12px;">
+          <div style="font-size:11px; font-weight:700; text-transform:uppercase; color:#38bdf8; letter-spacing:0.5px; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center;">
+            <span>Prueba de Latencia de IA (Ping)</span>
+            <span id="ai-ping-badge" style="font-size:10px; color:var(--text-muted);">Listo</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+            <div id="ai-ping-text" style="font-size:11.5px; color:var(--text-muted); flex:1;">Comprueba la velocidad del motor de IA seleccionado.</div>
+            <button type="button" id="btn-test-ai" class="btn-outline" onclick="runAiPingTest()" style="font-size:11px; padding:4px 10px; cursor:pointer; white-space:nowrap;">⚡ Probar Latencia</button>
+          </div>
+        </div>`;
+
+      // 6. Almacenamiento local
       if (storage && !storage.error) {
         content += `<div style="margin-top:14px; margin-bottom:14px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:10px 12px;">
           <div style="font-size:11px; font-weight:700; text-transform:uppercase; color:#38bdf8; letter-spacing:0.5px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
@@ -6743,11 +6828,103 @@
           </div>
         </div>`;
       }
+
+      content += `<div style="font-size:11px; font-weight:700; text-transform:uppercase; color:var(--text-muted); letter-spacing:0.5px; margin-bottom:6px;">Parámetros del Sistema:</div>`;
+      content += item('Modelo Whisper', c.whisper_model || 'small');
+      content += item('Dispositivo', c.device || 'CPU');
+      content += item('Precisión', c.compute_type || 'int8');
+      content += item('Hilos de CPU', c.cpu_threads || '8');
+      content += item('Codificador de video', c.encoder || 'libx264');
+      content += item('RAM máxima', (c.max_ram_gb || 18) + ' GB');
+      content += item('Carpeta de salida', 'data/outputs');
       content += '<div style="margin-top:10px; font-size:11px; color:var(--text-muted);">Ajustes configurables por variables de entorno: CLIP_HW_ENCODER, CLIP_WHISPER_MODEL, CLIP_MAX_UPLOAD_MB.</div>';
 
-      openInfoModal('Configuración y Diagnóstico (solo lectura)', content);
+      openInfoModal('Configuración y Diagnóstico del Sistema', content);
     } catch (e) {
       showToast('No se pudo cargar la configuración: ' + e.message);
+    }
+  }
+
+  async function startOllamaService() {
+    try {
+      showToast('Iniciando servicio Ollama en segundo plano...');
+      const res = await apiJson('/api/system/start_ollama', { method: 'POST' });
+      showToast(res.message || 'Ollama iniciado');
+      await openSettingsModal();
+    } catch (e) {
+      showToast('No se pudo iniciar Ollama: ' + e.message);
+    }
+  }
+
+  async function changeAiProvider(prov) {
+    try {
+      showToast(`Cambiando proveedor a ${prov}...`);
+      await apiJson('/api/system/ai_config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ provider: prov })
+      });
+      showToast(`Motor de IA cambiado a: ${prov === 'ollama' ? 'Ollama Local' : prov === 'gemini' ? 'Gemini Cloud' : 'Heurístico'}`);
+      await openSettingsModal();
+    } catch (e) {
+      showToast('Error al cambiar proveedor: ' + e.message);
+    }
+  }
+
+  async function changeOllamaModel(m) {
+    try {
+      await apiJson('/api/system/ai_config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ollama_model: m })
+      });
+      showToast(`Modelo Ollama cambiado a: ${m}`);
+      await openSettingsModal();
+    } catch (e) {
+      showToast('Error al cambiar modelo: ' + e.message);
+    }
+  }
+
+  async function saveGeminiKey() {
+    const input = document.getElementById('gemini-key-input');
+    const val = input ? input.value.trim() : '';
+    if (!val) {
+      showToast('Por favor escribe tu API Key');
+      return;
+    }
+    try {
+      await apiJson('/api/system/ai_config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ gemini_api_key: val })
+      });
+      showToast('Clave de Gemini API guardada con éxito');
+      await openSettingsModal();
+    } catch (e) {
+      showToast('Error al guardar clave: ' + e.message);
+    }
+  }
+
+  async function runAiPingTest() {
+    const btn = document.getElementById('btn-test-ai');
+    const badge = document.getElementById('ai-ping-badge');
+    const text = document.getElementById('ai-ping-text');
+    if (btn) btn.disabled = true;
+    if (badge) { badge.innerText = 'Probando...'; badge.style.color = '#fbbf24'; }
+    try {
+      const res = await apiJson('/api/system/test_ai', { method: 'POST' });
+      if (res.status === 'ok') {
+        if (badge) { badge.innerText = `${res.latency_ms} ms · ${res.model}`; badge.style.color = '#4ade80'; }
+        if (text) { text.innerHTML = `<span style="color:#4ade80;">✔ ${esc(res.message)}</span>`; }
+      } else {
+        if (badge) { badge.innerText = 'Error'; badge.style.color = '#f87171'; }
+        if (text) { text.innerHTML = `<span style="color:#f87171;">✗ ${esc(res.error || 'Error al conectar con la IA')}</span>`; }
+      }
+    } catch (e) {
+      if (badge) { badge.innerText = 'Error'; badge.style.color = '#f87171'; }
+      if (text) { text.innerHTML = `<span style="color:#f87171;">✗ ${esc(e.message)}</span>`; }
+    } finally {
+      if (btn) btn.disabled = false;
     }
   }
 

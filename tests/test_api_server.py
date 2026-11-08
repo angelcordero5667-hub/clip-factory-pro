@@ -492,6 +492,51 @@ def test_job_and_rerender_custom_highlight(tdb):
     assert re_job["options"]["custom_highlight"] == "&H00FF00FF"
 
 
+def test_ai_system_endpoints(tdb, monkeypatch):
+    # 1. Configuración de IA
+    r_get = client.get("/api/system/ai_config")
+    assert r_get.status_code == 200
+    cfg = r_get.json()
+    assert "provider" in cfg
+
+    # 2. Actualizar a Gemini
+    r_post = client.post("/api/system/ai_config", json={
+        "provider": "gemini",
+        "gemini_api_key": "AIzaSyFakeKey12345",
+        "gemini_model": "gemini-2.5-flash"
+    })
+    assert r_post.status_code == 200
+    assert r_post.json()["config"]["provider"] == "gemini"
+    assert r_post.json()["config"]["has_gemini_key"] is True
+
+    # 3. Test AI Ping con Heurístico
+    client.post("/api/system/ai_config", json={"provider": "heuristic"})
+    r_ping = client.post("/api/system/test_ai")
+    assert r_ping.status_code == 200
+    ping_data = r_ping.json()
+    assert ping_data["status"] == "ok"
+    assert ping_data["provider"] == "heuristic"
+    assert ping_data["latency_ms"] <= 10
+
+    # 4. Ollama Models mock
+    class MockResp:
+        status_code = 200
+        def json(self):
+            return {"models": [{"name": "llama3.2:3b", "size": 2147483648}]}
+
+    monkeypatch.setattr(api_server.requests, "get", lambda *a, **k: MockResp())
+    r_models = client.get("/api/system/ollama_models")
+    assert r_models.status_code == 200
+    assert r_models.json()["available"] is True
+    assert len(r_models.json()["models"]) == 1
+    assert r_models.json()["models"][0]["name"] == "llama3.2:3b"
+
+    # 5. Start Ollama (already running)
+    r_start = client.post("/api/system/start_ollama")
+    assert r_start.status_code == 200
+    assert r_start.json()["status"] == "already_running"
+
+
 
 
 
