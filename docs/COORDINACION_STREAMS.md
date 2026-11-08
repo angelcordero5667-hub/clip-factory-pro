@@ -27,6 +27,34 @@ Todo es **aditivo** en `src/web/index.html`, para que ambos podamos seguir edita
 - Si añades HTML nuevo: usa `<button>`/`<a href>` o pon `onclick` en un `div` (el script le añade rol y teclado), y no uses texto por debajo de 11.5 px ni gris más claro que `--text-muted`.
 - Pendiente de Antigravity: el panel FFmpeg aún muestra "FPS 120" fijo durante el renderizado.
 
+## Rediseño "Clip Factory AI" (panel Crear + menú) — ANÁLISIS DE CLAUDE, aún sin implementar
+**✅ IMPLEMENTADO por Claude (08-nov ~03:10).** Qué cambió en `src/web/index.html`: (1) menú lateral nuevo (`#sidebar`: logo "Clip Factory AI", Inicio / Mis proyectos / Historial, grupo "Herramientas", Configuración, Ayuda y tarjeta "Actualiza a Pro" informativa); (2) el modal "Crear clips" se eliminó y su contenido vive como panel `#crear-panel` al inicio de Inicio, **con los mismos IDs y las mismas funciones**; (3) bloque `<style id="design-v3">` y script final que redefine `openCrearModal/closeCrearModal/switchModalTab`, añade `goToCrear`, `showProInfo` y el resumen en vivo. Copia previa en el scratchpad de Claude (`index.before_v3.html`) y en git (HEAD). Verificado en navegador a 1440/1600 px y móvil: envío con todas las opciones, navegación del menú, subida de archivo, sin errores en consola. **Antigravity: ya puedes editar `index.html` de nuevo; relee el archivo antes y respeta los IDs de la tabla de abajo.**
+
+**DECISIÓN DEL USUARIO (08-nov ~03:02): lo implementa Claude.** Antigravity: por favor **no edites `src/web/index.html` mientras este rediseño esté en curso** (sidebar, panel Crear, estilos de esos bloques). Tus scripts `inspect_*.py` pueden borrarse cuando termines de usarlos. Claude actualizará este apartado al terminar.
+(Antes de la decisión: Claude había analizado sin tocar nada porque los `inspect_sidebar/inicio.py` sugerían que Antigravity hacía lo mismo.)
+
+**Hallazgo clave:** todos los controles de la maqueta ya existen y funcionan; el rediseño es solo de distribución/estilo, no hacen falta botones nuevos.
+| Control de la maqueta | Ya existe como | Backend |
+|---|---|---|
+| URL + "Modo rápido" | `#yt-url-input`, `#fast-mode-check` | `fast` |
+| Desde / Hasta (Surgical Slice) | `#stream-start-time`, `#stream-end-time` | `time_range_start/end` |
+| Layout Auto / Gaming / Desenfoque | `selectLayoutMode()`, `#layout-card-*` | `layout` |
+| Modo Turbo / Calidad Studio | `selectSpeedMode()`, `#speed-card-*` | `speed_mode` |
+| Auto-Hook Zoom | `#hook-zoom-check` | `hook_zoom` |
+| Formatos 9:16 / 1:1 / 16:9 | `selectFormat()` | `aspect_ratio` |
+| 5 estilos de subtítulos | `selectSubStyle(el,'hormozi'|'beast'|'bounce'|'glow'|'minimal')` | `subtitle_style` |
+| Marca de agua / Creador | `#watermark-input` | `watermark_text` |
+| Enfoque IA del clip | `#focus-prompt-input` | `focus_prompt` |
+| Cantidad de clips | `#clips-count-val` + range | `max_clips` |
+| PROCESAR VIDEO | `#btn-submit-process` → `submitCreation()` | `/api/process` |
+
+**Sin respaldo real (no dibujar como botón activo, regla 9 del encargo):**
+- *Posición de la marca de agua* (el desplegable "Esquina superior"): hoy solo hay texto y va arriba; mostrarlo como etiqueta fija, no como selector, salvo que se amplíe `subtitles.py`.
+- *Interruptor de tema claro (sol)*: no existe tema claro.
+- *"Actualizar a Pro"*: no hay planes ni pagos; solo puede ser una tarjeta informativa "próximamente".
+
+**Para no romper nada al mover el panel de modal a página:** conservar los IDs de arriba; `openCrearModal()` debe pasar a `switchView('inicio')` + foco en la URL (hay ~20 botones que la llaman); `closeCrearModal()` y `closeAllModals()` no deben fallar si `#modal-crear` ya no existe; la subida de archivo (`triggerLocalFileUpload()`) necesita un botón visible junto a la URL; conservar las vistas Editor, Biblioteca, Analytics, Subtítulos y Plantillas (agruparlas en "Herramientas").
+
 ## Zonas reservadas (no editar sin avisar aquí)
 - **Antigravity:** `framing.py`, layout gaming, sección de streams del HTML, `find_hype_moments`.
 - **Claude:** `stream_guard.py`, `tests/test_stream_guard.py`, `tests/test_security.py`, `trimming.py`, `audio_energy.compute_energy_profile`.

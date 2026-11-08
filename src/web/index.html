@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Clip Factory Pro — Estudio Viral con IA</title>
+<title>Clip Factory AI — Crea Clips Virales con IA</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%23a855f7'/%3E%3Cpath d='M9 7l8 5-8 5z' fill='%23fff'/%3E%3C/svg%3E">
 <meta name="color-scheme" content="dark">
 <style>
@@ -1673,6 +1673,1678 @@
       transition-duration: .001ms !important; scroll-behavior: auto !important;
     }
   }
+
+  /* ==========================================================================
+     REDiseño PROFESIONAL SAAS — CLIP FACTORY AI (TEMA FUTURISTA / NEÓN)
+     ========================================================================== */
+  :root {
+    --bg-dark-app: #080911;
+    --bg-dark-sidebar: #0a0b14;
+    --bg-card-glass: rgba(18, 20, 36, 0.65);
+    --border-card-glass: rgba(255, 255, 255, 0.08);
+    --border-card-hover: rgba(168, 85, 247, 0.3);
+    
+    --neon-purple-glow: rgba(168, 85, 247, 0.45);
+    --neon-blue-glow: rgba(99, 102, 241, 0.45);
+    --neon-cyan-glow: rgba(34, 211, 238, 0.45);
+    --neon-pink-glow: rgba(236, 72, 153, 0.45);
+    --neon-amber-glow: rgba(245, 158, 11, 0.45);
+
+    --grad-primary-btn: linear-gradient(90deg, #8b5cf6 0%, #d946ef 50%, #3b82f6 100%);
+    --grad-active-nav: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+  }
+
+  body {
+    background-color: var(--bg-dark-app) !important;
+    background-image: 
+      radial-gradient(circle at 10% 10%, rgba(139, 92, 246, 0.08) 0%, transparent 40%),
+      radial-gradient(circle at 90% 80%, rgba(59, 130, 246, 0.08) 0%, transparent 40%),
+      radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 0.5) 0%, transparent 100%) !important;
+    color: #e2e8f0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+
+  /* SIDEBAR REDESIGN */
+  .sidebar {
+    width: 250px !important;
+    background: #090a14 !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.06) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 20px 14px 20px 14px !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    bottom: 0 !important;
+    height: 100vh !important;
+    box-sizing: border-box !important;
+    background-image: radial-gradient(circle at 10% 98%, rgba(147, 51, 234, 0.25) 0%, transparent 65%) !important;
+    z-index: 100 !important;
+  }
+
+  .main-wrapper {
+    margin-left: 250px !important;
+    min-height: 100vh !important;
+    display: flex !important;
+    flex-direction: column !important;
+    box-sizing: border-box !important;
+  }
+
+  .logo-box {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    padding: 4px 6px 20px 6px !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+    margin-bottom: 16px !important;
+    cursor: pointer !important;
+  }
+  .logo-icon-neon {
+    width: 36px !important;
+    height: 36px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    filter: drop-shadow(0 0 10px rgba(168, 85, 247, 0.7));
+  }
+  .logo-titles {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 2px !important;
+  }
+  .logo-title-main {
+    font-size: 16px !important;
+    font-weight: 800 !important;
+    color: #ffffff !important;
+    letter-spacing: -0.3px !important;
+    font-family: inherit !important;
+  }
+  .logo-subtitle-desc {
+    font-size: 11px !important;
+    color: #818cf8 !important;
+    font-weight: 500 !important;
+  }
+
+  .nav-list {
+    list-style: none !important;
+    padding: 0 !important;
+    margin: 0 0 auto 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 6px !important;
+  }
+  .nav-item {
+    border-radius: 12px !important;
+    transition: all 0.2s ease !important;
+  }
+  .nav-item button {
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    padding: 12px 14px !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 12px !important;
+    color: #94a3b8 !important;
+    font-size: 13.5px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    text-align: left !important;
+  }
+  .nav-item button svg {
+    width: 18px !important;
+    height: 18px !important;
+    stroke: currentColor !important;
+    stroke-width: 2 !important;
+    fill: none !important;
+  }
+  .nav-item:hover button {
+    background: rgba(255, 255, 255, 0.04) !important;
+    color: #ffffff !important;
+  }
+  .nav-item.active button {
+    background: var(--grad-active-nav) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(192, 132, 252, 0.4) !important;
+    box-shadow: 0 4px 20px rgba(124, 58, 237, 0.4) !important;
+  }
+
+  /* SIDEBAR PRO UPGRADE CARD */
+  .sidebar-pro-card {
+    background: linear-gradient(180deg, rgba(30, 27, 75, 0.5) 0%, rgba(15, 23, 42, 0.75) 100%) !important;
+    border: 1px solid rgba(139, 92, 246, 0.3) !important;
+    border-radius: 16px !important;
+    padding: 18px 14px !important;
+    margin-top: 20px !important;
+    text-align: center !important;
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.15) !important;
+  }
+  .pro-bolt-icon {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 10px !important;
+    background: rgba(34, 211, 238, 0.1) !important;
+    margin-bottom: 8px !important;
+    filter: drop-shadow(0 0 8px rgba(34, 211, 238, 0.5)) !important;
+  }
+  .pro-card-title {
+    font-size: 13.5px !important;
+    font-weight: 700 !important;
+    color: #ffffff !important;
+    margin-bottom: 4px !important;
+  }
+  .pro-card-sub {
+    font-size: 11px !important;
+    color: #94a3b8 !important;
+    line-height: 1.3 !important;
+    margin-bottom: 14px !important;
+  }
+  .pro-card-btn {
+    width: 100% !important;
+    padding: 10px 14px !important;
+    border-radius: 9999px !important;
+    background: linear-gradient(90deg, #9333ea, #6366f1) !important;
+    border: none !important;
+    color: #ffffff !important;
+    font-size: 12.5px !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    box-shadow: 0 0 16px rgba(147, 51, 234, 0.45) !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+  }
+  .pro-card-btn:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 0 22px rgba(147, 51, 234, 0.65) !important;
+  }
+
+  /* STUDIO DASHBOARD (VIEW INICIO) */
+  #view-inicio {
+    padding: 24px 36px 40px 36px !important;
+    max-width: 1360px !important;
+    margin: 0 auto !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* FILA 1: URL BAR & THEME / AVATAR */
+  .studio-row-1 {
+    display: flex !important;
+    align-items: center !important;
+    gap: 14px !important;
+    margin-bottom: 6px !important;
+  }
+  .studio-url-box {
+    flex: 1 !important;
+    display: flex !important;
+    align-items: center !important;
+    position: relative !important;
+    background: rgba(15, 17, 30, 0.85) !important;
+    border: 1px solid rgba(99, 102, 241, 0.45) !important;
+    border-radius: 14px !important;
+    padding: 4px 6px 4px 18px !important;
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.15) !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+  }
+  .studio-url-box:focus-within {
+    border-color: #a855f7 !important;
+    box-shadow: 0 0 25px rgba(168, 85, 247, 0.35) !important;
+  }
+  .studio-url-box svg.link-ico {
+    width: 20px !important;
+    height: 20px !important;
+    stroke: #818cf8 !important;
+    stroke-width: 2 !important;
+    fill: none !important;
+    flex-shrink: 0 !important;
+    margin-right: 12px !important;
+  }
+  .studio-url-box input {
+    flex: 1 !important;
+    background: transparent !important;
+    border: none !important;
+    outline: none !important;
+    color: #ffffff !important;
+    font-size: 14px !important;
+    padding: 10px 0 !important;
+  }
+  .studio-url-box input::placeholder {
+    color: #64748b !important;
+  }
+  .studio-upload-chip {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    padding: 6px 14px !important;
+    background: rgba(99, 102, 241, 0.15) !important;
+    border: 1px solid rgba(99, 102, 241, 0.35) !important;
+    border-radius: 10px !important;
+    color: #a5b4fc !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    flex-shrink: 0 !important;
+  }
+  .studio-upload-chip:hover {
+    background: rgba(99, 102, 241, 0.25) !important;
+    color: #ffffff !important;
+  }
+  .studio-top-actions {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+  }
+  .studio-theme-btn {
+    width: 42px !important;
+    height: 42px !important;
+    border-radius: 50% !important;
+    background: rgba(255, 255, 255, 0.04) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    color: #cbd5e1 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    transition: background 0.2s ease !important;
+  }
+  .studio-theme-btn:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: #ffffff !important;
+  }
+  .studio-user-avatar {
+    width: 42px !important;
+    height: 42px !important;
+    border-radius: 50% !important;
+    background: linear-gradient(135deg, #6366f1, #a855f7) !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    font-size: 15px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    box-shadow: 0 0 16px rgba(99, 102, 241, 0.4) !important;
+  }
+
+  .studio-subrow-fast {
+    display: flex !important;
+    align-items: center !important;
+    gap: 14px !important;
+    margin-bottom: 16px !important;
+    padding-left: 4px !important;
+  }
+  .studio-checkbox-clean {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    font-size: 12px !important;
+    color: #94a3b8 !important;
+    cursor: pointer !important;
+  }
+  .studio-checkbox-clean input[type="checkbox"] {
+    accent-color: #8b5cf6 !important;
+    cursor: pointer !important;
+  }
+
+  /* GLASSMORPHIC STUDIO CARDS */
+  .studio-grid-2col {
+    display: grid !important;
+    grid-template-columns: 1.18fr 0.82fr !important;
+    gap: 16px !important;
+    margin-bottom: 16px !important;
+  }
+  .studio-card-box {
+    background: rgba(18, 20, 36, 0.65) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 16px !important;
+    padding: 16px 20px !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35) !important;
+    box-sizing: border-box !important;
+  }
+
+  .studio-card-header-row {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    margin-bottom: 12px !important;
+  }
+  .studio-card-title-neon {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    font-size: 13.5px !important;
+    font-weight: 700 !important;
+    color: #ffffff !important;
+  }
+  .studio-card-badge-info {
+    font-size: 11px !important;
+    color: #94a3b8 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    cursor: help !important;
+  }
+
+  /* SLICE INPUTS */
+  .slice-inputs-row {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+    margin-bottom: 8px !important;
+  }
+  .slice-field {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 4px !important;
+  }
+  .slice-field label {
+    font-size: 11px !important;
+    color: #94a3b8 !important;
+  }
+  .slice-input-wrap {
+    position: relative !important;
+    display: flex !important;
+    align-items: center !important;
+    background: rgba(11, 13, 24, 0.7) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 10px !important;
+    padding: 0 12px 0 32px !important;
+    height: 38px !important;
+  }
+  .slice-input-wrap svg {
+    position: absolute !important;
+    left: 10px !important;
+    width: 14px !important;
+    height: 14px !important;
+    stroke: #64748b !important;
+    stroke-width: 2 !important;
+    fill: none !important;
+  }
+  .slice-input-wrap input {
+    width: 100% !important;
+    background: transparent !important;
+    border: none !important;
+    outline: none !important;
+    color: #ffffff !important;
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: 12px !important;
+  }
+  .stream-alert-hint {
+    font-size: 11px !important;
+    color: #f59e0b !important;
+    line-height: 1.4 !important;
+    margin-bottom: 12px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+  }
+
+  /* LAYOUT BUTTONS */
+  .layout-label {
+    font-size: 11.5px !important;
+    color: #94a3b8 !important;
+    margin-bottom: 6px !important;
+  }
+  .layout-buttons-group {
+    display: grid !important;
+    grid-template-columns: 1.1fr 1.25fr 1fr !important;
+    gap: 8px !important;
+  }
+  .layout-card {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    padding: 9px 10px !important;
+    border-radius: 10px !important;
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    color: #94a3b8 !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    user-select: none !important;
+  }
+  .layout-card svg {
+    width: 14px !important;
+    height: 14px !important;
+    stroke: currentColor !important;
+    stroke-width: 2 !important;
+    fill: none !important;
+  }
+  .layout-card:hover {
+    background: rgba(255, 255, 255, 0.06) !important;
+    color: #ffffff !important;
+  }
+  .layout-card.active {
+    background: rgba(99, 102, 241, 0.18) !important;
+    border: 2px solid #6366f1 !important;
+    box-shadow: 0 0 16px rgba(99, 102, 241, 0.4) !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+  }
+
+  /* SPEED CARDS (TURBO VS STUDIO) */
+  .speed-cards-group {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+    margin-bottom: 14px !important;
+  }
+  .speed-card-item {
+    padding: 12px 14px !important;
+    border-radius: 12px !important;
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    user-select: none !important;
+  }
+  .speed-card-item:hover {
+    background: rgba(255, 255, 255, 0.06) !important;
+  }
+  .speed-card-item.active {
+    background: rgba(168, 85, 247, 0.12) !important;
+    border: 2px solid #a855f7 !important;
+    box-shadow: 0 0 20px rgba(168, 85, 247, 0.45) !important;
+  }
+  .speed-title-line {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    color: #ffffff !important;
+    margin-bottom: 2px !important;
+  }
+  .speed-desc-line {
+    font-size: 10.5px !important;
+    color: #94a3b8 !important;
+  }
+  .retention-check-line {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    font-size: 12px !important;
+    color: #ffffff !important;
+    cursor: pointer !important;
+    margin-top: 4px !important;
+  }
+  .retention-check-line input[type="checkbox"] {
+    accent-color: #22d3ee !important;
+    cursor: pointer !important;
+    width: 15px !important;
+    height: 15px !important;
+  }
+
+  /* FILA 3: FORMATOS & ESTILOS DE SUBTÍTULOS */
+  .studio-grid-row3 {
+    display: grid !important;
+    grid-template-columns: 0.36fr 0.64fr !important;
+    gap: 16px !important;
+    margin-bottom: 16px !important;
+  }
+  .format-options-row {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr 1fr !important;
+    gap: 8px !important;
+  }
+  .format-card {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    padding: 10px 8px !important;
+    border-radius: 12px !important;
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    color: #94a3b8 !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    user-select: none !important;
+  }
+  .format-card svg {
+    width: 15px !important;
+    height: 15px !important;
+    stroke: currentColor !important;
+    stroke-width: 2 !important;
+    fill: none !important;
+  }
+  .format-card:hover {
+    background: rgba(255, 255, 255, 0.06) !important;
+    color: #ffffff !important;
+  }
+  .format-card.active {
+    background: rgba(245, 158, 11, 0.12) !important;
+    border: 2px solid #f59e0b !important;
+    box-shadow: 0 0 16px rgba(245, 158, 11, 0.35) !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+  }
+
+  /* SUBTITLE CARDS (5 PREVIEWS) */
+  .subtitle-cards-row {
+    display: grid !important;
+    grid-template-columns: repeat(5, 1fr) !important;
+    gap: 8px !important;
+  }
+  .sub-style-card {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 8px 6px !important;
+    border-radius: 12px !important;
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    user-select: none !important;
+    text-align: center !important;
+  }
+  .sub-style-card:hover {
+    background: rgba(255, 255, 255, 0.06) !important;
+  }
+  .sub-style-card.active {
+    background: rgba(236, 72, 153, 0.1) !important;
+    border: 2px solid #ec4899 !important;
+    box-shadow: 0 0 18px rgba(236, 72, 153, 0.45) !important;
+  }
+  .sub-badge-preview {
+    font-size: 11px !important;
+    font-weight: 800 !important;
+    line-height: 1.2 !important;
+    margin-bottom: 4px !important;
+  }
+  .sub-badge-neon { color: #ec4899 !important; text-shadow: 0 0 10px rgba(236, 72, 153, 0.7); }
+  .sub-badge-lime { color: #84cc16 !important; text-shadow: 0 0 10px rgba(132, 204, 22, 0.7); }
+  .sub-badge-bounce { color: #f59e0b !important; text-shadow: 0 0 10px rgba(245, 158, 11, 0.7); }
+  .sub-badge-glow { color: #06b6d4 !important; text-shadow: 0 0 10px rgba(6, 182, 212, 0.7); }
+  .sub-badge-minimal { color: #94a3b8 !important; }
+  .sub-name-label {
+    font-size: 10px !important;
+    color: #94a3b8 !important;
+  }
+
+  /* FILA 4: MARCA DE AGUA, ENFOQUE IA, SLIDER */
+  .studio-row-4-card {
+    background: rgba(18, 20, 36, 0.65) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 16px !important;
+    padding: 14px 20px !important;
+    margin-bottom: 16px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35) !important;
+  }
+  .studio-form-line {
+    display: grid !important;
+    grid-template-columns: 240px 1fr 140px !important;
+    gap: 12px !important;
+    align-items: center !important;
+  }
+  .studio-form-label {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    font-size: 12.5px !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
+  }
+  .studio-form-label svg {
+    width: 16px !important;
+    height: 16px !important;
+    stroke: currentColor !important;
+    stroke-width: 2 !important;
+    fill: none !important;
+    flex-shrink: 0 !important;
+  }
+  .studio-inline-input {
+    width: 100% !important;
+    height: 38px !important;
+    background: rgba(11, 13, 24, 0.7) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 10px !important;
+    padding: 0 12px !important;
+    color: #ffffff !important;
+    font-size: 12.5px !important;
+    outline: none !important;
+    transition: border-color 0.2s ease !important;
+    box-sizing: border-box !important;
+  }
+  .studio-inline-input:focus {
+    border-color: #a855f7 !important;
+  }
+  .studio-select-dropdown {
+    height: 38px !important;
+    background: rgba(11, 13, 24, 0.7) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 10px !important;
+    padding: 0 10px !important;
+    color: #94a3b8 !important;
+    font-size: 11.5px !important;
+    outline: none !important;
+    cursor: pointer !important;
+    box-sizing: border-box !important;
+  }
+  .studio-range-wrap {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    grid-column: 2 / span 2 !important;
+  }
+  .studio-range-slider {
+    flex: 1 !important;
+    accent-color: #8b5cf6 !important;
+    cursor: pointer !important;
+  }
+  .studio-badge-count {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 8px !important;
+    background: rgba(139, 92, 246, 0.15) !important;
+    border: 1px solid rgba(139, 92, 246, 0.35) !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    font-size: 13px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  /* FILA 5: BOTÓN PRINCIPAL PROCESAR VIDEO */
+  .studio-btn-process {
+    width: 100% !important;
+    height: 52px !important;
+    border-radius: 9999px !important;
+    background: var(--grad-primary-btn) !important;
+    border: none !important;
+    color: #ffffff !important;
+    font-size: 15px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.5px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 10px !important;
+    cursor: pointer !important;
+    box-shadow: 0 0 25px rgba(168, 85, 247, 0.5) !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease !important;
+    margin-bottom: 24px !important;
+  }
+  .studio-btn-process:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 0 35px rgba(168, 85, 247, 0.7) !important;
+    filter: brightness(1.08) !important;
+  }
+  .studio-btn-process svg {
+    width: 18px !important;
+    height: 18px !important;
+    fill: currentColor !important;
+  }
+
+</style>
+<style id="design-v3">
+  /* ==========================================================================
+     DISEÑO v3 — rediseño "Clip Factory AI": menú lateral + panel Crear horizontal.
+     Bloque añadido; sobrescribe lo anterior sin borrar reglas ni funciones.
+     ========================================================================== */
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+
+  /* ---------- Menú lateral ---------- */
+  .sidebar { width: 252px; background: linear-gradient(180deg, #0d0f1b 0%, #090b14 100%); gap: 0; }
+  .logo-box { gap: 12px; padding: 4px 6px 18px; margin-bottom: 16px; }
+  .logo-icon.logo-icon-lg {
+    width: 46px; height: 46px; border-radius: 14px;
+    background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 50%, #22d3ee 100%);
+    box-shadow: 0 0 22px rgba(99,102,241,.65), 0 0 44px rgba(168,85,247,.3);
+  }
+  .logo-text { display: flex; flex-direction: column; min-width: 0; }
+  .logo-title { font-size: 16px; line-height: 1.15; }
+  .logo-sub { font-size: 11.5px; color: var(--text-secondary); margin-top: 2px; }
+  .nav-list { gap: 4px; flex-grow: 0; }
+  .nav-group-label {
+    list-style: none; font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--text-muted); padding: 16px 12px 6px;
+  }
+  .nav-item button { padding: 11px 14px; font-size: 14px; border-radius: 12px; min-height: 40px; }
+  .nav-item.active button {
+    background: linear-gradient(135deg, rgba(99,102,241,.55), rgba(168,85,247,.42));
+    box-shadow: 0 0 20px rgba(99,102,241,.35), inset 0 0 0 1px rgba(168,85,247,.55);
+  }
+  .nav-item.active svg { color: #fff; }
+  .sidebar-bottom { margin-top: auto; padding-top: 14px; border-top: 1px solid var(--border-subtle); display: flex; flex-direction: column; gap: 14px; }
+  .pro-card {
+    position: relative; overflow: hidden; text-align: center; padding: 16px 14px;
+    border-radius: 16px; border: 1px solid rgba(139,92,246,.45);
+    background: linear-gradient(160deg, rgba(99,102,241,.28), rgba(168,85,247,.12) 60%, rgba(34,211,238,.08));
+    box-shadow: 0 0 26px rgba(99,102,241,.22), inset 0 1px 0 rgba(255,255,255,.08);
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+  }
+  .pro-bolt { width: 26px; height: 26px; fill: #818cf8; filter: drop-shadow(0 0 8px rgba(129,140,248,.9)); }
+  .pro-card strong { font-size: 15px; color: #fff; margin-top: 2px; }
+  .pro-card p { font-size: 12px; color: var(--text-secondary); line-height: 1.4; margin-bottom: 8px; }
+  .pro-btn {
+    width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 38px;
+    border: 0; border-radius: 999px; cursor: pointer; color: #fff; font-weight: 600; font-size: 13px;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6); box-shadow: 0 0 18px rgba(99,102,241,.55);
+    transition: transform .2s ease, box-shadow .2s ease;
+  }
+  .pro-btn:hover { transform: translateY(-1px); box-shadow: 0 0 26px rgba(139,92,246,.8); }
+  .pro-btn svg { width: 15px; height: 15px; fill: #fff; }
+
+  /* ---------- Panel Crear ---------- */
+  .crear-panel { display: flex; flex-direction: column; gap: 14px; margin: 4px 0 28px; }
+  .crear-panel svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+
+  .cp-card {
+    background: linear-gradient(160deg, rgba(255,255,255,.05), rgba(255,255,255,.015));
+    -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+    border: 1px solid var(--border-subtle); border-radius: 18px; padding: 14px 18px;
+    box-shadow: 0 10px 34px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.07);
+    animation: cpIn .4s ease both;
+  }
+  @keyframes cpIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  .cp-card-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+  .cp-card-head h3 { display: flex; align-items: center; gap: 9px; font-size: 14.5px; font-weight: 700; color: #fff; }
+  .cp-card-head h3 small { font-weight: 500; color: var(--text-secondary); font-size: 12.5px; }
+  .cp-card-head .ico-h { color: var(--neon-cyan); }
+  .cp-streams .ico-h { color: #c084fc; }
+  .cp-tag {
+    font-size: 12px; color: var(--text-secondary); border: 1px solid var(--border-subtle); border-radius: 999px;
+    padding: 3px 10px; cursor: help;
+  }
+
+  /* Fila 1: URL */
+  .cp-row1 { display: flex; flex-direction: column; gap: 8px; }
+  .url-bar {
+    display: flex; align-items: center; gap: 12px; padding: 6px 8px 6px 18px; border-radius: 18px;
+    background: rgba(9,11,22,.85); border: 1px solid rgba(99,102,241,.7);
+    box-shadow: 0 0 0 1px rgba(168,85,247,.25), 0 0 26px rgba(99,102,241,.38);
+    transition: box-shadow .2s ease, border-color .2s ease;
+  }
+  .url-bar:focus-within { border-color: var(--neon-cyan); box-shadow: 0 0 0 2px rgba(34,211,238,.5), 0 0 30px rgba(34,211,238,.35); }
+  .url-bar .url-ico { color: #818cf8; width: 22px; height: 22px; }
+  .url-bar input { flex: 1; min-width: 0; background: transparent; border: 0; outline: none; color: #fff; font-size: 15.5px; padding: 12px 0; }
+  .url-bar input::placeholder { color: var(--text-muted); }
+  .url-attach {
+    display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 16px; border-radius: 12px; cursor: pointer;
+    background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); color: #fff; font-size: 13px; font-weight: 600;
+    transition: background .2s ease, border-color .2s ease;
+  }
+  .url-attach:hover { background: rgba(99,102,241,.25); border-color: rgba(99,102,241,.7); }
+  .cp-row1-meta { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px 18px; padding: 0 4px; }
+  .check-row { display: inline-flex; align-items: center; gap: 10px; font-size: 13.5px; color: #fff; cursor: pointer; user-select: none; }
+  .check-row em { font-style: normal; color: var(--text-secondary); }
+  .check-row input { width: 18px; height: 18px; accent-color: var(--neon-purple); cursor: pointer; flex-shrink: 0; }
+  .check-row-lg { margin-top: 12px; }
+  .check-row-lg input { accent-color: var(--neon-cyan); }
+
+  /* Fila 2 */
+  .cp-grid2 { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 14px; }
+  .cp-streams { border-color: rgba(139,92,246,.42); background: linear-gradient(160deg, rgba(99,102,241,.14), rgba(168,85,247,.05)); }
+  .cp-speed { border-color: rgba(34,211,238,.34); background: linear-gradient(160deg, rgba(34,211,238,.11), rgba(16,185,129,.03)); }
+  .cp-time-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 8px; }
+  .time-field label { display: block; font-size: 13px; color: #fff; margin-bottom: 5px; font-weight: 500; }
+  .time-field label small { color: var(--text-secondary); font-weight: 400; }
+  .time-input { position: relative; }
+  .time-input svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: var(--text-secondary); pointer-events: none; }
+  .time-input input {
+    width: 100%; background: rgba(9,11,22,.8); border: 1px solid rgba(255,255,255,.14); border-radius: 12px;
+    color: #fff; font-size: 14px; padding: 10px 12px 10px 36px; outline: none; font-variant-numeric: tabular-nums;
+    transition: border-color .2s ease, box-shadow .2s ease;
+  }
+  .time-input input:focus { border-color: #818cf8; box-shadow: 0 0 0 2px rgba(129,140,248,.35); }
+  .time-input input::placeholder { color: var(--text-muted); }
+  .cp-hint { display: flex; align-items: flex-start; gap: 8px; font-size: 12.5px; line-height: 1.45; color: #fbbf24; margin-bottom: 10px; }
+  .cp-hint svg { width: 14px; height: 14px; margin-top: 2px; fill: #fbbf24; stroke: none; }
+  .cp-sub-label { font-size: 13px; color: #fff; font-weight: 500; margin-bottom: 6px; }
+  .cp-choice3 { display: grid; grid-template-columns: 1fr 1.2fr 1fr; gap: 8px; }
+  .cp-choice2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  /* Tarjetas de elección (layout, velocidad): estado claro */
+  .crear-panel .layout-card {
+    display: flex; align-items: center; justify-content: center; gap: 9px; min-height: 46px; padding: 9px 12px;
+    background: rgba(15,18,32,.75); border: 1px solid rgba(255,255,255,.13); border-radius: 14px;
+    font-size: 13.5px; font-weight: 600; color: #e2e8f0; cursor: pointer;
+    transition: border-color .18s ease, box-shadow .18s ease, background .18s ease, transform .18s ease;
+  }
+  .crear-panel .layout-card:hover { border-color: rgba(129,140,248,.7); transform: translateY(-1px); box-shadow: none; }
+  .crear-panel .layout-card.active {
+    border-color: #6366f1; background: linear-gradient(135deg, rgba(99,102,241,.32), rgba(139,92,246,.18)); color: #fff;
+    box-shadow: 0 0 0 1px #6366f1, 0 0 20px rgba(99,102,241,.55);
+  }
+  .crear-panel .speed-card { justify-content: flex-start; padding: 12px 16px; min-height: 62px; }
+  .crear-panel .speed-card span { display: flex; flex-direction: column; text-align: left; gap: 2px; }
+  .crear-panel .speed-card i { font-style: normal; font-weight: 400; font-size: 12px; color: var(--text-secondary); }
+  .crear-panel .speed-card.active { border-color: #a855f7; box-shadow: 0 0 0 1px #a855f7, 0 0 22px rgba(168,85,247,.6); background: linear-gradient(135deg, rgba(168,85,247,.3), rgba(99,102,241,.14)); }
+  .crear-panel .speed-card svg { width: 22px; height: 22px; color: #fbbf24; }
+  #speed-card-studio svg { color: #22d3ee; }
+
+  /* Resumen en vivo (rellena el hueco con datos reales) */
+  .cp-summary { margin-top: 14px; padding: 10px 14px; border-radius: 14px; background: rgba(9,11,22,.55); border: 1px solid rgba(255,255,255,.08); }
+  .cp-sum-title { font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 6px; }
+  .cp-summary dl { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px 14px; }
+  .cp-summary dl > div { min-width: 0; }
+  .cp-summary dt { font-size: 11.5px; color: var(--text-muted); }
+  .cp-summary dd { font-size: 13px; color: #fff; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* Fila 3 */
+  .cp-row3 { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.5fr); gap: 14px; }
+  .crear-panel .format-options { gap: 10px; }
+  .crear-panel .format-card {
+    display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 64px; padding: 10px;
+    background: rgba(15,18,32,.75); border: 1px solid rgba(255,255,255,.13); border-radius: 14px; font-size: 15px; font-weight: 700;
+    transition: border-color .18s ease, box-shadow .18s ease, background .18s ease, transform .18s ease;
+  }
+  .crear-panel .format-card:hover { border-color: rgba(249,115,22,.7); transform: translateY(-1px); box-shadow: none; }
+  .crear-panel .format-card.active {
+    border-color: #f97316; background: linear-gradient(135deg, rgba(249,115,22,.28), rgba(249,115,22,.08));
+    box-shadow: 0 0 0 1px #f97316, 0 0 22px rgba(249,115,22,.5);
+  }
+  .crear-panel .format-card svg { width: 22px; height: 22px; }
+  .crear-panel .subtitle-cards { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
+  .crear-panel .sub-style-card {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 76px; padding: 10px 6px;
+    background: rgba(15,18,32,.75); border: 1px solid rgba(255,255,255,.13); border-radius: 14px;
+    transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+  }
+  .crear-panel .sub-style-card:hover { border-color: rgba(236,72,153,.6); transform: translateY(-1px); }
+  .crear-panel .sub-style-card.active { border-color: #ec4899; box-shadow: 0 0 0 1px #ec4899, 0 0 22px rgba(236,72,153,.5); background: rgba(236,72,153,.1); }
+  .crear-panel .sub-style-card > div:first-child { margin-bottom: 0; font-size: 14px; line-height: 1.15; text-align: center; }
+  .sub-name { font-size: 12px; color: var(--text-secondary); }
+  .crear-panel .sub-style-card.active .sub-name { color: #fff; }
+
+  /* Fila 4 */
+  .cp-fields { display: grid; grid-template-columns: 1fr; gap: 10px; padding: 14px 18px; }
+  .cp-field { display: grid; grid-template-columns: minmax(210px, 270px) minmax(0, 1fr); align-items: center; gap: 16px; }
+  .cp-field-label { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; color: #fff; }
+  .cp-field-label svg { color: #c084fc; width: 20px; height: 20px; }
+  .cp-field-label small { font-weight: 400; color: var(--text-secondary); font-size: 12.5px; }
+  .cp-field-input { display: flex; align-items: center; gap: 12px; background: rgba(9,11,22,.8); border: 1px solid rgba(255,255,255,.14); border-radius: 12px; padding: 0 14px; transition: border-color .2s ease, box-shadow .2s ease; }
+  .cp-field-input:focus-within { border-color: #818cf8; box-shadow: 0 0 0 2px rgba(129,140,248,.35); }
+  .cp-field-input input { flex: 1; min-width: 0; background: transparent; border: 0; outline: none; color: #fff; font-size: 14px; padding: 12px 0; }
+  .cp-field-input input::placeholder { color: var(--text-muted); }
+  .cp-static { font-size: 12.5px; color: var(--text-secondary); white-space: nowrap; cursor: help; }
+  .cp-range { display: flex; align-items: center; gap: 16px; }
+  .cp-range .range-slider { flex: 1; height: 6px; accent-color: #a855f7; cursor: pointer; }
+  .count-box { min-width: 54px; text-align: center; padding: 8px 12px; border-radius: 10px; font-weight: 700; font-size: 15px; color: #fff; background: rgba(9,11,22,.8); border: 1px solid rgba(255,255,255,.18); font-variant-numeric: tabular-nums; }
+
+  /* Fila 5 */
+  .crear-panel .btn-process {
+    min-height: 58px; font-size: 17px; letter-spacing: .02em; border-radius: 999px; gap: 12px;
+    background: linear-gradient(90deg, #a855f7 0%, #7c3aed 40%, #3b82f6 100%); background-size: 200% 100%;
+    box-shadow: 0 0 30px rgba(124,58,237,.6), 0 8px 24px rgba(0,0,0,.4);
+  }
+  .crear-panel .btn-process svg { width: 22px; height: 22px; fill: #fff; stroke: #fff; }
+  .crear-panel .btn-process:disabled { opacity: .6; cursor: progress; transform: none; }
+
+  /* Respeto al foco del teclado dentro del panel */
+  .crear-panel .layout-card:focus-visible, .crear-panel .format-card:focus-visible, .crear-panel .sub-style-card:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 1180px) {
+    .cp-grid2, .cp-row3 { grid-template-columns: 1fr; }
+    .crear-panel .subtitle-cards { grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); }
+  }
+  @media (max-width: 900px) {
+    .cp-field { grid-template-columns: 1fr; gap: 8px; }
+  }
+  @media (max-width: 768px) {
+    .url-attach span { display: none; }
+    .url-attach { padding: 0 12px; }
+    .url-bar { padding-left: 14px; }
+    .url-bar input { font-size: 14px; }
+    .cp-time-grid, .cp-choice3, .cp-choice2 { grid-template-columns: 1fr; }
+    .cp-summary dl { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .cp-card { padding: 12px 14px; }
+    .cp-static { display: none; }
+    .crear-panel .btn-process { min-height: 54px; font-size: 16px; }
+  }
+
+  /* ==========================================================================
+     REDiseño PROFESIONAL SAAS — CLIP FACTORY AI (TEMA FUTURISTA / NEÓN)
+     ========================================================================== */
+  :root {
+    --bg-dark-app: #080911;
+    --bg-dark-sidebar: #0a0b14;
+    --bg-card-glass: rgba(18, 20, 36, 0.65);
+    --border-card-glass: rgba(255, 255, 255, 0.08);
+    --border-card-hover: rgba(168, 85, 247, 0.3);
+    
+    --neon-purple-glow: rgba(168, 85, 247, 0.45);
+    --neon-blue-glow: rgba(99, 102, 241, 0.45);
+    --neon-cyan-glow: rgba(34, 211, 238, 0.45);
+    --neon-pink-glow: rgba(236, 72, 153, 0.45);
+    --neon-amber-glow: rgba(245, 158, 11, 0.45);
+
+    --grad-primary-btn: linear-gradient(90deg, #8b5cf6 0%, #d946ef 50%, #3b82f6 100%);
+    --grad-active-nav: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+  }
+
+  body {
+    background-color: var(--bg-dark-app) !important;
+    background-image: 
+      radial-gradient(circle at 10% 10%, rgba(139, 92, 246, 0.08) 0%, transparent 40%),
+      radial-gradient(circle at 90% 80%, rgba(59, 130, 246, 0.08) 0%, transparent 40%),
+      radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 0.5) 0%, transparent 100%) !important;
+    color: #e2e8f0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+
+  /* SIDEBAR REDESIGN */
+  .sidebar {
+    width: 250px !important;
+    background: #090a14 !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.06) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 20px 14px 20px 14px !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    bottom: 0 !important;
+    height: 100vh !important;
+    box-sizing: border-box !important;
+    background-image: radial-gradient(circle at 10% 98%, rgba(147, 51, 234, 0.25) 0%, transparent 65%) !important;
+    z-index: 100 !important;
+  }
+
+  .main-wrapper {
+    margin-left: 250px !important;
+    min-height: 100vh !important;
+    display: flex !important;
+    flex-direction: column !important;
+    box-sizing: border-box !important;
+  }
+
+  .logo-box {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    padding: 4px 6px 20px 6px !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+    margin-bottom: 16px !important;
+    cursor: pointer !important;
+  }
+  .logo-icon-neon {
+    width: 36px !important;
+    height: 36px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    filter: drop-shadow(0 0 10px rgba(168, 85, 247, 0.7));
+  }
+  .logo-titles {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 2px !important;
+  }
+  .logo-title-main {
+    font-size: 16px !important;
+    font-weight: 800 !important;
+    color: #ffffff !important;
+    letter-spacing: -0.3px !important;
+    font-family: inherit !important;
+  }
+  .logo-subtitle-desc {
+    font-size: 11px !important;
+    color: #818cf8 !important;
+    font-weight: 500 !important;
+  }
+
+  .nav-list {
+    list-style: none !important;
+    padding: 0 !important;
+    margin: 0 0 auto 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 6px !important;
+  }
+  .nav-item {
+    border-radius: 12px !important;
+    transition: all 0.2s ease !important;
+  }
+  .nav-item button {
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    padding: 12px 14px !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 12px !important;
+    color: #94a3b8 !important;
+    font-size: 13.5px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    text-align: left !important;
+  }
+  .nav-item button svg {
+    width: 18px !important;
+    height: 18px !important;
+    stroke: currentColor !important;
+    stroke-width: 2 !important;
+    fill: none !important;
+  }
+  .nav-item:hover button {
+    background: rgba(255, 255, 255, 0.04) !important;
+    color: #ffffff !important;
+  }
+  .nav-item.active button {
+    background: var(--grad-active-nav) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(192, 132, 252, 0.4) !important;
+    box-shadow: 0 4px 20px rgba(124, 58, 237, 0.4) !important;
+  }
+
+  /* SIDEBAR PRO UPGRADE CARD */
+  .sidebar-pro-card {
+    background: linear-gradient(180deg, rgba(30, 27, 75, 0.5) 0%, rgba(15, 23, 42, 0.75) 100%) !important;
+    border: 1px solid rgba(139, 92, 246, 0.3) !important;
+    border-radius: 16px !important;
+    padding: 18px 14px !important;
+    margin-top: 20px !important;
+    text-align: center !important;
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.15) !important;
+  }
+  .pro-bolt-icon {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 10px !important;
+    background: rgba(34, 211, 238, 0.1) !important;
+    margin-bottom: 8px !important;
+    filter: drop-shadow(0 0 8px rgba(34, 211, 238, 0.5)) !important;
+  }
+  .pro-card-title {
+    font-size: 13.5px !important;
+    font-weight: 700 !important;
+    color: #ffffff !important;
+    margin-bottom: 4px !important;
+  }
+  .pro-card-sub {
+    font-size: 11px !important;
+    color: #94a3b8 !important;
+    line-height: 1.3 !important;
+    margin-bottom: 14px !important;
+  }
+  .pro-card-btn {
+    width: 100% !important;
+    padding: 10px 14px !important;
+    border-radius: 9999px !important;
+    background: linear-gradient(90deg, #9333ea, #6366f1) !important;
+    border: none !important;
+    color: #ffffff !important;
+    font-size: 12.5px !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    box-shadow: 0 0 16px rgba(147, 51, 234, 0.45) !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+  }
+  .pro-card-btn:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 0 22px rgba(147, 51, 234, 0.65) !important;
+  }
+
+  /* STUDIO DASHBOARD (VIEW INICIO) */
+  #view-inicio {
+    padding: 24px 36px 40px 36px !important;
+    max-width: 1360px !important;
+    margin: 0 auto !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* FILA 1: URL BAR & THEME / AVATAR */
+  .studio-row-1 {
+    display: flex !important;
+    align-items: center !important;
+    gap: 14px !important;
+    margin-bottom: 6px !important;
+  }
+  .studio-url-box {
+    flex: 1 !important;
+    display: flex !important;
+    align-items: center !important;
+    position: relative !important;
+    background: rgba(15, 17, 30, 0.85) !important;
+    border: 1px solid rgba(99, 102, 241, 0.45) !important;
+    border-radius: 14px !important;
+    padding: 4px 6px 4px 18px !important;
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.15) !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+  }
+  .studio-url-box:focus-within {
+    border-color: #a855f7 !important;
+    box-shadow: 0 0 25px rgba(168, 85, 247, 0.35) !important;
+  }
+  .studio-url-box svg.link-ico {
+    width: 20px !important;
+    height: 20px !important;
+    stroke: #818cf8 !important;
+    stroke-width: 2 !important;
+    fill: none !important;
+    flex-shrink: 0 !important;
+    margin-right: 12px !important;
+  }
+  .studio-url-box input {
+    flex: 1 !important;
+    background: transparent !important;
+    border: none !important;
+    outline: none !important;
+    color: #ffffff !important;
+    font-size: 14px !important;
+    padding: 10px 0 !important;
+  }
+  .studio-url-box input::placeholder {
+    color: #64748b !important;
+  }
+  .studio-upload-chip {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    padding: 6px 14px !important;
+    background: rgba(99, 102, 241, 0.15) !important;
+    border: 1px solid rgba(99, 102, 241, 0.35) !important;
+    border-radius: 10px !important;
+    color: #a5b4fc !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    flex-shrink: 0 !important;
+  }
+  .studio-upload-chip:hover {
+    background: rgba(99, 102, 241, 0.25) !important;
+    color: #ffffff !important;
+  }
+  .studio-top-actions {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+  }
+  .studio-theme-btn {
+    width: 42px !important;
+    height: 42px !important;
+    border-radius: 50% !important;
+    background: rgba(255, 255, 255, 0.04) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    color: #cbd5e1 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    transition: background 0.2s ease !important;
+  }
+  .studio-theme-btn:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: #ffffff !important;
+  }
+  .studio-user-avatar {
+    width: 42px !important;
+    height: 42px !important;
+    border-radius: 50% !important;
+    background: linear-gradient(135deg, #6366f1, #a855f7) !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    font-size: 15px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    box-shadow: 0 0 16px rgba(99, 102, 241, 0.4) !important;
+  }
+
+  .studio-subrow-fast {
+    display: flex !important;
+    align-items: center !important;
+    gap: 14px !important;
+    margin-bottom: 16px !important;
+    padding-left: 4px !important;
+  }
+  .studio-checkbox-clean {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    font-size: 12px !important;
+    color: #94a3b8 !important;
+    cursor: pointer !important;
+  }
+  .studio-checkbox-clean input[type="checkbox"] {
+    accent-color: #8b5cf6 !important;
+    cursor: pointer !important;
+  }
+
+  /* GLASSMORPHIC STUDIO CARDS */
+  .studio-grid-2col {
+    display: grid !important;
+    grid-template-columns: 1.18fr 0.82fr !important;
+    gap: 16px !important;
+    margin-bottom: 16px !important;
+  }
+  .studio-card-box {
+    background: rgba(18, 20, 36, 0.65) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 16px !important;
+    padding: 16px 20px !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35) !important;
+    box-sizing: border-box !important;
+  }
+
+  .studio-card-header-row {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    margin-bottom: 12px !important;
+  }
+  .studio-card-title-neon {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    font-size: 13.5px !important;
+    font-weight: 700 !important;
+    color: #ffffff !important;
+  }
+  .studio-card-badge-info {
+    font-size: 11px !important;
+    color: #94a3b8 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    cursor: help !important;
+  }
+
+  /* SLICE INPUTS */
+  .slice-inputs-row {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+    margin-bottom: 8px !important;
+  }
+  .slice-field {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 4px !important;
+  }
+  .slice-field label {
+    font-size: 11px !important;
+    color: #94a3b8 !important;
+  }
+  .slice-input-wrap {
+    position: relative !important;
+    display: flex !important;
+    align-items: center !important;
+    background: rgba(11, 13, 24, 0.7) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 10px !important;
+    padding: 0 12px 0 32px !important;
+    height: 38px !important;
+  }
+  .slice-input-wrap svg {
+    position: absolute !important;
+    left: 10px !important;
+    width: 14px !important;
+    height: 14px !important;
+    stroke: #64748b !important;
+    stroke-width: 2 !important;
+    fill: none !important;
+  }
+  .slice-input-wrap input {
+    width: 100% !important;
+    background: transparent !important;
+    border: none !important;
+    outline: none !important;
+    color: #ffffff !important;
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: 12px !important;
+  }
+  .stream-alert-hint {
+    font-size: 11px !important;
+    color: #f59e0b !important;
+    line-height: 1.4 !important;
+    margin-bottom: 12px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+  }
+
+  /* LAYOUT BUTTONS */
+  .layout-label {
+    font-size: 11.5px !important;
+    color: #94a3b8 !important;
+    margin-bottom: 6px !important;
+  }
+  .layout-buttons-group {
+    display: grid !important;
+    grid-template-columns: 1.1fr 1.25fr 1fr !important;
+    gap: 8px !important;
+  }
+  .layout-card {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    padding: 9px 10px !important;
+    border-radius: 10px !important;
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    color: #94a3b8 !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    user-select: none !important;
+  }
+  .layout-card svg {
+    width: 14px !important;
+    height: 14px !important;
+    stroke: currentColor !important;
+    stroke-width: 2 !important;
+    fill: none !important;
+  }
+  .layout-card:hover {
+    background: rgba(255, 255, 255, 0.06) !important;
+    color: #ffffff !important;
+  }
+  .layout-card.active {
+    background: rgba(99, 102, 241, 0.18) !important;
+    border: 2px solid #6366f1 !important;
+    box-shadow: 0 0 16px rgba(99, 102, 241, 0.4) !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+  }
+
+  /* SPEED CARDS (TURBO VS STUDIO) */
+  .speed-cards-group {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+    margin-bottom: 14px !important;
+  }
+  .speed-card-item {
+    padding: 12px 14px !important;
+    border-radius: 12px !important;
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    user-select: none !important;
+  }
+  .speed-card-item:hover {
+    background: rgba(255, 255, 255, 0.06) !important;
+  }
+  .speed-card-item.active {
+    background: rgba(168, 85, 247, 0.12) !important;
+    border: 2px solid #a855f7 !important;
+    box-shadow: 0 0 20px rgba(168, 85, 247, 0.45) !important;
+  }
+  .speed-title-line {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    color: #ffffff !important;
+    margin-bottom: 2px !important;
+  }
+  .speed-desc-line {
+    font-size: 10.5px !important;
+    color: #94a3b8 !important;
+  }
+  .retention-check-line {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    font-size: 12px !important;
+    color: #ffffff !important;
+    cursor: pointer !important;
+    margin-top: 4px !important;
+  }
+  .retention-check-line input[type="checkbox"] {
+    accent-color: #22d3ee !important;
+    cursor: pointer !important;
+    width: 15px !important;
+    height: 15px !important;
+  }
+
+  /* FILA 3: FORMATOS & ESTILOS DE SUBTÍTULOS */
+  .studio-grid-row3 {
+    display: grid !important;
+    grid-template-columns: 0.36fr 0.64fr !important;
+    gap: 16px !important;
+    margin-bottom: 16px !important;
+  }
+  .format-options-row {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr 1fr !important;
+    gap: 8px !important;
+  }
+  .format-card {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    padding: 10px 8px !important;
+    border-radius: 12px !important;
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    color: #94a3b8 !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    user-select: none !important;
+  }
+  .format-card svg {
+    width: 15px !important;
+    height: 15px !important;
+    stroke: currentColor !important;
+    stroke-width: 2 !important;
+    fill: none !important;
+  }
+  .format-card:hover {
+    background: rgba(255, 255, 255, 0.06) !important;
+    color: #ffffff !important;
+  }
+  .format-card.active {
+    background: rgba(245, 158, 11, 0.12) !important;
+    border: 2px solid #f59e0b !important;
+    box-shadow: 0 0 16px rgba(245, 158, 11, 0.35) !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+  }
+
+  /* SUBTITLE CARDS (5 PREVIEWS) */
+  .subtitle-cards-row {
+    display: grid !important;
+    grid-template-columns: repeat(5, 1fr) !important;
+    gap: 8px !important;
+  }
+  .sub-style-card {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 8px 6px !important;
+    border-radius: 12px !important;
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    user-select: none !important;
+    text-align: center !important;
+  }
+  .sub-style-card:hover {
+    background: rgba(255, 255, 255, 0.06) !important;
+  }
+  .sub-style-card.active {
+    background: rgba(236, 72, 153, 0.1) !important;
+    border: 2px solid #ec4899 !important;
+    box-shadow: 0 0 18px rgba(236, 72, 153, 0.45) !important;
+  }
+  .sub-badge-preview {
+    font-size: 11px !important;
+    font-weight: 800 !important;
+    line-height: 1.2 !important;
+    margin-bottom: 4px !important;
+  }
+  .sub-badge-neon { color: #ec4899 !important; text-shadow: 0 0 10px rgba(236, 72, 153, 0.7); }
+  .sub-badge-lime { color: #84cc16 !important; text-shadow: 0 0 10px rgba(132, 204, 22, 0.7); }
+  .sub-badge-bounce { color: #f59e0b !important; text-shadow: 0 0 10px rgba(245, 158, 11, 0.7); }
+  .sub-badge-glow { color: #06b6d4 !important; text-shadow: 0 0 10px rgba(6, 182, 212, 0.7); }
+  .sub-badge-minimal { color: #94a3b8 !important; }
+  .sub-name-label {
+    font-size: 10px !important;
+    color: #94a3b8 !important;
+  }
+
+  /* FILA 4: MARCA DE AGUA, ENFOQUE IA, SLIDER */
+  .studio-row-4-card {
+    background: rgba(18, 20, 36, 0.65) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 16px !important;
+    padding: 14px 20px !important;
+    margin-bottom: 16px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35) !important;
+  }
+  .studio-form-line {
+    display: grid !important;
+    grid-template-columns: 240px 1fr 140px !important;
+    gap: 12px !important;
+    align-items: center !important;
+  }
+  .studio-form-label {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    font-size: 12.5px !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
+  }
+  .studio-form-label svg {
+    width: 16px !important;
+    height: 16px !important;
+    stroke: currentColor !important;
+    stroke-width: 2 !important;
+    fill: none !important;
+    flex-shrink: 0 !important;
+  }
+  .studio-inline-input {
+    width: 100% !important;
+    height: 38px !important;
+    background: rgba(11, 13, 24, 0.7) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 10px !important;
+    padding: 0 12px !important;
+    color: #ffffff !important;
+    font-size: 12.5px !important;
+    outline: none !important;
+    transition: border-color 0.2s ease !important;
+    box-sizing: border-box !important;
+  }
+  .studio-inline-input:focus {
+    border-color: #a855f7 !important;
+  }
+  .studio-select-dropdown {
+    height: 38px !important;
+    background: rgba(11, 13, 24, 0.7) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 10px !important;
+    padding: 0 10px !important;
+    color: #94a3b8 !important;
+    font-size: 11.5px !important;
+    outline: none !important;
+    cursor: pointer !important;
+    box-sizing: border-box !important;
+  }
+  .studio-range-wrap {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    grid-column: 2 / span 2 !important;
+  }
+  .studio-range-slider {
+    flex: 1 !important;
+    accent-color: #8b5cf6 !important;
+    cursor: pointer !important;
+  }
+  .studio-badge-count {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 8px !important;
+    background: rgba(139, 92, 246, 0.15) !important;
+    border: 1px solid rgba(139, 92, 246, 0.35) !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    font-size: 13px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  /* FILA 5: BOTÓN PRINCIPAL PROCESAR VIDEO */
+  .studio-btn-process {
+    width: 100% !important;
+    height: 52px !important;
+    border-radius: 9999px !important;
+    background: var(--grad-primary-btn) !important;
+    border: none !important;
+    color: #ffffff !important;
+    font-size: 15px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.5px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 10px !important;
+    cursor: pointer !important;
+    box-shadow: 0 0 25px rgba(168, 85, 247, 0.5) !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease !important;
+    margin-bottom: 24px !important;
+  }
+  .studio-btn-process:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 0 35px rgba(168, 85, 247, 0.7) !important;
+    filter: brightness(1.08) !important;
+  }
+  .studio-btn-process svg {
+    width: 18px !important;
+    height: 18px !important;
+    fill: currentColor !important;
+  }
+
 </style>
 </head>
 <body>
@@ -1681,85 +3353,76 @@
   <input type="file" id="local-file-input" accept="video/*,audio/*" style="display:none;" onchange="handleLocalFileUpload(event)">
 
   <!-- SIDEBAR LATERAL -->
-  <aside class="sidebar" aria-label="Navegación principal">
-    <div class="window-dots" onclick="switchView('inicio')" title="Restablecer vista">
-      <div class="dot dot-red" role="button" aria-label="Cerrar paneles" title="Cerrar paneles abiertos" onclick="event.stopPropagation(); closeAllModals()"></div>
-      <div class="dot dot-yellow" role="button" aria-label="Ir a Inicio" title="Ir a Inicio" onclick="event.stopPropagation(); switchView('inicio')"></div>
-      <div class="dot dot-green" role="button" aria-label="Pantalla completa" title="Pantalla completa" onclick="event.stopPropagation(); toggleFullscreen()"></div>
-    </div>
-
+    <!-- SIDEBAR LATERAL FUTURISTA SAAS -->
+  <aside class="sidebar" id="sidebar" aria-label="Navegación principal">
     <div class="logo-box" onclick="switchView('inicio')">
-      <div class="logo-icon">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M15 10l5 5-5 5"/><path d="M4 4v7a4 4 0 0 0 4 4h12"/></svg>
+      <div class="logo-icon-neon">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+          <defs>
+            <linearGradient id="neonPlayGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#ec4899"/>
+              <stop offset="50%" stop-color="#a855f7"/>
+              <stop offset="100%" stop-color="#6366f1"/>
+            </linearGradient>
+          </defs>
+          <polygon points="6 4 20 12 6 20 6 4" fill="url(#neonPlayGrad)"/>
+        </svg>
       </div>
-      <span class="logo-title">Clip Factory</span>
-      <span class="logo-badge">Pro v2.0</span>
+      <div class="logo-titles">
+        <span class="logo-title-main">Clip Factory AI</span>
+        <span class="logo-subtitle-desc">Crea Clips Virales con IA</span>
+      </div>
     </div>
 
     <ul class="nav-list">
       <li class="nav-item active" id="nav-inicio">
         <button onclick="switchView('inicio')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
           Inicio
         </button>
       </li>
-      <li class="nav-item" id="nav-crear">
-        <button onclick="openCrearModal()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-          Crear clips
-        </button>
-      </li>
       <li class="nav-item" id="nav-proyectos">
-        <button onclick="switchView('ffmpeg')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-          Mis proyectos
+        <button onclick="switchView('proyectos')">
+          <svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+          Mis Proyectos
         </button>
       </li>
       <li class="nav-item" id="nav-historial">
         <button onclick="showJobsHistory()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/></svg>
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/></svg>
           Historial
         </button>
       </li>
-      <li class="nav-item" id="nav-biblioteca">
-        <button onclick="switchView('ffmpeg')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
-          Biblioteca
+      <li class="nav-item" id="nav-settings">
+        <button onclick="openSettingsModal()">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          Configuración
+        </button>
+      </li>
+      <li class="nav-item" id="nav-ayuda">
+        <button onclick="openHelpModal()">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          Ayuda
         </button>
       </li>
       <li class="nav-item" id="nav-editor">
         <button onclick="switchView('editor')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg>
-          Editor de video
-        </button>
-      </li>
-      <li class="nav-item" id="nav-subtitulos">
-        <button onclick="switchView('editor')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M7 15h4M15 15h2M7 11h2M13 11h4"/></svg>
-          Subtítulos
-        </button>
-      </li>
-      <li class="nav-item" id="nav-plantillas">
-        <button onclick="openCrearModal()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-          Plantillas
-        </button>
-      </li>
-      <li class="nav-item" id="nav-analytics">
-        <button onclick="showAnalytics()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-          Analytics
+          <svg viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg>
+          Editor de Video
         </button>
       </li>
     </ul>
 
-    <div class="nav-config">
-      <div class="nav-item" id="nav-settings">
-        <button onclick="openSettingsModal()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-          Configuración
-        </button>
+    <div class="sidebar-pro-card">
+      <div class="pro-bolt-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
       </div>
+      <div class="pro-card-title">Actualiza a Pro</div>
+      <div class="pro-card-sub">Desbloquea todas las funciones premium</div>
+      <button type="button" class="pro-card-btn" onclick="openProModal()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M2 4l3 12h14l3-12-5 6-5-6-5 6z"/></svg>
+        Actualizar Ahora
+      </button>
     </div>
   </aside>
 
@@ -1845,144 +3508,237 @@
 
     <!-- VISTA 1: AUDIOVISUAL (DASHBOARD) -->
     <main class="view-section active" id="view-inicio">
-      <div class="view-title-row">
-        <h1 class="view-title">Audiovisual</h1>
-        <div class="view-actions-bar">
-          <input type="text" class="input-action" placeholder="Buscar fuentes..." oninput="handleGlobalSearch(this.value)" style="width: 160px;">
-          <button class="btn-sm-action" onclick="showJobsHistory()">Historial</button>
-          <button class="btn-sm-action" onclick="openCrearModal()">+ Crear</button>
-          <button class="btn-sm-action" onclick="openSettingsModal()">Ajustes</button>
-          <button class="btn-sm-action" onclick="openHelpModal()" title="Ayuda y atajos">?</button>
+      <!-- FILA 1: URL DEL VIDEO + MODO RÁPIDO + THEME / AVATAR -->
+      <div class="studio-row-1">
+        <div class="studio-url-box">
+          <svg class="link-ico" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          <input type="text" id="yt-url-input" value="" autocomplete="off" spellcheck="false"
+                 placeholder="Introduce la URL del video o directo"
+                 aria-label="URL del video o directo" oninput="validateInputUrl(this.value)">
+          <button type="button" class="studio-upload-chip" onclick="triggerLocalFileUpload()" title="Subir un archivo de video local de tu equipo (MP4/MOV)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <span>Subir MP4</span>
+          </button>
+        </div>
+        <div class="studio-top-actions">
+          <button type="button" class="studio-theme-btn" onclick="toggleTheme()" title="Cambiar tema">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          </button>
+          <div class="studio-user-avatar" onclick="openSettingsModal()" title="Perfil de Usuario (Ajustes)">A</div>
         </div>
       </div>
 
-      <!-- Fila 1: Actividades / Tendencias / Crear Proyectos -->
-      <div class="dashboard-grid-row1">
-        <!-- Tarjeta 1: Actividades -->
-        <div class="card">
-          <div class="card-header">
-            <h2 class="card-title">Actividades</h2>
-            <a href="#" class="card-link" onclick="showAnalytics(); return false;">Ver métricas</a>
-          </div>
-          <div class="stat-grid" id="dash-activity" aria-live="polite">
-            <div class="stat-tile"><span class="stat-num" data-stat="total_videos">–</span><span class="stat-label">Videos procesados</span></div>
-            <div class="stat-tile"><span class="stat-num" data-stat="total_clips">–</span><span class="stat-label">Clips generados</span></div>
-            <div class="stat-tile"><span class="stat-num stat-ok" data-stat="approved_clips">–</span><span class="stat-label">Aprobados</span></div>
-            <div class="stat-tile"><span class="stat-num" data-stat="avg_score">–</span><span class="stat-label">Puntaje medio</span></div>
-          </div>
-        </div>
-
-        <!-- Tarjeta 2: Tendencias Actuales -->
-        <div class="card">
-          <div class="card-header">
-            <h2 class="card-title">Puntaje de tus clips</h2>
-            <a href="#" class="card-link" onclick="switchView('ffmpeg'); return false;">Ver clips</a>
-          </div>
-          <div class="score-bars" id="dash-trend" role="img" aria-label="Puntaje de viralidad de los clips más recientes">
-            <div class="empty-hint">Cuando generes clips verás aquí su puntaje.</div>
-          </div>
-        </div>
-
-        <!-- Tarjeta 3: Crear Proyectos -->
-        <div class="card">
-          <div class="card-header">
-            <h2 class="card-title">Crear proyectos</h2>
-            <a href="#" class="card-link" onclick="openCrearModal(); return false;">Ver todos</a>
-          </div>
-          <div class="tiles-row">
-            <div class="tile-action" onclick="openCrearModal()">
-              <div class="tile-icon tile-purple">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M2 12h20"/></svg>
-              </div>
-              <span class="tile-label">Crear clip</span>
-            </div>
-            <div class="tile-action" onclick="triggerLocalFileUpload()">
-              <div class="tile-icon tile-cyan">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-              </div>
-              <span class="tile-label">Archivos</span>
-            </div>
-            <div class="tile-action" onclick="switchView('editor')">
-              <div class="tile-icon tile-orange">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-              </div>
-              <span class="tile-label">Proyectar</span>
-            </div>
-          </div>
-          <button class="btn-full-card" onclick="openCrearModal()">Preparar clip contenido</button>
+      <div class="studio-subrow-fast">
+        <label class="studio-checkbox-clean">
+          <input type="checkbox" id="fast-mode-check">
+          <span>Modo rápido (sin IA/LLM, solo heurístico)...</span>
+        </label>
+        <div class="validation-badge" id="val-badge" style="display:none;" role="status">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+          <span id="val-badge-text">URL validada</span>
         </div>
       </div>
 
-      <!-- Fila 2: Proyectos Recientes y Quick Actions -->
-      <div class="dashboard-grid-row2">
-        <div class="card">
-          <div class="card-header">
-            <h2 class="card-title">Proyectos recientes</h2>
-            <a href="#" class="card-link" onclick="switchView('ffmpeg'); return false;">Ver proyectos</a>
+      <!-- FILA 2: DOS COLUMNAS (DIRECTOS/STREAMS Y GAMING / VELOCIDAD & RETENCIÓN) -->
+      <div class="studio-grid-2col">
+        <!-- Columna Izquierda: Directos / Streams y Gaming -->
+        <div class="studio-card-box">
+          <div class="studio-card-header-row">
+            <div class="studio-card-title-neon">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2.2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+              <span>Directos / Streams y Gaming (Opcional)</span>
+            </div>
+            <span class="studio-card-badge-info" title="Descarga solo el tramo exacto en segundos">Surgical Slice ⓘ</span>
+          </div>
+
+          <div class="slice-inputs-row">
+            <div class="slice-field">
+              <label for="stream-start-time">Desde (ej. 01:15:00)</label>
+              <div class="slice-input-wrap">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/></svg>
+                <input type="text" id="stream-start-time" placeholder="00:00:00" autocomplete="off">
+              </div>
+            </div>
+            <div class="slice-field">
+              <label for="stream-end-time">Hasta (ej. 01:35:00)</label>
+              <div class="slice-input-wrap">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/></svg>
+                <input type="text" id="stream-end-time" placeholder="00:20:00" autocomplete="off">
+              </div>
+            </div>
+          </div>
+
+          <div class="stream-alert-hint">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            <span>Para directos de varias horas (Twitch/YouTube/Kick), descarga solo este tramo en segmentos.</span>
+          </div>
+
+          <div class="layout-label">Diseña la Pantalla (Layout):</div>
+          <div class="layout-buttons-group">
+            <div class="layout-card active" id="layout-card-auto" onclick="selectLayoutMode('auto')">
+              <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+              Automático (IA)
+            </div>
+            <div class="layout-card" id="layout-card-gaming" onclick="selectLayoutMode('gaming')">
+              <svg viewBox="0 0 24 24"><line x1="6" y1="12" x2="10" y2="12"/><line x1="8" y1="10" x2="8" y2="14"/><circle cx="15" cy="13" r="1"/><circle cx="18" cy="11" r="1"/><path d="M17.32 5H6.68a4 4 0 0 0-3.98 3.59L2 15a3 3 0 0 0 5.2 2l1.3-1.5h7l1.3 1.5A3 3 0 0 0 22 15l-.7-6.41A4 4 0 0 0 17.32 5z"/></svg>
+              Gaming / Streamer
+            </div>
+            <div class="layout-card" id="layout-card-blur" onclick="selectLayoutMode('blur')">
+              <svg viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+              Desenfoque
+            </div>
+          </div>
+        </div>
+
+        <!-- Columna Derecha: Velocidad de Render y Efectos de Retención -->
+        <div class="studio-card-box">
+          <div class="studio-card-header-row">
+            <div class="studio-card-title-neon">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              <span>Velocidad de Render y Efectos de Retención</span>
+            </div>
+          </div>
+
+          <div class="speed-cards-group">
+            <div class="speed-card-item active" id="speed-card-turbo" onclick="selectSpeedMode('turbo')">
+              <div class="speed-title-line">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                <span>Modo Turbo (3x)</span>
+              </div>
+              <div class="speed-desc-line">Render ultrarrápido</div>
+            </div>
+            <div class="speed-card-item" id="speed-card-studio" onclick="selectSpeedMode('studio')">
+              <div class="speed-title-line">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="2"><path d="M6 3h12l4 6-10 12L2 9z"/></svg>
+                <span>Calidad Studio</span>
+              </div>
+              <div class="speed-desc-line">Máxima fidelidad</div>
+            </div>
+          </div>
+
+          <label class="retention-check-line">
+            <input type="checkbox" id="hook-zoom-check" checked>
+            <span><b>Auto-Hook Zoom (0-2.5x)</b> — <span style="color:#94a3b8; font-size:11px;">Punch-in que dispara retención</span></span>
+          </label>
+        </div>
+      </div>
+
+      <!-- FILA 3: FORMATOS DE SALIDA & ESTILOS DE SUBTÍTULOS -->
+      <div class="studio-grid-row3">
+        <!-- Formato de salida -->
+        <div class="studio-card-box">
+          <div class="studio-card-header-row">
+            <div class="studio-card-title-neon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/></svg>
+              <span>Formato de salida ⓘ</span>
+            </div>
+          </div>
+          <div class="format-options-row">
+            <div class="format-card active" onclick="selectFormat(this, '9:16')">
+              <svg viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+              <span>9:16</span>
+            </div>
+            <div class="format-card" onclick="selectFormat(this, '1:1')">
+              <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+              <span>1:1</span>
+            </div>
+            <div class="format-card" onclick="selectFormat(this, '16:9')">
+              <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/></svg>
+              <span>16:9</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Estilos de subtítulos -->
+        <div class="studio-card-box">
+          <div class="studio-card-header-row">
+            <div class="studio-card-title-neon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ec4899" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M7 15h4M15 15h2M7 11h2M13 11h4"/></svg>
+              <span>Estilos de subtítulos ⓘ</span>
+            </div>
+          </div>
+          <div class="subtitle-cards-row">
+            <div class="sub-style-card active" onclick="selectSubStyle(this, 'hormozi')">
+              <div class="sub-badge-preview sub-badge-neon">Hormozi<br>Neón</div>
+              <div class="sub-name-label">Hormozi Neón</div>
+            </div>
+            <div class="sub-style-card" onclick="selectSubStyle(this, 'beast')">
+              <div class="sub-badge-preview sub-badge-lime">MrBeast<br>Lime</div>
+              <div class="sub-name-label">MrBeast Lime</div>
+            </div>
+            <div class="sub-style-card" onclick="selectSubStyle(this, 'bounce')">
+              <div class="sub-badge-preview sub-badge-bounce">Pop<br>Bounce</div>
+              <div class="sub-name-label">Pop Bouncing</div>
+            </div>
+            <div class="sub-style-card" onclick="selectSubStyle(this, 'glow')">
+              <div class="sub-badge-preview sub-badge-glow">Cyber<br>Glow</div>
+              <div class="sub-name-label">Cyber Glow</div>
+            </div>
+            <div class="sub-style-card" onclick="selectSubStyle(this, 'minimal')">
+              <div class="sub-badge-preview sub-badge-minimal">Minimal<br>&nbsp;</div>
+              <div class="sub-name-label">Minimal</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FILA 4: MARCA DE AGUA, ENFOQUE IA, CANTIDAD DE CLIPS -->
+      <div class="studio-row-4-card">
+        <div class="studio-form-line">
+          <div class="studio-form-label">
+            <svg viewBox="0 0 24 24" stroke="#f59e0b"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+            <span>Marca de agua / Creador (Opcional)</span>
+          </div>
+          <input type="text" id="watermark-input" class="studio-inline-input" placeholder="@tu_canal o marca..." maxlength="50" autocomplete="off">
+          <select id="watermark-pos-select" class="studio-select-dropdown">
+            <option value="top">Esquina superior</option>
+            <option value="bottom">Esquina inferior</option>
+          </select>
+        </div>
+
+        <div class="studio-form-line">
+          <div class="studio-form-label">
+            <svg viewBox="0 0 24 24" stroke="#ec4899"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg>
+            <span>Enfoque IA del Clip (Opcional)</span>
+          </div>
+          <input type="text" id="focus-prompt-input" class="studio-inline-input" placeholder="Ej: Momentos divertidos, dinero y negocios, historias..." maxlength="200" autocomplete="off">
+          <select id="focus-prompt-type" class="studio-select-dropdown">
+            <option value="theme">Instrucción o temática</option>
+            <option value="keywords">Palabras clave</option>
+            <option value="speaker">Hablante específico</option>
+          </select>
+        </div>
+
+        <div class="studio-form-line">
+          <div class="studio-form-label">
+            <svg viewBox="0 0 24 24" stroke="#a855f7"><rect x="2" y="2" width="20" height="20" rx="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
+            <span>Cantidad de clips a generar</span>
+          </div>
+          <div class="studio-range-wrap">
+            <input type="range" id="clips-range" class="studio-range-slider" min="1" max="10" value="5" aria-label="Cantidad de clips" oninput="document.getElementById('clips-count-val').innerText = this.value">
+            <div class="studio-badge-count" id="clips-count-val">5</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FILA 5: BOTÓN PRINCIPAL PROCESAR VIDEO -->
+      <button type="button" class="studio-btn-process" id="btn-submit-process" onclick="submitCreation()">
+        <svg viewBox="0 0 24 24"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+        <span>Procesar Video</span>
+      </button>
+
+      <!-- PROYECTOS RECIENTES Y GALERÍA EN VIVO DEBAJO DEL ESTUDIO -->
+      <div class="dashboard-grid-row2" style="margin-top: 14px;">
+        <div class="card" style="background: rgba(18, 20, 36, 0.65); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 18px 20px;">
+          <div class="card-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+            <h2 class="card-title" style="font-size:14px; font-weight:700; color:#fff; display:flex; align-items:center; gap:8px;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+              Proyectos y clips recientes
+            </h2>
+            <button class="btn-sm-action" onclick="switchView('proyectos')" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#cbd5e1; padding:6px 12px; border-radius:8px; cursor:pointer; font-size:11.5px; font-weight:600;">Ver todos los clips</button>
           </div>
           <div class="video-carousel" id="carousel-proyectos">
-            <!-- Cargado dinámicamente desde /api/clips -->
-            <div class="rec-info" style="padding:10px; color:var(--text-muted); font-size:12px;">Cargando clips...</div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-header">
-            <h2 class="card-title">Quick Actions</h2>
-            <a href="#" class="card-link" onclick="openCrearModal(); return false;">Ver todos</a>
-          </div>
-          <div class="quick-actions-row">
-            <div class="quick-tile" onclick="switchView('editor')">
-              <div class="tile-icon quick-red">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/></svg>
-              </div>
-              <span class="tile-label">Recorte perfecto</span>
-            </div>
-            <div class="quick-tile" onclick="triggerLocalFileUpload()">
-              <div class="tile-icon quick-blue">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/></svg>
-              </div>
-              <span class="tile-label">Subir Video</span>
-            </div>
-            <div class="quick-tile" onclick="switchView('ffmpeg')">
-              <div class="tile-icon quick-pink">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-              </div>
-              <span class="tile-label">Filtro viral</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Fila 3: Crear Títulos y Color Actions -->
-      <div class="dashboard-grid-row3">
-        <div class="card">
-          <div class="card-header">
-            <h2 class="card-title">Crear Títulos y Copys</h2>
-            <a href="#" class="card-link" onclick="switchView('editor'); return false;">Abrir editor</a>
-          </div>
-          <table class="titles-table">
-            <thead>
-              <tr style="color: var(--text-muted); font-size: 11px; text-align: left;">
-                <th>Nombre</th>
-                <th>Red de acción</th>
-                <th>Alcance</th>
-                <th>Control</th>
-              </tr>
-            </thead>
-            <tbody id="copys-tbody">
-              <tr><td colspan="4" style="color:var(--text-muted); font-size:12px; padding:14px 0;">Aún no hay clips. Crea uno y aquí aparecerán sus títulos y copys.</td></tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div class="card">
-          <div class="card-header">
-            <h2 class="card-title">Color Actions</h2>
-            <a href="#" class="card-link" onclick="switchView('ffmpeg'); return false;">Ver todos</a>
-          </div>
-          <div class="color-actions-grid" id="color-actions-container">
-            <div class="rec-info" style="padding:10px; color:var(--text-muted); font-size:12px;">Los clips mejor puntuados aparecerán aquí.</div>
+            <div class="rec-info" style="padding:16px; color:#94a3b8; font-size:12px;">Cargando clips generados...</div>
           </div>
         </div>
       </div>
@@ -2289,162 +4045,6 @@
 
   </div>
 
-  <!-- MODAL CREAR CLIPS -->
-  <div class="modal-overlay" id="modal-crear" onclick="if(event.target===this) closeCrearModal()">
-    <div class="crear-clips-card">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-        <h2 style="font-size:16px; font-weight:700; color:#fff;">Crear clips con IA</h2>
-        <button class="icon-btn" onclick="closeCrearModal()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-      </div>
-
-      <div class="crear-clips-tabs">
-        <div class="crear-tab active" id="tab-yt" onclick="switchModalTab('yt')">URL del video</div>
-        <div class="crear-tab" id="tab-local" onclick="switchModalTab('local')">Archivo Local</div>
-      </div>
-
-      <div class="form-group" id="group-yt">
-        <label class="form-label" for="yt-url-input">Introduce la URL del video o directo</label>
-        <div class="input-glow-wrapper">
-          <input type="text" id="yt-url-input" class="input-glow" placeholder="YouTube, Twitch VOD, Kick.com o enlace web..." value="" oninput="validateInputUrl(this.value)">
-        </div>
-        <div class="validation-badge" id="val-badge" style="display:none;">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-          <span id="val-badge-text">URL Validada</span>
-        </div>
-        <label style="display:flex; align-items:center; gap:8px; margin-top:10px; font-size:12px; color:var(--text-secondary); cursor:pointer;">
-          <input type="checkbox" id="fast-mode-check"> Modo rápido (sin IA/LLM, solo heurístico)
-        </label>
-      </div>
-
-      <div class="form-group" id="group-local" style="display:none;">
-        <label class="form-label">Selecciona un video local</label>
-        <button class="btn-outline" style="width:100%; padding:14px; justify-content:center;" onclick="triggerLocalFileUpload()">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Seleccionar archivo MP4
-        </button>
-      </div>
-
-      <!-- SECCIÓN STREAMS Y DIRECTOS -->
-      <div class="form-group" style="background: rgba(168, 85, 247, 0.06); border: 1px solid rgba(168, 85, 247, 0.22); border-radius: var(--radius-md); padding: 12px 14px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-          <label class="form-label" style="margin-bottom:0; color:#c084fc; font-weight:700; display:flex; align-items:center; gap:6px;">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"/></svg>
-            Directos / Streams y Gaming (Opcional)
-          </label>
-          <span style="font-size:10.5px; color:var(--text-muted);">Surgical Slice</span>
-        </div>
-
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:8px;">
-          <div>
-            <label style="font-size:11px; color:var(--text-muted); display:block; margin-bottom:4px;">Desde (ej. 01:15:00)</label>
-            <input type="text" id="stream-start-time" class="input-glow" style="padding:6px 10px; font-size:12px;" placeholder="00:00:00">
-          </div>
-          <div>
-            <label style="font-size:11px; color:var(--text-muted); display:block; margin-bottom:4px;">Hasta (ej. 01:35:00)</label>
-            <input type="text" id="stream-end-time" class="input-glow" style="padding:6px 10px; font-size:12px;" placeholder="00:20:00">
-          </div>
-        </div>
-        <div style="font-size:10.5px; color:var(--text-secondary); margin-bottom:10px; line-height:1.4;">
-          ⚡ Para directos de varias horas (Twitch/YouTube/Kick), descarga solo este tramo en segundos.
-        </div>
-
-        <label style="font-size:11px; color:var(--text-muted); display:block; margin-bottom:6px;">Diseño de Pantalla (Layout):</label>
-        <div style="display:grid; grid-template-columns: 1fr 1.35fr 1fr; gap:6px;">
-          <div class="layout-card active" id="layout-card-auto" onclick="selectLayoutMode('auto')">Automático (IA)</div>
-          <div class="layout-card" id="layout-card-gaming" onclick="selectLayoutMode('gaming')">🎮 Gaming / Streamer</div>
-          <div class="layout-card" id="layout-card-blur" onclick="selectLayoutMode('blur')">Desenfoque</div>
-        </div>
-      </div>
-
-      <!-- VELOCIDAD Y RETENCIÓN -->
-      <div class="form-group" style="background: rgba(34, 211, 238, 0.05); border: 1px solid rgba(34, 211, 238, 0.22); border-radius: var(--radius-md); padding: 12px 14px;">
-        <label class="form-label" style="color:var(--neon-cyan); font-weight:700; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-          Velocidad de Render y Efectos de Retención
-        </label>
-        
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:10px;">
-          <div class="layout-card active" id="speed-card-turbo" onclick="selectSpeedMode('turbo')">
-            <span style="font-weight:700;">⚡ Modo Turbo (3x)</span>
-            <div style="font-size:10px; color:var(--text-muted); margin-top:2px;">Render ultrarrápido</div>
-          </div>
-          <div class="layout-card" id="speed-card-studio" onclick="selectSpeedMode('studio')">
-            <span style="font-weight:700;">💎 Calidad Studio</span>
-            <div style="font-size:10px; color:var(--text-muted); margin-top:2px;">Máxima fidelidad</div>
-          </div>
-        </div>
-
-        <label style="display:flex; align-items:center; gap:8px; font-size:12px; color:#fff; cursor:pointer; user-select:none;">
-          <input type="checkbox" id="hook-zoom-check" checked style="accent-color:var(--neon-cyan); cursor:pointer;">
-          <span>🎣 <b>Auto-Hook Zoom (0-2.5s)</b> <span style="color:var(--text-muted); font-size:11px;">— Punch-in que dispara retención</span></span>
-        </label>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">Formato de salida ⓘ</label>
-        <div class="format-options">
-          <div class="format-card active" onclick="selectFormat(this, '9:16')">9:16</div>
-          <div class="format-card" onclick="selectFormat(this, '1:1')">1:1</div>
-          <div class="format-card" onclick="selectFormat(this, '16:9')">16:9</div>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">Estilos de subtítulos ⓘ</label>
-        <div class="subtitle-cards">
-          <div class="sub-style-card active" onclick="selectSubStyle(this, 'hormozi')">
-            <div class="sub-preview-neon">Hormozi<br>Neón</div>
-            <div style="font-size:10px; color:var(--text-muted);">Hormozi Neón</div>
-          </div>
-          <div class="sub-style-card" onclick="selectSubStyle(this, 'beast')">
-            <div class="sub-preview-lime">MrBeast<br>Lime</div>
-            <div style="font-size:10px; color:var(--text-muted);">MrBeast Lime</div>
-          </div>
-          <div class="sub-style-card" onclick="selectSubStyle(this, 'bounce')">
-            <div class="sub-preview-bounce">Pop<br>Bounce</div>
-            <div style="font-size:10px; color:var(--text-muted);">Pop Bouncing</div>
-          </div>
-          <div class="sub-style-card" onclick="selectSubStyle(this, 'glow')">
-            <div class="sub-preview-glow">Cyber<br>Glow</div>
-            <div style="font-size:10px; color:var(--text-muted);">Cyber Glow</div>
-          </div>
-          <div class="sub-style-card" onclick="selectSubStyle(this, 'minimal')">
-            <div class="sub-preview-minimal">Minimal<br>&nbsp;</div>
-            <div style="font-size:10px; color:var(--text-muted);">Minimal</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label" style="display:flex; justify-content:space-between; align-items:center;">
-          <span>🏷️ Marca de agua / Creador (Opcional)</span>
-          <span style="font-size:10.5px; color:var(--text-muted);">Esquina superior</span>
-        </label>
-        <input type="text" id="watermark-input" class="input-glow" placeholder="@tu_canal o marca..." style="font-size:12px; width:100%; box-sizing:border-box;">
-      </div>
-
-      <div class="form-group">
-        <label class="form-label" style="display:flex; justify-content:space-between; align-items:center;">
-          <span>🎯 Enfoque IA del Clip (Opcional)</span>
-          <span style="font-size:10.5px; color:var(--text-muted);">Instrucción o temática</span>
-        </label>
-        <input type="text" id="focus-prompt-input" class="input-glow" placeholder="Ej: Momentos divertidos, dinero y negocios, historias..." style="font-size:12px; width:100%; box-sizing:border-box;">
-      </div>
-
-      <div class="form-group">
-        <div class="slider-header">
-          <span>Cantidad de clips a generar</span>
-          <span id="clips-count-val" style="font-weight:700; color:#fff;">5</span>
-        </div>
-        <input type="range" class="range-slider" min="1" max="10" value="5" oninput="document.getElementById('clips-count-val').innerText = this.value" aria-label="Cantidad de clips">
-      </div>
-
-      <button class="btn-generate-ai" id="btn-submit-process" onclick="submitCreation()">
-        Procesar Video
-      </button>
-    </div>
-  </div>
-
   <!-- MODAL INFORMATIVO (historial, métricas, ajustes, ayuda) -->
   <div class="modal-overlay" id="modal-info" onclick="if(event.target===this) closeInfoModal()">
     <div class="crear-clips-card" style="max-height:80vh; overflow:auto;">
@@ -2507,7 +4107,19 @@
   }
 
   // CAMBIO DE VISTAS
+  
+  // Pro Modal Handler
+  function openProModal() {
+    showToast('👑 Clip Factory Pro: Plan Comercial Ilimitado Activado');
+  }
+
+  // Theme Toggle Handler
+  function toggleTheme() {
+    showToast('Modo Oscuro Neón optimizado para máxima fidelidad visual');
+  }
+
   function switchView(viewName) {
+    if (viewName === 'proyectos') viewName = 'ffmpeg';
     currentView = viewName;
     document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
     document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
@@ -3852,6 +5464,72 @@
     return result;
   };
   loadClips();   // la primera carga (hecha antes de este bloque) no actualizaba las tarjetas
+})();
+</script>
+<!-- DISEÑO v3: el panel Crear ya no es una ventana; estas funciones mantienen vivos todos los botones que la llamaban -->
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+
+  // Todos los botones "Crear" (≈20) llaman a openCrearModal(): ahora llevan al panel y enfocan la URL
+  window.openCrearModal = function () {
+    switchView('inicio');
+    const panel = $('crear-panel');
+    if (panel) panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setTimeout(() => { const u = $('yt-url-input'); if (u) u.focus({ preventScroll: true }); }, 250);
+  };
+  window.closeCrearModal = function () { /* el panel es parte de la página: no hay nada que cerrar */ };
+  window.switchModalTab = function () { /* las pestañas URL/archivo se sustituyeron por el botón "Subir archivo" */ };
+
+  window.goToCrear = function (section) {
+    switchView('inicio');
+    const target = $(section === 'estilos' ? 'cp-estilos' : 'crear-panel');
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  window.showProInfo = function () {
+    openInfoModal('Clip Factory Pro (próximamente)',
+      '<p>Hoy Clip Factory AI funciona en tu equipo, <b style="color:#fff">sin límites ni costo</b>: todas las funciones del panel están disponibles.</p>' +
+      '<p style="margin-top:10px">El plan <b style="color:#fff">Pro</b> está en preparación: cuentas de usuario, minutos mensuales, procesamiento prioritario y exportación sin marca de agua en la nube. ' +
+      'Todavía <b style="color:#fff">no hay pagos ni planes activos</b>; este botón es informativo.</p>');
+  };
+
+  // Enter en la URL = Procesar video
+  const url = $('yt-url-input');
+  if (url) url.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); submitCreation(); } });
+
+  // Resumen en vivo con los valores reales que se enviarán
+  const STYLE_NAMES = { hormozi: 'Hormozi Neón', beast: 'MrBeast Lime', bounce: 'Pop Bouncing', glow: 'Cyber Glow', minimal: 'Minimal' };
+  const LAYOUT_NAMES = { auto: 'Automático (IA)', gaming: 'Gaming / Streamer', blur: 'Desenfoque' };
+  const SPEED_NAMES = { turbo: 'Turbo (3x)', studio: 'Calidad Studio' };
+  function renderSummary() {
+    const set = (id, txt) => { const el = $(id); if (el) el.textContent = txt; };
+    const a = ($('stream-start-time') || {}).value, b = ($('stream-end-time') || {}).value;
+    set('sum-format', typeof activeFormat !== 'undefined' ? activeFormat : '9:16');
+    set('sum-style', STYLE_NAMES[typeof activeSubStyle !== 'undefined' ? activeSubStyle : 'hormozi'] || '—');
+    set('sum-layout', LAYOUT_NAMES[typeof activeLayoutMode !== 'undefined' ? activeLayoutMode : 'auto'] || '—');
+    const speed = SPEED_NAMES[typeof activeSpeedMode !== 'undefined' ? activeSpeedMode : 'turbo'] || '—';
+    set('sum-speed', speed + ($('hook-zoom-check') && $('hook-zoom-check').checked ? ' + Hook Zoom' : ''));
+    set('sum-range', (a && a.trim()) || (b && b.trim()) ? `${(a || '').trim() || '00:00:00'} → ${(b || '').trim() || '…'}` : 'Video completo');
+    set('sum-clips', ($('clips-count-val') || {}).textContent || '5');
+  }
+  ['selectFormat', 'selectLayoutMode', 'selectSpeedMode', 'selectSubStyle'].forEach((name) => {
+    const original = window[name];
+    if (typeof original !== 'function') return;
+    window[name] = function (...args) { const r = original.apply(this, args); renderSummary(); syncPressed(); return r; };
+  });
+  ['stream-start-time', 'stream-end-time', 'clips-range', 'hook-zoom-check', 'fast-mode-check'].forEach((id) => {
+    const el = $(id); if (el) el.addEventListener('input', renderSummary);
+  });
+
+  // Estado seleccionado también para lectores de pantalla (aria-pressed sigue a la clase .active)
+  function syncPressed() {
+    document.querySelectorAll('.crear-panel .layout-card, .crear-panel .format-card, .crear-panel .sub-style-card').forEach((el) => {
+      el.setAttribute('aria-pressed', el.classList.contains('active') ? 'true' : 'false');
+    });
+  }
+  new MutationObserver(syncPressed).observe($('crear-panel') || document.body, { attributes: true, attributeFilter: ['class'], subtree: true });
+  renderSummary(); syncPressed();
 })();
 </script>
 </body>
