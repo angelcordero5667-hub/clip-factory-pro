@@ -243,7 +243,50 @@ class ViralMomentDetector:
         aligned = self._apply_energy(aligned, energy)
         deduped = self.deduplicate_candidates(aligned)
         deduped.sort(key=lambda c: c.virality_score, reverse=True)
+        deduped = self.normalize_virality_scores(deduped)
         return deduped[: self.max_candidates]
+
+    @staticmethod
+    def normalize_virality_scores(
+        candidates: List[ViralMomentCandidate],
+        target_min: float = 66.0,
+        target_max: float = 97.0,
+    ) -> List[ViralMomentCandidate]:
+        """Normaliza los puntajes de viralidad dentro del video para evitar saturación en 99-100.
+
+        Preserva estrictamente el orden relativo, mapeando los candidatos a un rango
+        perceptible (por defecto 66 a 97) combinando su valor relativo continuo (65%)
+        con su posición percentil (35%). Ajusta proporcionalmente los subpuntajes del desglose.
+        """
+        n = len(candidates)
+        if n == 0:
+            return candidates
+        if n == 1:
+            c = candidates[0]
+            raw = c.virality_score
+            c.virality_score = round(min(target_max, max(75.0, raw)), 1)
+            return candidates
+
+        candidates.sort(key=lambda x: x.virality_score, reverse=True)
+        scores = [c.virality_score for c in candidates]
+        s_min, s_max = min(scores), max(scores)
+
+        for i, c in enumerate(candidates):
+            raw = c.virality_score
+            v = (raw - s_min) / (s_max - s_min) if s_max > s_min else 0.5
+            p = ((n - 1) - i) / (n - 1)
+            t = 0.65 * v + 0.35 * p
+            norm_score = round(target_min + t * (target_max - target_min), 1)
+
+            if c.breakdown and raw > 0:
+                ratio = norm_score / raw
+                c.breakdown.hook_score = round(min(100.0, max(0.0, c.breakdown.hook_score * ratio)), 1)
+                c.breakdown.flow_score = round(min(100.0, max(0.0, c.breakdown.flow_score * ratio)), 1)
+                c.breakdown.trend_score = round(min(100.0, max(0.0, c.breakdown.trend_score * ratio)), 1)
+
+            c.virality_score = norm_score
+
+        return candidates
 
     # ------------------------------------------------------------------
     # Motor LLM por ventanas

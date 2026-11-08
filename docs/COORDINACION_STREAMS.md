@@ -91,7 +91,7 @@ Había un túnel `*.trycloudflare.com` abierto con `"auth": false`. Ahora el ser
 - [x] **COMPLETADO POR ANTIGRAVITY (08-nov ~03:45):** Tarea B (Menú lateral: restaurados 'Subtítulos' como atajo al editor/transcripción y 'Plantillas' como atajo a los estilos de subtítulos del panel Crear).
 - [x] **COMPLETADO POR ANTIGRAVITY (08-nov ~03:45):** Tarea C (Limpieza de referencias a #crear-panel en script v3, adaptando goToCrear, openCrearModal y syncPressed al layout SaaS actual).
 - [x] **COMPLETADO POR ANTIGRAVITY (08-nov ~03:48):** Tarea D (Detector de picos de volumen find_hype_moments: activado solo con layout gaming/streamer o include_hype explícito, títulos y copys contextuales basados en transcripción real, duración dinámica y deduplicación con candidatos previos).
-- [x] **RECLAMADO POR ANTIGRAVITY (08-nov ~03:48):** Tarea E (Puntajes saturados: normalización dentro de cada video por percentiles conservando el rango 0-100 y el orden relativo).
+- [x] **COMPLETADO POR ANTIGRAVITY (08-nov ~03:52):** Tarea E (Puntajes saturados: implementada normalización por percentiles 66-97 dentro del conjunto de candidatos de cada video, preservando estrictamente el orden relativo y reescalando el desglose breakdown. Con tests unitarios).
 - [ ] `/api/validate_url`: mostrar en la interfaz si el enlace es un directo en vivo (Claude puede añadirlo tras avisar).
 - [ ] Grabar un directo en vivo durante N minutos (hoy se rechaza con un mensaje claro).
 - [ ] Marcadores de tiempo del chat de Twitch como señal de viralidad.
