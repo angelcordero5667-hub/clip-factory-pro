@@ -3859,6 +3859,7 @@
         <div class="url-preview-info">
           <div class="url-preview-header">
             <span id="url-preview-platform" class="url-preview-tag">YouTube</span>
+            <span id="url-preview-live-badge" class="pill-tag" style="display:none; background:rgba(239,68,68,0.22); color:#f87171; border:1px solid rgba(239,68,68,0.45); font-size:10px; padding:2px 7px; font-weight:700;">🔴 EN VIVO</span>
             <span id="url-preview-channel" class="url-preview-channel">Canal</span>
           </div>
           <h4 id="url-preview-title" class="url-preview-title">Título del video</h4>
@@ -3871,6 +3872,10 @@
               <span class="preview-metric-label">Duración:</span>
               <span id="url-preview-duration-text" class="preview-metric-val">—</span>
             </div>
+          </div>
+          <div id="url-preview-live-warning" class="url-preview-warning" style="display: none; background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.35); color: #fca5a5;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <span id="url-preview-live-text">🔴 <strong>Emisión en directo:</strong> La transmisión sigue en vivo (no tiene fin definido). Espera a que termine o usa un directo ya finalizado (VOD) para poder crear clips.</span>
           </div>
           <div id="url-preview-long-warning" class="url-preview-warning" style="display: none;">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
@@ -4929,6 +4934,39 @@
 
     const badgeEl = document.getElementById('url-preview-dur-badge');
     if (badgeEl) badgeEl.innerText = formatDurationSec(data.duration);
+
+    const liveBadge = document.getElementById('url-preview-live-badge');
+    const liveWarn = document.getElementById('url-preview-live-warning');
+    const liveText = document.getElementById('url-preview-live-text');
+
+    if (data.is_live) {
+      if (liveBadge) {
+        liveBadge.style.display = 'inline-flex';
+        liveBadge.style.color = '#f87171';
+        liveBadge.style.borderColor = 'rgba(239,68,68,0.5)';
+        liveBadge.style.background = 'rgba(239,68,68,0.25)';
+        liveBadge.innerText = '🔴 EN VIVO';
+      }
+      if (liveWarn) {
+        liveWarn.style.display = 'flex';
+        if (liveText) liveText.innerHTML = '🔴 <strong>Emisión en directo:</strong> La transmisión sigue en vivo (no tiene fin definido). Espera a que termine o usa un directo ya finalizado (VOD) para poder crear clips.';
+      }
+    } else if (data.is_upcoming) {
+      if (liveBadge) {
+        liveBadge.style.display = 'inline-flex';
+        liveBadge.style.color = '#38bdf8';
+        liveBadge.style.borderColor = 'rgba(56,189,248,0.5)';
+        liveBadge.style.background = 'rgba(56,189,248,0.2)';
+        liveBadge.innerText = '🕒 PROGRAMADO';
+      }
+      if (liveWarn) {
+        liveWarn.style.display = 'flex';
+        if (liveText) liveText.innerHTML = '🕒 <strong>Transmisión programada:</strong> Este directo aún no ha comenzado en la plataforma.';
+      }
+    } else {
+      if (liveBadge) liveBadge.style.display = 'none';
+      if (liveWarn) liveWarn.style.display = 'none';
+    }
 
     const imgEl = document.getElementById('url-preview-thumb');
     const phEl = document.getElementById('url-preview-placeholder');

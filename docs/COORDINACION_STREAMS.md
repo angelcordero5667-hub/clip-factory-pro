@@ -84,6 +84,7 @@ Pendientes para Antigravity: restaurar "Subtítulos" y "Plantillas" en el menú 
   4. Modelo Faster-Whisper actualizado por defecto a `small` (pre-descargado en `data/cache/whisper_models` y configurable con `CLIP_WHISPER_MODEL`) para máxima precisión fonética en español.
 
 ## Pendiente / ideas (reclamar aquí antes de empezar)
+- [x] **COMPLETADO POR ANTIGRAVITY (08-nov ~07:45):** Tarea 10: Detección y badges visuales de directos en vivo (/api/validate_url informa is_live e is_upcoming, y la tarjeta de previsualización muestra badge pulsante rojo '🔴 EN VIVO' y aviso amigable).
 - [x] **COMPLETADO POR ANTIGRAVITY (08-nov ~07:23):** Tarea 9: Modo Split-Screen / Pantalla dividida Podcast 2 caras (soporte de layout 'split' en panel Crear, api_server, choose_framing y clip_maker con auto-detección de 2 hablantes).
 - [x] **COMPLETADO POR ANTIGRAVITY (08-nov ~07:18):** Tarea 8: Filtro y badges por categoría de gancho IA (humor, debate, épico, revelación, consejo) en la biblioteca de clips con filtrado en tiempo real.
 - [x] **COMPLETADO POR ANTIGRAVITY (08-nov ~07:12):** Tarea 7: Generador de Hooks A/B/C interactivo en editor de copys y empaquetado masivo en ZIP con subtítulos .SRT individuales por clip.

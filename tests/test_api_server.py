@@ -237,6 +237,30 @@ def test_validate_url_success_with_thumbnail(monkeypatch):
     assert data["duration"] == 600
     assert data["uploader"] == "Canal Pro"
     assert data["thumbnail"] == "https://img.youtube.com/vi/test/maxresdefault.jpg"
+    assert data["is_live"] is False
+    assert data["is_upcoming"] is False
+
+
+def test_validate_url_detects_live_stream(monkeypatch):
+    class FakeLiveYDL:
+        def __init__(self, *args, **kwargs): pass
+        def __enter__(self): return self
+        def __exit__(self, *args): pass
+        def extract_info(self, url, download=False):
+            return {
+                "title": "Directo en Vivo Gamer",
+                "duration": None,
+                "uploader": "Streamer Pro",
+                "live_status": "is_live",
+                "is_live": True,
+            }
+    import yt_dlp
+    monkeypatch.setattr(yt_dlp, "YoutubeDL", FakeLiveYDL)
+    r = client.get("/api/validate_url", params={"url": "https://www.youtube.com/watch?v=live123"})
+    assert r.status_code == 200
+    data = r.json()
+    assert data["valid"] is True
+    assert data["is_live"] is True
 
 
 def test_list_jobs_includes_video_duration(tdb):

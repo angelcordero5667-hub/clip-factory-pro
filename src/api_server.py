@@ -830,6 +830,10 @@ def validate_url(url: str):
 
             uploader = info.get("uploader") or info.get("channel") or ""
 
+            live_status = str(info.get("live_status") or "").lower()
+            is_live = bool(info.get("is_live") or live_status == "is_live")
+            is_upcoming = bool(live_status == "is_upcoming")
+
             return {
                 "valid": True,
                 "title": info.get("title") or f"Directo / Video de {platform}",
@@ -837,6 +841,8 @@ def validate_url(url: str):
                 "uploader": uploader,
                 "thumbnail": thumbnail,
                 "is_stream": is_stream,
+                "is_live": is_live,
+                "is_upcoming": is_upcoming,
                 "platform": platform,
             }
     except Exception as e:
