@@ -58,6 +58,8 @@ class ClipFactoryPipeline:
         fast: bool = False,
         language: Optional[str] = None,
         layout_mode: Optional[str] = None,
+        speed_mode: Optional[str] = None,
+        hook_zoom: Optional[bool] = None,
         time_range: Optional[Tuple[float, float]] = None,
         progress_callback: Optional[Callable[[str], None]] = None,
         step_callback: Optional[StepCallback] = None,
@@ -218,6 +220,8 @@ class ClipFactoryPipeline:
                 uppercase=uppercase,
                 add_watermark=add_watermark,
                 layout_mode=layout_mode,
+                speed_mode=speed_mode,
+                hook_zoom=hook_zoom,
             )
             for cand in candidates:
                 res = results.get(cand.id)

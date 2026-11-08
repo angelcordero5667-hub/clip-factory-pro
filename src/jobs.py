@@ -95,6 +95,8 @@ class JobWorker:
                 time_range = (t_start, t_start + 1800.0)
 
             layout_mode = opts.get("layout") or opts.get("layout_mode") or "auto"
+            speed_mode = opts.get("speed_mode") or "turbo"
+            hook_zoom = bool(opts.get("hook_zoom", True)) if "hook_zoom" in opts else True
 
             video_id, cands = pipeline.run_pipeline(
                 video_input=job["source"],
@@ -105,6 +107,8 @@ class JobWorker:
                 fast=bool(opts.get("fast", False)),
                 language=opts.get("language") or None,
                 layout_mode=layout_mode,
+                speed_mode=speed_mode,
+                hook_zoom=hook_zoom,
                 time_range=time_range,
                 step_callback=on_step,
             )

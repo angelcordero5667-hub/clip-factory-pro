@@ -62,14 +62,14 @@ class VerticalClipMaker:
         
         self.face_tracker = FaceTracker()
 
-    def detect_scene_cuts(self, video_path: str) -> List[float]:
+    def detect_scene_cuts(self, video_path: str, frame_skip: int = 8) -> List[float]:
         cuts = []
         try:
             from scenedetect import open_video, SceneManager, ContentDetector
             video = open_video(video_path)
             scene_manager = SceneManager()
             scene_manager.add_detector(ContentDetector(threshold=27.0, min_scene_len=15))
-            scene_manager.detect_scenes(video, frame_skip=4, show_progress=False)
+            scene_manager.detect_scenes(video, frame_skip=frame_skip, show_progress=False)
             scene_list = scene_manager.get_scene_list()
 
             for scene in scene_list:
@@ -117,13 +117,14 @@ class VerticalClipMaker:
 
     def build_filter_complex(
         self, w: int, h: int, ass_path: Optional[Path] = None, framing: Optional[Framing] = None,
-        cut_expr: Optional[str] = None,
+        cut_expr: Optional[str] = None, hook_zoom: bool = False,
     ) -> Tuple[str, str]:
         """Construye el filtro según el layout. Devuelve (filtro, etiqueta_final).
 
         - blur (por defecto): fondo desenfocado a 1/4 de resolución (270x480 en 9:16) reescalado.
         - crop: recorte centrado en el hablante con x dinámica (expresión en `t`).
         - split: 2 hablantes, mitad superior e inferior (solo vertical).
+        - hook_zoom: punch-in sutil (1.08x) durante los primeros 2.5s para atrapar la mirada en TikTok/Reels.
         """
         framing = framing or Framing()
         if framing.mode == "crop" and framing.crop_w > 0:
@@ -159,6 +160,13 @@ class VerticalClipMaker:
                 "[bg_blur][fg_scaled]overlay=(W-w)/2:(H-h)/2[combined]",
             ]
         label = "[combined]"
+        if hook_zoom:
+            parts.append(
+                f";{label}split=2[v_base][v_hook];"
+                f"[v_hook]crop=w=iw/1.08:h=ih/1.08,scale={w}:{h}[v_punch];"
+                f"[v_base][v_punch]overlay=x=0:y=0:enable='between(t,0,2.5)'[v_hooked]"
+            )
+            label = "[v_hooked]"
         if cut_expr:
             # El encuadre ya se aplicó sobre la línea de tiempo original; ahora se quitan las pausas
             # y se cierran los huecos. Los subtítulos (ya re-sincronizados) se queman después.
@@ -175,13 +183,21 @@ class VerticalClipMaker:
         return "".join(parts), label
 
     @staticmethod
-    def video_codec_args(encoder: str) -> List[str]:
+    def video_codec_args(encoder: str, speed_mode: Optional[str] = None) -> List[str]:
         r = settings.render
+        if speed_mode == "turbo":
+            preset = "superfast"
+        elif speed_mode == "studio":
+            preset = "medium"
+        elif speed_mode == "fast":
+            preset = "veryfast"
+        else:
+            preset = r.preset
         if encoder == "h264_amf":
             return ["-c:v", "h264_amf", "-quality", "speed", "-rc", "cqp",
                     "-qp_i", str(r.crf), "-qp_p", str(r.crf + 2), "-qp_b", str(r.crf + 2),
                     "-pix_fmt", "yuv420p"]
-        return ["-c:v", "libx264", "-preset", r.preset, "-crf", str(r.crf), "-pix_fmt", "yuv420p"]
+        return ["-c:v", "libx264", "-preset", preset, "-crf", str(r.crf), "-pix_fmt", "yuv420p"]
 
     def build_ffmpeg_cmd(
         self,
@@ -195,6 +211,7 @@ class VerticalClipMaker:
         is_pretrimmed: bool = False,
         normalize_audio: bool = True,
         cut_expr: Optional[str] = None,
+        speed_mode: Optional[str] = None,
     ) -> List[str]:
         seek_arg = ["-ss", "0.0"] if is_pretrimmed else ["-ss", f"{start_time:.3f}"]
         af_parts = []
@@ -212,7 +229,7 @@ class VerticalClipMaker:
             "-map", final_label,
             "-map", "0:a?",
             *audio_filter,
-            *self.video_codec_args(encoder),
+            *self.video_codec_args(encoder, speed_mode=speed_mode),
             "-c:a", "aac", "-b:a", "160k",
             "-threads", str(settings.render.threads_per_clip),
             "-movflags", "+faststart",
@@ -250,6 +267,8 @@ class VerticalClipMaker:
         smart_framing: Optional[bool] = None,
         trim_silences: Optional[bool] = None,
         layout_mode: Optional[str] = None,
+        speed_mode: Optional[str] = None,
+        hook_zoom: Optional[bool] = None,
     ) -> Path:
         input_p = Path(video_path)
         if not input_p.exists():
@@ -321,12 +340,14 @@ class VerticalClipMaker:
             elif layout_mode == "gaming":
                 framing = choose_framing([], 1920, 1080, w, h, allow_split=False, layout_mode="gaming")
 
-        filter_str, final_label = self.build_filter_complex(w, h, ass_path, framing, cut_expr=cut_expr)
+        if hook_zoom is None:
+            hook_zoom = settings.render.hook_zoom
+        filter_str, final_label = self.build_filter_complex(w, h, ass_path, framing, cut_expr=cut_expr, hook_zoom=hook_zoom)
 
         logger.info(f"Renderizando clip {aspect_ratio}: {output_file.name} ({duration:.1f}s)")
         self._run_ffmpeg(lambda enc: self.build_ffmpeg_cmd(
             input_p, output_file, start_time, duration, filter_str, final_label,
-            encoder=enc, is_pretrimmed=is_pretrimmed, cut_expr=cut_expr,
+            encoder=enc, is_pretrimmed=is_pretrimmed, cut_expr=cut_expr, speed_mode=speed_mode,
         ))
         self.make_thumbnail(output_file)
         logger.info(f"Clip generado: {output_file}")

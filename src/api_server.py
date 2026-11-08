@@ -39,6 +39,7 @@ SUBTITLE_STYLES = (
 )
 ASPECT_RATIOS = ("9:16", "1:1", "16:9")
 LAYOUT_MODES = ("auto", "gaming", "blur")
+SPEED_MODES = ("turbo", "fast", "studio")
 VALID_STATUS = ("pending", "approved", "rejected")
 MIN_CLIP_SEC, MAX_CLIP_SEC = 5.0, 180.0
 
@@ -381,6 +382,8 @@ class JobBody(BaseModel):
     time_range_start: Optional[str] = None
     time_range_end: Optional[str] = None
     layout: Optional[str] = "auto"
+    speed_mode: Optional[str] = "turbo"
+    hook_zoom: Optional[bool] = True
 
 
 def _is_public_url(url: str) -> bool:
@@ -428,6 +431,8 @@ def create_job(body: JobBody):
         raise HTTPException(status_code=400, detail="Formato inválido. Opciones: 9:16, 1:1, 16:9.")
     if body.layout and body.layout not in LAYOUT_MODES:
         raise HTTPException(status_code=400, detail=f"Diseño inválido. Opciones: {', '.join(LAYOUT_MODES)}.")
+    if body.speed_mode and body.speed_mode not in SPEED_MODES:
+        raise HTTPException(status_code=400, detail=f"Modo de velocidad inválido. Opciones: {', '.join(SPEED_MODES)}.")
     source = _validate_source(body.source)
     options = body.model_dump(exclude={"source"})
     job_id = db.create_job(source=source, options=options)

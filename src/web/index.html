@@ -1437,6 +1437,54 @@
     padding: 1px 3px;
     border-radius: 3px;
   }
+  .grid-score {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    background: rgba(16, 185, 129, 0.9);
+    color: #fff;
+    font-size: 9px;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    padding: 2px 5px;
+    border-radius: 4px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+  }
+  .grid-card-info {
+    padding: 6px 8px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    background: #141827;
+  }
+  .grid-card-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .btn-grid-copy {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    background: rgba(168, 85, 247, 0.15);
+    border: 1px solid rgba(168, 85, 247, 0.35);
+    color: #d8b4fe;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 4px 6px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .btn-grid-copy:hover {
+    background: rgba(168, 85, 247, 0.35);
+    color: #fff;
+    border-color: #c084fc;
+  }
 
   /* TOAST FLOATING NOTIFICATION */
   .toast-notification {
@@ -1969,6 +2017,28 @@
           </div>
           <div id="clip-status-line" style="font-size:12px; color:var(--text-muted); margin-bottom:12px;">Selecciona un clip para ver sus acciones.</div>
 
+          <!-- Card de Copys Virales con 1 Clic -->
+          <div class="card" id="editor-copys-box" style="margin-bottom:12px; padding:12px; background:rgba(20, 24, 39, 0.85); border:1px solid rgba(255,255,255,0.08); border-radius:var(--radius-md);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <span style="font-size:12px; font-weight:700; color:#fff; display:flex; align-items:center; gap:6px;">
+                <span style="color:#ec4899;">♬</span> Copys Virales
+              </span>
+              <span class="pill-tag" id="editor-clip-score" style="font-size:10px;">-- % Viral</span>
+            </div>
+            
+            <div style="display:flex; gap:6px; margin-bottom:8px;">
+              <button class="pill-tag active" id="tab-copy-tiktok" onclick="switchCopyTab('TikTok')" style="cursor:pointer; font-size:11px;">TikTok</button>
+              <button class="pill-tag" id="tab-copy-reels" onclick="switchCopyTab('Reels')" style="cursor:pointer; font-size:11px;">Reels</button>
+              <button class="pill-tag" id="tab-copy-shorts" onclick="switchCopyTab('Shorts')" style="cursor:pointer; font-size:11px;">Shorts</button>
+            </div>
+
+            <div id="editor-copy-preview" style="font-size:11.5px; color:var(--text-secondary); background:rgba(0,0,0,0.3); border-radius:6px; padding:8px; line-height:1.4; max-height:85px; overflow-y:auto; white-space:pre-wrap; border:1px solid rgba(255,255,255,0.05);">Selecciona un clip para ver el copy...</div>
+            
+            <button class="btn-verificar" id="btn-copy-tab" onclick="copyCurrentTabCopy()" style="width:100%; margin-top:8px; justify-content:center;">
+              📋 Copiar Copy & Hashtags
+            </button>
+          </div>
+
           <button class="btn-generate-ai" onclick="openCrearModal()">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
             Generar clips con IA
@@ -2244,6 +2314,30 @@
         </div>
       </div>
 
+      <!-- VELOCIDAD Y RETENCIÓN -->
+      <div class="form-group" style="background: rgba(34, 211, 238, 0.05); border: 1px solid rgba(34, 211, 238, 0.22); border-radius: var(--radius-md); padding: 12px 14px;">
+        <label class="form-label" style="color:var(--neon-cyan); font-weight:700; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          Velocidad de Render y Efectos de Retención
+        </label>
+        
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:10px;">
+          <div class="layout-card active" id="speed-card-turbo" onclick="selectSpeedMode('turbo')">
+            <span style="font-weight:700;">⚡ Modo Turbo (3x)</span>
+            <div style="font-size:10px; color:var(--text-muted); margin-top:2px;">Render ultrarrápido</div>
+          </div>
+          <div class="layout-card" id="speed-card-studio" onclick="selectSpeedMode('studio')">
+            <span style="font-weight:700;">💎 Calidad Studio</span>
+            <div style="font-size:10px; color:var(--text-muted); margin-top:2px;">Máxima fidelidad</div>
+          </div>
+        </div>
+
+        <label style="display:flex; align-items:center; gap:8px; font-size:12px; color:#fff; cursor:pointer; user-select:none;">
+          <input type="checkbox" id="hook-zoom-check" checked style="accent-color:var(--neon-cyan); cursor:pointer;">
+          <span>🎣 <b>Auto-Hook Zoom (0-2.5s)</b> <span style="color:var(--text-muted); font-size:11px;">— Punch-in que dispara retención</span></span>
+        </label>
+      </div>
+
       <div class="form-group">
         <label class="form-label">Formato de salida ⓘ</label>
         <div class="format-options">
@@ -2446,15 +2540,26 @@
   let activeLayoutMode = 'auto';
   function selectLayoutMode(mode) {
     activeLayoutMode = mode;
-    document.querySelectorAll('.layout-card').forEach(c => c.classList.remove('active'));
-    const target = document.getElementById('layout-card-' + mode);
-    if (target) target.classList.add('active');
+    ['auto', 'gaming', 'blur'].forEach(m => {
+      const el = document.getElementById('layout-card-' + m);
+      if (el) el.classList.toggle('active', m === mode);
+    });
     const labels = {
       'auto': 'Automático (IA)',
       'gaming': 'Gaming / Streamer (Cámara arriba + Juego abajo)',
       'blur': 'Fondo desenfoque (Original)'
     };
     showToast(`Diseño: ${labels[mode] || mode}`);
+  }
+
+  let activeSpeedMode = 'turbo';
+  function selectSpeedMode(mode) {
+    activeSpeedMode = mode;
+    ['turbo', 'studio'].forEach(m => {
+      const el = document.getElementById('speed-card-' + m);
+      if (el) el.classList.toggle('active', m === mode);
+    });
+    showToast(mode === 'turbo' ? '⚡ Modo Turbo activado (3x más rápido)' : '💎 Calidad Studio seleccionada');
   }
 
   function selectSubStyle(el, st) {
@@ -2548,7 +2653,9 @@
       language: 'es',
       time_range_start: startRange || null,
       time_range_end: endRange || null,
-      layout: activeLayoutMode || 'auto'
+      layout: activeLayoutMode || 'auto',
+      speed_mode: activeSpeedMode || 'turbo',
+      hook_zoom: !!document.getElementById('hook-zoom-check')?.checked
     };
 
     const btn = document.getElementById('btn-submit-process');
@@ -3036,10 +3143,55 @@
       <div class="grid-clip-card" onclick="selectClipForEditorById('${esc(c.id)}')" title="${esc(c.title)}">
         <div class="grid-thumb-box">
           ${clipThumb(c, 20)}
+          <span class="grid-score">🔥 ${c.score}%</span>
           <span class="grid-duration">${clock(c.end - c.start)}</span>
+        </div>
+        <div class="grid-card-info">
+          <div class="grid-card-title">${esc(c.title)}</div>
+          <button class="btn-grid-copy" onclick="event.stopPropagation(); copyClipCopy('${esc(c.id)}')">
+            <span>📋 Copiar Copy</span>
+          </button>
         </div>
       </div>
     `).join('');
+  }
+
+  let activeCopyTab = 'TikTok';
+  function switchCopyTab(net) {
+    activeCopyTab = net;
+    ['TikTok', 'Reels', 'Shorts'].forEach(n => {
+      const el = document.getElementById('tab-copy-' + n.toLowerCase());
+      if (el) el.classList.toggle('active', n === net);
+    });
+    updateEditorCopyDisplay();
+  }
+
+  function updateEditorCopyDisplay() {
+    const box = document.getElementById('editor-copy-preview');
+    const scoreBadge = document.getElementById('editor-clip-score');
+    if (!box) return;
+    if (!currentActiveClip) {
+      box.innerText = 'Selecciona un clip para ver el copy...';
+      if (scoreBadge) scoreBadge.innerText = '-- % Viral';
+      return;
+    }
+    if (scoreBadge) scoreBadge.innerText = `${currentActiveClip.score}% Viral`;
+    const copyData = currentActiveClip.copy && currentActiveClip.copy[activeCopyTab];
+    if (copyData) {
+      box.innerText = `${copyData[0]}\n\n${copyData[1]}`;
+    } else {
+      box.innerText = `${currentActiveClip.title}\n\n#viral #shorts #podcast`;
+    }
+  }
+
+  function copyCurrentTabCopy() {
+    if (!currentActiveClip) {
+      showToast('No hay un clip seleccionado');
+      return;
+    }
+    const copyData = currentActiveClip.copy && currentActiveClip.copy[activeCopyTab];
+    const text = copyData ? `${copyData[0]}\n\n${copyData[1]}` : `${currentActiveClip.title}\n\n#viral #shorts #podcast`;
+    copyText(text, `Copy de ${activeCopyTab} copiado`);
   }
 
   function selectClipForEditorById(clipId) {
@@ -3061,6 +3213,7 @@
     const nameEl = document.getElementById('current-clip-track-name');
     if (nameEl) nameEl.innerText = c.title || 'Clip Seleccionado';
     refreshActionBar();
+    updateEditorCopyDisplay();
     switchView('editor');
   }
 

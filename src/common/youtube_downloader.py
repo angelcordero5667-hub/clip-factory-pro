@@ -26,6 +26,9 @@ def _base_opts(progress: ProgressFn) -> dict:
         'retries': DEFAULT_RETRIES,
         'fragment_retries': DEFAULT_RETRIES,
         'socket_timeout': SOCKET_TIMEOUT,
+        'concurrent_fragment_downloads': 4,
+        'buffersize': 1024 * 1024,
+        'http_chunk_size': 10485760,
     }
     if progress:
         def hook(d):
