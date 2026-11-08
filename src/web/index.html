@@ -3526,6 +3526,94 @@
     }
   }
 
+  /* ==========================================================================
+     BARRA DE PRESETS (TAREA 4)
+     ========================================================================== */
+  .studio-presets-bar {
+    background: rgba(18, 20, 34, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 10px 14px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .presets-bar-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+  .presets-chips-container {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    flex-wrap: wrap;
+    flex: 1;
+  }
+  .preset-chip {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    color: #e2e8f0;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 5px 11px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+    user-select: none;
+  }
+  .preset-chip:hover {
+    background: rgba(168, 85, 247, 0.18);
+    border-color: rgba(168, 85, 247, 0.5);
+    color: #fff;
+    transform: translateY(-1px);
+  }
+  .preset-chip.active {
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.45), rgba(59, 130, 246, 0.45));
+    border-color: var(--neon-purple);
+    color: #fff;
+    box-shadow: 0 0 12px rgba(168, 85, 247, 0.35);
+  }
+  .preset-chip.preset-chip-add {
+    background: rgba(34, 211, 238, 0.08);
+    border: 1px dashed rgba(34, 211, 238, 0.4);
+    color: #38bdf8;
+    font-weight: 600;
+  }
+  .preset-chip.preset-chip-add:hover {
+    background: rgba(34, 211, 238, 0.18);
+    border-color: #38bdf8;
+    color: #fff;
+  }
+  .preset-del-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: rgba(239, 68, 68, 0.25);
+    color: #fca5a5;
+    font-size: 11.5px;
+    line-height: 1;
+    margin-left: 4px;
+    transition: background 0.15s ease;
+  }
+  .preset-del-btn:hover {
+    background: #ef4444;
+    color: #fff;
+  }
+
 </style>
 </head>
 <body>
@@ -3771,6 +3859,17 @@
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
             <span>Video de más de 30 min: te sugerimos indicar <strong>Desde</strong> y <strong>Hasta</strong> abajo para extraer clips de tu momento favorito más rápido.</span>
           </div>
+        </div>
+      </div>
+
+      <!-- BARRA DE PRESETS Y AJUSTES RÁPIDOS (TAREA 4) -->
+      <div class="studio-presets-bar">
+        <div class="presets-bar-title">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2.2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          <span>Presets:</span>
+        </div>
+        <div class="presets-chips-container" id="presets-chips-container">
+          <!-- Renderizado dinámico de chips de presets -->
         </div>
       </div>
 
@@ -4849,10 +4948,15 @@
   }
 
   function selectFormat(el, fmt) {
+    if (typeof el === 'string') {
+      fmt = el;
+      el = Array.from(document.querySelectorAll('.format-card')).find(c => c.innerText.includes(fmt));
+    }
     document.querySelectorAll('.format-card').forEach(c => c.classList.remove('active'));
-    el.classList.add('active');
+    if (el) el.classList.add('active');
     activeFormat = fmt;
-    showToast(`Formato seleccionado: ${fmt}`);
+    saveLastSettings();
+    showToast(`Formato: ${fmt}`);
   }
 
   let activeClipDuration = 'medium';
@@ -4870,6 +4974,7 @@
       'medium': 'Medio (30-60 s)',
       'long': 'Largo (60-90 s)'
     };
+    saveLastSettings();
     showToast(`Duración objetivo: ${labels[dur] || dur}`);
   }
 
@@ -4885,6 +4990,7 @@
       'gaming': 'Gaming / Streamer (Cámara arriba + Juego abajo)',
       'blur': 'Fondo desenfoque (Original)'
     };
+    saveLastSettings();
     showToast(`Diseño: ${labels[mode] || mode}`);
   }
 
@@ -4895,14 +5001,20 @@
       const el = document.getElementById('speed-card-' + m);
       if (el) el.classList.toggle('active', m === mode);
     });
+    saveLastSettings();
     showToast(mode === 'turbo' ? '⚡ Modo Turbo activado (3x más rápido)' : '💎 Calidad Studio seleccionada');
   }
 
   function selectSubStyle(el, st) {
+    if (typeof el === 'string') {
+      st = el;
+      el = Array.from(document.querySelectorAll('.sub-style-card')).find(c => (c.getAttribute('onclick') || '').includes(st));
+    }
     document.querySelectorAll('.sub-style-card').forEach(c => c.classList.remove('active'));
-    el.classList.add('active');
+    if (el) el.classList.add('active');
     activeSubStyle = st;
     applySubtitleStyle(st);
+    saveLastSettings();
   }
 
   function applySubtitleStyle(st) {
@@ -4987,6 +5099,7 @@
     const sel = document.getElementById('editor-sub-size');
     if (sel) sel.value = sz;
     updateSubOverlayPreview();
+    if (typeof saveLastSettings === 'function') saveLastSettings();
   }
 
   function selectSubPos(el, pos) {
@@ -4995,6 +5108,7 @@
     const sel = document.getElementById('editor-sub-pos');
     if (sel) sel.value = pos;
     updateSubOverlayPreview();
+    if (typeof saveLastSettings === 'function') saveLastSettings();
   }
 
   function updateSubOverlayPreview() {
@@ -5025,6 +5139,210 @@
     } else if (posVal === 'top') {
       box.style.top = '12%';
     }
+  }
+
+  // ==========================================================================
+  // RECORDAR AJUSTES Y PRESETS (TAREA 4)
+  // ==========================================================================
+  const DEFAULT_PRESETS = {
+    'Podcast': {
+      format: '9:16',
+      sub_style: 'minimal',
+      sub_size: 'medium',
+      sub_pos: 'bottom',
+      layout: 'auto',
+      speed: 'turbo',
+      hook_zoom: true,
+      fast: false,
+      language: 'es',
+      target_duration: 'medium',
+      clips: 5,
+      watermark: '',
+      focus_prompt: 'Momentos clave, reflexiones y anécdotas impactantes'
+    },
+    'Gaming': {
+      format: '9:16',
+      sub_style: 'beast',
+      sub_size: 'small',
+      sub_pos: 'bottom_low',
+      layout: 'gaming',
+      speed: 'turbo',
+      hook_zoom: true,
+      fast: false,
+      language: 'es',
+      target_duration: 'short',
+      clips: 5,
+      watermark: '',
+      focus_prompt: 'Clips divertidos, reacciones épicas y jugadas destacadas'
+    },
+    'Entrevista': {
+      format: '9:16',
+      sub_style: 'hormozi',
+      sub_size: 'medium',
+      sub_pos: 'bottom',
+      layout: 'auto',
+      speed: 'turbo',
+      hook_zoom: true,
+      fast: false,
+      language: 'es',
+      target_duration: 'long',
+      clips: 4,
+      watermark: '',
+      focus_prompt: 'Declaraciones reveladoras, preguntas intensas y lecciones'
+    }
+  };
+
+  function getCurrentPanelSettings() {
+    return {
+      format: activeFormat || '9:16',
+      sub_style: activeSubStyle || 'hormozi',
+      sub_size: activeSubSize || 'medium',
+      sub_pos: activeSubPos || 'bottom',
+      layout: activeLayoutMode || 'auto',
+      speed: activeSpeedMode || 'turbo',
+      hook_zoom: !!document.getElementById('hook-zoom-check')?.checked,
+      fast: !!document.getElementById('fast-mode-check')?.checked,
+      language: document.getElementById('clip-language-select')?.value || 'auto',
+      target_duration: activeClipDuration || 'medium',
+      clips: parseInt(document.getElementById('clips-range')?.value || '5', 10),
+      watermark: document.getElementById('watermark-input')?.value || '',
+      focus_prompt: document.getElementById('focus-prompt-input')?.value || '',
+      focus_prompt_type: document.getElementById('focus-prompt-type')?.value || 'theme'
+    };
+  }
+
+  function applySettingsObject(s, silent = false) {
+    if (!s || typeof s !== 'object') return;
+    if (s.format) selectFormat(s.format);
+    if (s.sub_style) selectSubStyle(s.sub_style);
+    if (s.sub_size) selectSubSize(null, s.sub_size);
+    if (s.sub_pos) selectSubPos(null, s.sub_pos);
+    if (s.layout) selectLayoutMode(s.layout);
+    if (s.speed) selectSpeedMode(s.speed);
+    if (s.target_duration) selectClipDuration(s.target_duration);
+
+    const hzEl = document.getElementById('hook-zoom-check');
+    if (hzEl && typeof s.hook_zoom === 'boolean') hzEl.checked = s.hook_zoom;
+
+    const fastEl = document.getElementById('fast-mode-check');
+    if (fastEl && typeof s.fast === 'boolean') fastEl.checked = s.fast;
+
+    const langEl = document.getElementById('clip-language-select');
+    if (langEl && s.language) langEl.value = s.language;
+
+    const rangeEl = document.getElementById('clips-range');
+    const valEl = document.getElementById('clips-count-val');
+    if (rangeEl && s.clips) {
+      rangeEl.value = s.clips;
+      if (valEl) valEl.innerText = s.clips;
+    }
+
+    const wmEl = document.getElementById('watermark-input');
+    if (wmEl && typeof s.watermark === 'string') wmEl.value = s.watermark;
+
+    const fpEl = document.getElementById('focus-prompt-input');
+    if (fpEl && typeof s.focus_prompt === 'string') fpEl.value = s.focus_prompt;
+
+    const fptEl = document.getElementById('focus-prompt-type');
+    if (fptEl && s.focus_prompt_type) fptEl.value = s.focus_prompt_type;
+
+    if (!silent) saveLastSettings();
+  }
+
+  function saveLastSettings() {
+    try {
+      const s = getCurrentPanelSettings();
+      localStorage.setItem('clip_last_settings', JSON.stringify(s));
+    } catch (e) {}
+  }
+
+  function restoreLastSettings() {
+    try {
+      const raw = localStorage.getItem('clip_last_settings');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        applySettingsObject(parsed, true);
+      }
+    } catch (e) {}
+    renderPresetChips();
+  }
+
+  function applyPreset(name) {
+    let preset = DEFAULT_PRESETS[name];
+    if (!preset) {
+      try {
+        const customs = JSON.parse(localStorage.getItem('clip_custom_presets') || '{}');
+        preset = customs[name];
+      } catch (e) {}
+    }
+    if (!preset) {
+      showToast(`No se encontró el preset "${name}"`);
+      return;
+    }
+    applySettingsObject(preset);
+    showToast(`Preset "${name}" aplicado`);
+    highlightActivePresetChip(name);
+  }
+
+  function promptSaveCustomPreset() {
+    const name = (prompt('Nombre para tu preset (ej. Shorts rápidos, Gameplays):') || '').trim();
+    if (!name) return;
+    if (DEFAULT_PRESETS[name]) {
+      alert('Ese nombre coincide con un preset predeterminado. Usa otro nombre.');
+      return;
+    }
+    try {
+      const customs = JSON.parse(localStorage.getItem('clip_custom_presets') || '{}');
+      customs[name] = getCurrentPanelSettings();
+      localStorage.setItem('clip_custom_presets', JSON.stringify(customs));
+      renderPresetChips();
+      highlightActivePresetChip(name);
+      showToast(`Preset "${name}" guardado exitosamente`);
+    } catch (e) {
+      showToast('No se pudo guardar el preset (localStorage no disponible)');
+    }
+  }
+
+  function deleteCustomPreset(name, event) {
+    if (event) event.stopPropagation();
+    if (!confirm(`¿Eliminar tu preset personalizado "${name}"?`)) return;
+    try {
+      const customs = JSON.parse(localStorage.getItem('clip_custom_presets') || '{}');
+      delete customs[name];
+      localStorage.setItem('clip_custom_presets', JSON.stringify(customs));
+      renderPresetChips();
+      showToast(`Preset "${name}" eliminado`);
+    } catch (e) {}
+  }
+
+  function renderPresetChips() {
+    const container = document.getElementById('presets-chips-container');
+    if (!container) return;
+    let customs = {};
+    try {
+      customs = JSON.parse(localStorage.getItem('clip_custom_presets') || '{}');
+    } catch (e) {}
+
+    let html = '';
+    html += `<button type="button" class="preset-chip" data-preset="Podcast" onclick="applyPreset('Podcast')" title="Ajustes ideales para podcasts y entrevistas">🎙️ Podcast</button>`;
+    html += `<button type="button" class="preset-chip" data-preset="Gaming" onclick="applyPreset('Gaming')" title="Layout gaming, subtítulos discretos y clips cortos">🎮 Gaming</button>`;
+    html += `<button type="button" class="preset-chip" data-preset="Entrevista" onclick="applyPreset('Entrevista')" title="Hormozi Neón y clips largos de 60-90s">💬 Entrevista</button>`;
+
+    for (const [name, data] of Object.entries(customs)) {
+      html += `<button type="button" class="preset-chip preset-custom" data-preset="${esc(name)}" onclick="applyPreset('${esc(name)}')" title="Preset personalizado">
+        <span>⭐ ${esc(name)}</span>
+        <span class="preset-del-btn" onclick="deleteCustomPreset('${esc(name)}', event)" title="Eliminar preset">×</span>
+      </button>`;
+    }
+
+    html += `<button type="button" class="preset-chip preset-chip-add" onclick="promptSaveCustomPreset()" title="Guardar ajustes actuales como un nuevo preset">+ Guardar preset</button>`;
+    container.innerHTML = html;
+  }
+
+  function highlightActivePresetChip(name) {
+    document.querySelectorAll('.preset-chip').forEach(c => {
+      c.classList.toggle('active', c.getAttribute('data-preset') === name);
+    });
   }
 
   // ENVÍO DE PROCESO REAL
@@ -6212,6 +6530,20 @@
       notifyCheck.checked = (savedNotify === 'true');
     }
   } catch (e) {}
+
+  // Auto-guardado de ajustes del panel Crear
+  ['hook-zoom-check', 'fast-mode-check', 'clip-language-select', 'focus-prompt-type'].forEach(id => {
+    document.getElementById(id)?.addEventListener('change', () => {
+      if (typeof saveLastSettings === 'function') saveLastSettings();
+    });
+  });
+  ['watermark-input', 'focus-prompt-input', 'clips-range'].forEach(id => {
+    document.getElementById(id)?.addEventListener('input', () => {
+      if (typeof saveLastSettings === 'function') saveLastSettings();
+    });
+  });
+
+  restoreLastSettings();
 
   ['stream-start-time', 'stream-end-time'].forEach(id => {
     document.getElementById(id)?.addEventListener('input', () => {
