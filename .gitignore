@@ -17,6 +17,8 @@ data/temp/
 data/*.db
 data/*.db-journal
 data/*.txt
+data/*.disabled
+data/api_token*
 data/*.json
 data/*.ass
 data/*.mp4

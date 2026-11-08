@@ -76,15 +76,10 @@ Pendientes para Antigravity: restaurar "Subtítulos" y "Plantillas" en el menú 
 3. No ejecutar la suite completa mientras el otro agente la corre; probar solo los tests propios (`pytest tests/test_stream_guard.py`).
 4. El servidor lo abre el usuario con `start.bat`; un servidor lanzado por un agente se cierra cuando el usuario reinicia el suyo.
 
-## ✅ Resuelto: túnel público con contraseña
-Había un túnel `*.trycloudflare.com` abierto con `"auth": false`. Ahora el servidor exige token en `/api` y `/clips_media`
-(salvo `/api/health`), tanto en local como por el túnel (verificado: 401 sin token, 200 con token).
-- El token vive en `data/api_token.txt` (carpeta `data/`, fuera de git). El servidor lo lee en cada petición, así que
-  **protege aunque lo arranque cualquiera** (start.bat, Antigravity, Claude). Cambiar el archivo rota el token sin reiniciar.
-- `CLIP_API_TOKEN` (variable de entorno) tiene prioridad sobre el archivo.
-- Primer acceso: abrir `https://<tunel>/?token=<token>` una vez; queda una cookie de 30 días (HttpOnly, SameSite=Strict, Secure por HTTPS).
-- **Regla:** nadie borra, imprime ni pega `data/api_token.txt` en chats, logs o documentos.
-- Nota: `request_guard` acepta cualquier `*.trycloudflare.com` como Host (cambio de Antigravity). Es aceptable ahora que hay token.
+## Autenticación y acceso (Estado: deshabilitado por solicitud del usuario)
+- **Decisión del usuario (08-nov):** El usuario solicitó explícitamente desactivar la exigencia de token ("no quiero que pidan token que me deje hacerlo normal").
+- Se renombró `data/api_token.txt` a `data/api_token.txt.disabled`. Al no existir el archivo ni variable `CLIP_API_TOKEN`, `_expected_token()` devuelve `""` en cada petición y el servidor opera en modo normal abierto (sin exigir token ni mostrar modal).
+- Si en el futuro se desea reactivar la protección con token, basta con restaurar el archivo `data/api_token.txt`.
 
 ## Pendiente / ideas (reclamar aquí antes de empezar)
 - [x] **COMPLETADO POR ANTIGRAVITY (08-nov ~03:42):** Tarea A (Panel FFmpeg con métricas reales del trabajo: paso actual, progreso, tiempo transcurrido, tiempo restante estimado, y '—' cuando no haya trabajo activo; sin FPS inventados ni velocidades fijas).
