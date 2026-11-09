@@ -133,3 +133,53 @@ def download_youtube_audio(url: str, output_dir: Path = settings.inputs_dir,
 
     logger.info(f"Audio descargado: {filename}")
     return filename, title
+
+
+def capture_live_stream(url: str, duration_seconds: float = 300.0,
+                        output_dir: Path = settings.inputs_dir,
+                        max_height: int = 720,
+                        progress: ProgressFn = None) -> Tuple[str, str]:
+    """
+    Captura un fragmento de N segundos de una transmisión EN VIVO (YouTube, Twitch, Kick, etc.)
+    utilizando yt-dlp y FFmpeg como descargador externo sin esperar a que el directo termine.
+    """
+    output_dir.mkdir(parents=True, exist_ok=True)
+    import time
+    import yt_dlp
+
+    ffmpeg_dir = str(Path(settings.ffmpeg_exe).parent)
+    dur = max(30, min(1800, int(duration_seconds)))  # entre 30s y 30 min
+    ts_tag = int(time.time())
+    outtmpl = str(output_dir / f"live_capture_%(id)s_{ts_tag}.%(ext)s")
+
+    ydl_opts = {
+        'quiet': True,
+        'no_warnings': True,
+        'noplaylist': True,
+        'ffmpeg_location': ffmpeg_dir,
+        'format': (f'bestvideo[height<={max_height}]+bestaudio/best[height<={max_height}]/best'),
+        'outtmpl': outtmpl,
+        'external_downloader': 'ffmpeg',
+        'external_downloader_args': {'ffmpeg_i': ['-t', str(dur)]},
+        'merge_output_format': 'mp4',
+        'socket_timeout': 30,
+        'retries': DEFAULT_RETRIES,
+    }
+    if progress:
+        progress(0.1)
+
+    logger.info(f"Iniciando captura de directo en vivo ({dur}s): {url}")
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(url, download=True)
+            filename = _resolve_file(ydl, info)
+            title = info.get('title') or 'Directo en Vivo'
+            title = f"[EN VIVO] {title}"
+    except Exception as e:
+        raise _friendly_error(url, e) from e
+
+    if progress:
+        progress(1.0)
+    logger.info(f"Captura en vivo completada exitosamente: {filename}")
+    return filename, title
+

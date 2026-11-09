@@ -145,5 +145,5 @@ Pendientes para Antigravity: restaurar "Subtítulos" y "Plantillas" en el menú 
 - [x] **COMPLETADO POR ANTIGRAVITY (08-nov ~03:48):** Tarea D (Detector de picos de volumen find_hype_moments: activado solo con layout gaming/streamer o include_hype explícito, títulos y copys contextuales basados en transcripción real, duración dinámica y deduplicación con candidatos previos).
 - [x] **COMPLETADO POR ANTIGRAVITY (08-nov ~03:52):** Tarea E (Puntajes saturados: implementada normalización por percentiles 66-97 dentro del conjunto de candidatos de cada video, preservando estrictamente el orden relativo y reescalando el desglose breakdown. Con tests unitarios).
 - [ ] `/api/validate_url`: mostrar en la interfaz si el enlace es un directo en vivo (Claude puede añadirlo tras avisar).
-- [ ] Grabar un directo en vivo durante N minutos (hoy se rechaza con un mensaje claro).
+- [x] **COMPLETADO POR ANTIGRAVITY (09-nov):** Grabar y clipear directos EN VIVO durante N minutos (`capture_live_stream` con selector de 3/5/10/15 min en panel Crear y en advertencia de directos, parámetro `live_record_minutes` en JobBody/jobs/pipeline y extracción directa con FFmpeg sin esperar a que termine el en vivo).
 - [ ] Marcadores de tiempo del chat de Twitch como señal de viralidad.

@@ -7,7 +7,7 @@ from typing import List, Optional, Tuple, Callable
 from src.common.config import settings
 from src.common.database import db
 from src.common.models import ViralMomentCandidate, TranscriptResult
-from src.common.youtube_downloader import download_youtube_video, download_youtube_audio
+from src.common.youtube_downloader import download_youtube_video, download_youtube_audio, capture_live_stream
 from src.agents.agent1_transcription.transcriber import AudioTranscriber
 from src.agents.agent2_viral_detector.detector import ViralMomentDetector
 from src.agents.agent2_viral_detector.audio_energy import compute_energy_profile
@@ -73,6 +73,7 @@ class ClipFactoryPipeline:
         split_glow: Optional[bool] = None,
         hook_headline: Optional[str] = None,
         broll_theme: Optional[str] = "gameplay",
+        live_record_minutes: Optional[float] = None,
         progress_callback: Optional[Callable[[str], None]] = None,
         step_callback: Optional[StepCallback] = None,
     ) -> Tuple[str, List[ViralMomentCandidate]]:
@@ -90,7 +91,20 @@ class ClipFactoryPipeline:
 
         # 0. Enlace de YouTube o archivo local
         is_remote = video_input.startswith("http://") or video_input.startswith("https://")
-        if is_remote:
+        is_live_record = bool(is_remote and live_record_minutes and live_record_minutes > 0)
+        yt_title = None
+        if is_live_record:
+            rec_mins = float(live_record_minutes)
+            rec_label = int(rec_mins) if rec_mins.is_integer() else rec_mins
+            step(0, 0.0, f"🔴 Grabando {rec_label} min del directo en vivo...")
+            local_path, yt_title = capture_live_stream(
+                video_input,
+                duration_seconds=rec_mins * 60.0,
+                progress=lambda f: step_callback and step_callback(0, f, f"🔴 Grabando directo... {f:.0%}")
+            )
+            path = Path(local_path)
+            step(0, 1.0, f"✅ Captura en vivo lista: {yt_title}")
+        elif is_remote:
             range_info = f" ({int(time_range[0]//60)}m-{int(time_range[1]//60)}m)" if time_range else ""
             step(0, 0.0, f"📥 Descargando audio del enlace{range_info}...")
             dl_audio_kwargs = {}
@@ -213,7 +227,7 @@ class ClipFactoryPipeline:
         if render_clips:
             render_source = path
             step(3, 0.0, "🎬 Preparando el renderizado...")
-            if is_remote:
+            if is_remote and not is_live_record:
                 range_info = f" [{int(time_range[0]//60)}m-{int(time_range[1]//60)}m]" if time_range else ""
                 log_step(f"⚡ Descargando video 720p{range_info} (una sola vez)...")
                 dl_video_kwargs = {}
@@ -225,6 +239,9 @@ class ClipFactoryPipeline:
                     **dl_video_kwargs
                 )
                 render_source = Path(local_video)
+                db.update_video_filepath(video_id, str(render_source.resolve()))
+            elif is_live_record:
+                render_source = path
                 db.update_video_filepath(video_id, str(render_source.resolve()))
 
             # Los cortes de escena solo sirven para ajustar clips que NO se alinearon a pausas del habla, y solo

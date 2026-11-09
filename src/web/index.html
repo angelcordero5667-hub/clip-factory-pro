@@ -3561,6 +3561,32 @@
   .preview-metric-val.highlight {
     color: #b6f23a;
   }
+  .live-capture-pill {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    border-radius: 6px;
+    color: #fca5a5;
+    font-size: 11px;
+    padding: 4px 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: 600;
+  }
+  .live-capture-pill:hover {
+    background: rgba(239, 68, 68, 0.22);
+    border-color: #ef4444;
+  }
+  .live-capture-pill.active {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.5), rgba(220, 38, 38, 0.6));
+    border-color: #ef4444;
+    color: #fff;
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.45);
+  }
+  @keyframes livePulse {
+    0% { transform: scale(0.95); opacity: 0.8; }
+    50% { transform: scale(1.25); opacity: 1; }
+    100% { transform: scale(0.95); opacity: 0.8; }
+  }
   .url-preview-warning {
     display: flex;
     align-items: flex-start;
@@ -4959,6 +4985,30 @@
                   </div>
                 </div>
               </div>
+              
+              <!-- Control de Captura en Vivo de N minutos -->
+              <div style="margin-top:12px; padding:10px 12px; background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.25); border-radius:8px; display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+                <div>
+                  <div style="font-size:12px; font-weight:700; color:#fca5a5; display:flex; align-items:center; gap:6px;">
+                    <span class="live-pulse-dot" style="display:inline-block; width:8px; height:8px; background:#ef4444; border-radius:50%; animation: livePulse 1.2s infinite;"></span>
+                    <span>Modo Grabación en Vivo (Streams Activos)</span>
+                  </div>
+                  <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">Graba los próximos minutos de cualquier transmisión en vivo sin esperar a que termine.</div>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <select id="manual-live-mins" onchange="setLiveCaptureMins(parseFloat(this.value))" style="background:rgba(0,0,0,0.5); border:1px solid rgba(239,68,68,0.4); color:#fff; border-radius:6px; padding:4px 8px; font-size:11.5px; cursor:pointer;">
+                    <option value="3">3 minutos</option>
+                    <option value="5" selected>5 minutos (Recomendado)</option>
+                    <option value="10">10 minutos</option>
+                    <option value="15">15 minutos</option>
+                  </select>
+                  <label class="opus-switch" title="Activar modo captura en vivo">
+                    <input type="checkbox" id="manual-live-toggle" onchange="toggleManualLiveCapture(this.checked)">
+                    <span class="opus-slider" style="--slider-glow: #ef4444;"></span>
+                  </label>
+                </div>
+              </div>
+
               <div class="layout-label" style="margin-top:10px;">Diseña la Pantalla (Layout):</div>
               <div class="layout-buttons-group">
                 <div class="layout-card active" id="layout-card-auto" onclick="selectLayoutMode('auto')">
@@ -6517,6 +6567,49 @@
   let urlIsValid = false;
   let currentValidatedVideo = null;
 
+  let activeLiveMins = 5;
+  let isManualLiveCaptureActive = false;
+
+  function setLiveCaptureMins(m) {
+    activeLiveMins = m;
+    document.querySelectorAll('.live-capture-pill').forEach(btn => {
+      const bMins = parseInt(btn.getAttribute('data-mins'), 10);
+      btn.classList.toggle('active', bMins === m);
+    });
+    const sel = document.getElementById('manual-live-mins');
+    if (sel) sel.value = String(m);
+    updateSubmitButtonLiveState(true);
+  }
+
+  function toggleManualLiveCapture(checked) {
+    isManualLiveCaptureActive = checked;
+    updateSubmitButtonLiveState(checked || !!(currentValidatedVideo && currentValidatedVideo.is_live));
+    if (checked) {
+      showToast(`Modo directo en vivo activo: se capturarán ${activeLiveMins} minutos.`);
+    }
+  }
+
+  function updateSubmitButtonLiveState(isLive) {
+    const btn = document.getElementById('btn-submit-process');
+    if (!btn) return;
+    if (isLive) {
+      btn.style.background = 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
+      btn.style.boxShadow = '0 0 16px rgba(239, 68, 68, 0.45)';
+      btn.innerHTML = `
+        <span class="live-pulse-dot" style="display:inline-block; width:8px; height:8px; background:#fff; border-radius:50%; margin-right:4px; animation: livePulse 1.2s infinite;"></span>
+        <span>Capturar en Vivo (${activeLiveMins}m) ⚡</span>
+      `;
+    } else {
+      btn.style.background = '';
+      btn.style.boxShadow = '';
+      btn.innerHTML = `
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+        <span>Crear Clips ⚡</span>
+      `;
+    }
+  }
+
+
   function formatDurationSec(sec) {
     if (!sec || isNaN(sec) || sec <= 0) return '00:00';
     const s = Math.round(sec);
@@ -6621,6 +6714,12 @@
     }
   }
 
+  
+  window.setLiveCaptureMins = setLiveCaptureMins;
+  window.toggleManualLiveCapture = toggleManualLiveCapture;
+  window.renderVideoPreview = renderVideoPreview;
+  window.updateSubmitButtonLiveState = updateSubmitButtonLiveState;
+
   function renderVideoPreview(data) {
     const card = document.getElementById('url-preview-card');
     if (!card) return;
@@ -6658,8 +6757,26 @@
       }
       if (liveWarn) {
         liveWarn.style.display = 'flex';
-        if (liveText) liveText.innerHTML = '🔴 <strong>Emisión en directo:</strong> La transmisión sigue en vivo (no tiene fin definido). Espera a que termine o usa un directo ya finalizado (VOD) para poder crear clips.';
+        if (liveText) {
+          liveText.innerHTML = `
+            <div style="width:100%;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                <strong style="color:#fecaca; font-size:12px;">🔴 DIRECTO EN VIVO DETECTADO</strong>
+                <span style="font-size:10px; background:rgba(239,68,68,0.35); color:#fff; padding:2px 7px; border-radius:10px; font-weight:700;">LIVE</span>
+              </div>
+              <div style="font-size:11.5px; color:#e2e8f0; margin-bottom:8px;">
+                ¡Puedes clipear el directo ahora mismo! Elige cuántos minutos capturar del stream actual para crear tus clips virales:
+              </div>
+              <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+                <button type="button" class="live-capture-pill ${activeLiveMins === 3 ? 'active' : ''}" data-mins="3" onclick="setLiveCaptureMins(3)">⏱️ 3 min</button>
+                <button type="button" class="live-capture-pill ${activeLiveMins === 5 ? 'active' : ''}" data-mins="5" onclick="setLiveCaptureMins(5)">⏱️ 5 min (Recomendado)</button>
+                <button type="button" class="live-capture-pill ${activeLiveMins === 10 ? 'active' : ''}" data-mins="10" onclick="setLiveCaptureMins(10)">⏱️ 10 min</button>
+                <button type="button" class="live-capture-pill ${activeLiveMins === 15 ? 'active' : ''}" data-mins="15" onclick="setLiveCaptureMins(15)">⏱️ 15 min</button>
+              </div>
+            </div>`;
+        }
       }
+      updateSubmitButtonLiveState(true);
     } else if (data.is_upcoming) {
       if (liveBadge) {
         liveBadge.style.display = 'inline-flex';
@@ -7144,6 +7261,7 @@
       split_glow: !!document.getElementById('split-glow-check')?.checked,
       color_filter: activeColorFilter || 'none',
       broll_theme: activeBrollTheme || 'gameplay',
+      live_record_minutes: ((currentValidatedVideo && currentValidatedVideo.is_live) || isManualLiveCaptureActive) ? (activeLiveMins || 5.0) : null,
       hook_headline: document.getElementById('hook-headline-input')?.value || ''
     };
   }
@@ -7341,7 +7459,8 @@
       dynamic_zoom: !!document.getElementById('dynamic-zoom-check')?.checked,
       split_glow: !!document.getElementById('split-glow-check')?.checked,
       hook_headline: document.getElementById('hook-headline-input')?.value.trim() || null,
-      broll_theme: activeBrollTheme || 'gameplay'
+      broll_theme: activeBrollTheme || 'gameplay',
+      live_record_minutes: ((currentValidatedVideo && currentValidatedVideo.is_live) || isManualLiveCaptureActive) ? (activeLiveMins || 5.0) : null
     };
     addRecentUrl(url, document.getElementById('url-preview-title')?.innerText || '');
 

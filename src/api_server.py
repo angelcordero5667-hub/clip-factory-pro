@@ -701,6 +701,7 @@ class JobBody(BaseModel):
     split_glow: Optional[bool] = False
     hook_headline: Optional[str] = Field(default=None, max_length=100)
     broll_theme: Optional[str] = Field(default="gameplay", max_length=30)
+    live_record_minutes: Optional[float] = Field(default=None, ge=0.5, le=30.0)
 
 
 def _is_public_url(url: str) -> bool:

@@ -109,6 +109,7 @@ class JobWorker:
             hook_zoom = bool(opts.get("hook_zoom", True)) if "hook_zoom" in opts else True
             watermark_text = opts.get("watermark_text") or opts.get("watermark") or None
             focus_prompt = opts.get("focus_prompt") or None
+            live_record_minutes = opts.get("live_record_minutes")
 
             min_clip_dur = opts.get("min_clip_duration")
             max_clip_dur = opts.get("max_clip_duration")
@@ -148,6 +149,7 @@ class JobWorker:
                 split_glow=opts.get("split_glow"),
                 hook_headline=opts.get("hook_headline"),
                 broll_theme=opts.get("broll_theme", "gameplay"),
+                live_record_minutes=float(live_record_minutes) if live_record_minutes is not None else None,
             )
             self.db.update_job(job_id, status="done", progress=1.0, video_id=video_id,
                                step_index=len(STEPS) - 1, step_label=STEPS[-1],
