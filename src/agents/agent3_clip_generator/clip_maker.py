@@ -144,6 +144,9 @@ class VerticalClipMaker:
     def build_filter_complex(
         self, w: int, h: int, ass_path: Optional[Path] = None, framing: Optional[Framing] = None,
         cut_expr: Optional[str] = None, hook_zoom: bool = False,
+        progress_bar: bool = False, clip_duration: float = 30.0,
+        color_filter: Optional[str] = None, dynamic_zoom: bool = False,
+        split_glow: bool = False, broll_theme: Optional[str] = None,
     ) -> Tuple[str, str]:
         """Construye el filtro según el layout. Devuelve (filtro, etiqueta_final).
 
@@ -165,6 +168,11 @@ class VerticalClipMaker:
                 f"[sp_b]crop=w={framing.crop_w}:h=ih:x={xb}:y=0,scale={w}:{half}:flags=bicubic[sp_bot];",
                 "[sp_top][sp_bot]vstack=inputs=2[combined]",
             ]
+            if split_glow:
+                parts.append(
+                    f";[combined]drawbox=x=0:y={half-4}:w=iw:h=8:color=0xa855f7@0.45:t=fill,"
+                    f"drawbox=x=0:y={half-2}:w=iw:h=4:color=white@0.95:t=fill[sp_glow]"
+                )
         elif framing.mode == "gaming":
             top_h = int(h * 0.38) // 2 * 2
             bot_h = h - top_h
@@ -184,7 +192,12 @@ class VerticalClipMaker:
             broll_dir = settings.base_dir / "data" / "broll"
             broll_files = []
             if broll_dir.exists():
-                broll_files = [f for f in broll_dir.iterdir() if f.is_file() and f.suffix.lower() in (".mp4", ".mov", ".mkv", ".webm")]
+                all_vids = [f for f in broll_dir.iterdir() if f.is_file() and f.suffix.lower() in (".mp4", ".mov", ".mkv", ".webm")]
+                if broll_theme and broll_theme not in ("auto", "none"):
+                    theme_matches = [f for f in all_vids if broll_theme.lower() in f.stem.lower()]
+                    broll_files = theme_matches if theme_matches else all_vids
+                else:
+                    broll_files = all_vids
             if broll_files:
                 broll_path = self._escape_filter_path(broll_files[0])
                 parts = [
@@ -208,7 +221,7 @@ class VerticalClipMaker:
                 f"[v_fg]scale={w}:{h}:force_original_aspect_ratio=decrease:force_divisible_by=2[fg_scaled];",
                 "[bg_blur][fg_scaled]overlay=(W-w)/2:(H-h)/2[combined]",
             ]
-        label = "[combined]"
+        label = "[sp_glow]" if (framing.mode == "split" and split_glow) else "[combined]"
         if hook_zoom:
             parts.append(
                 f";{label}split=2[v_base][v_hook];"
@@ -216,6 +229,28 @@ class VerticalClipMaker:
                 f"[v_base][v_punch]overlay=x=0:y=0:enable='between(t,0,2.5)'[v_hooked]"
             )
             label = "[v_hooked]"
+        if dynamic_zoom:
+            parts.append(
+                f";{label}crop=w='if(between(mod(t,12),0,2.2),iw/1.12,iw)':"
+                f"h='if(between(mod(t,12),0,2.2),ih/1.12,ih)':"
+                f"x='(in_w-out_w)/2':y='(in_h-out_h)/2',"
+                f"scale={w}:{h}[v_dynzoom]"
+            )
+            label = "[v_dynzoom]"
+        if color_filter and color_filter not in ("none", "natural", ""):
+            cf = color_filter.lower().strip()
+            cf_node = None
+            if cf == "pop":
+                cf_node = "eq=contrast=1.12:saturation=1.28:brightness=0.02"
+            elif cf == "cinema":
+                cf_node = "colorbalance=rs=0.08:gs=0.02:bs=-0.08:rh=-0.05:gh=0.02:bh=0.08"
+            elif cf == "vignette":
+                cf_node = "vignette=angle=PI/5"
+            elif cf == "warm":
+                cf_node = "colorbalance=rs=0.09:gs=0.03:bs=-0.06"
+            if cf_node:
+                parts.append(f";{label}{cf_node}[v_color]")
+                label = "[v_color]"
         if cut_expr:
             # El encuadre ya se aplicó sobre la línea de tiempo original; ahora se quitan las pausas
             # y se cierran los huecos. Los subtítulos (ya re-sincronizados) se queman después.
@@ -229,6 +264,14 @@ class VerticalClipMaker:
                 fonts_opt = f":fontsdir='{self._escape_filter_path(FONTS_DIR)}'"
             parts.append(f";{label}subtitles='{escaped_ass}'{fonts_opt}[v_subbed]")
             label = "[v_subbed]"
+        if progress_bar:
+            bar_h = 8 if h >= 1080 else 5
+            cdur = max(0.5, float(clip_duration))
+            parts.append(
+                f";{label}drawbox=x=0:y=ih-{bar_h}:w=iw:h={bar_h}:color=white@0.22:t=fill,"
+                f"drawbox=x=0:y=ih-{bar_h}:w='iw*min(1,t/{cdur:.3f})':h={bar_h}:color=0xa855f7@0.95:t=fill[v_prog]"
+            )
+            label = "[v_prog]"
         return "".join(parts), label
 
     @staticmethod
@@ -320,6 +363,12 @@ class VerticalClipMaker:
         speed_mode: Optional[str] = None,
         hook_zoom: Optional[bool] = None,
         subtitle_size: Optional[str] = None,
+        progress_bar: Optional[bool] = None,
+        color_filter: Optional[str] = None,
+        dynamic_zoom: Optional[bool] = None,
+        split_glow: Optional[bool] = None,
+        hook_headline: Optional[str] = None,
+        broll_theme: Optional[str] = None,
     ) -> Path:
         input_p = Path(video_path)
         if not input_p.exists():
@@ -359,6 +408,12 @@ class VerticalClipMaker:
 
         actual_sub_pos = "middle" if (layout_mode in ("gaming", "broll") and subtitle_position in ("bottom", "bottom_low", "lower")) else subtitle_position
 
+        headline_text = None
+        if isinstance(hook_headline, str) and hook_headline.strip():
+            headline_text = hook_headline.strip()
+        elif hook_headline is True:
+            headline_text = getattr(candidate, "headline", None) or getattr(candidate, "title", None) or getattr(candidate, "hook_text", None)
+
         ass_path = None
         if with_subtitles and sub_segments:
             ass_path = settings.cache_dir / f"{candidate.id}_subtitles.ass"
@@ -377,6 +432,7 @@ class VerticalClipMaker:
                 watermark_text=watermark_text,
                 aspect_ratio=aspect_ratio,
                 subtitle_size=subtitle_size,
+                hook_headline=headline_text,
             )
 
         framing = Framing()
@@ -399,7 +455,15 @@ class VerticalClipMaker:
 
         if hook_zoom is None:
             hook_zoom = settings.render.hook_zoom
-        filter_str, final_label = self.build_filter_complex(w, h, ass_path, framing, cut_expr=cut_expr, hook_zoom=hook_zoom)
+        eff_prog = bool(progress_bar)
+        eff_zoom = bool(dynamic_zoom)
+        eff_split_glow = bool(split_glow) if split_glow is not None else (framing.mode == "split")
+
+        filter_str, final_label = self.build_filter_complex(
+            w, h, ass_path, framing, cut_expr=cut_expr, hook_zoom=hook_zoom,
+            progress_bar=eff_prog, clip_duration=duration, color_filter=color_filter,
+            dynamic_zoom=eff_zoom, split_glow=eff_split_glow, broll_theme=broll_theme
+        )
 
         logger.info(f"Renderizando clip {aspect_ratio}: {output_file.name} ({duration:.1f}s)")
         self._run_ffmpeg(lambda enc: self.build_ffmpeg_cmd(

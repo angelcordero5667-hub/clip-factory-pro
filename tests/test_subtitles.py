@@ -188,3 +188,14 @@ def test_subtitle_size_presets_in_generate_ass(tmp_path):
     content_large = out_large.read_text(encoding="utf-8")
     assert ",90," in content_large
 
+
+def test_hook_headline_in_generate_ass(tmp_path):
+    g = SubtitleGenerator()
+    seg = [TranscriptSegment(id=0, start=0.0, end=8.0, text="este es un clip de prueba para titulares")]
+    out = g.generate_ass(0.0, 8.0, seg, tmp_path / "headline.ass", style_preset="hormozi", hook_headline="ESTE SECRETO CAMBIA TODO")
+    content = out.read_text(encoding="utf-8")
+    assert "Style: Headline" in content
+    assert "ESTE SECRETO CAMBIA TODO" in content
+    assert "Dialogue: 2,0:00:00.00,0:00:06.00,Headline" in content
+
+

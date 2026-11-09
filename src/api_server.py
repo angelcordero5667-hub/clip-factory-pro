@@ -385,6 +385,12 @@ def rerender_clip(
     size: str = "medium",
     fontsize: Optional[int] = None,
     highlight: Optional[str] = None,
+    progress_bar: Optional[bool] = False,
+    color_filter: Optional[str] = "none",
+    dynamic_zoom: Optional[bool] = False,
+    hook_headline: Optional[str] = None,
+    broll_theme: Optional[str] = "gameplay",
+    split_glow: Optional[bool] = False,
 ):
     _get_clip_or_404(clip_id)
     if style not in SUBTITLE_STYLES or aspect not in ASPECT_RATIOS:
@@ -397,6 +403,12 @@ def rerender_clip(
                                "subtitle_size": size,
                                "custom_fontsize": fontsize,
                                "custom_highlight": highlight,
+                               "progress_bar": progress_bar,
+                               "color_filter": color_filter,
+                               "dynamic_zoom": dynamic_zoom,
+                               "hook_headline": hook_headline,
+                               "broll_theme": broll_theme,
+                               "split_glow": split_glow,
                            })
     return {"job_id": job_id}
 
@@ -682,6 +694,13 @@ class JobBody(BaseModel):
     subtitle_size: Optional[str] = "medium"
     custom_fontsize: Optional[int] = None
     custom_highlight: Optional[str] = Field(default=None, max_length=25)
+    # Efectos virales y de retención
+    progress_bar: Optional[bool] = False
+    color_filter: Optional[str] = Field(default="none", max_length=20)
+    dynamic_zoom: Optional[bool] = False
+    split_glow: Optional[bool] = False
+    hook_headline: Optional[str] = Field(default=None, max_length=100)
+    broll_theme: Optional[str] = Field(default="gameplay", max_length=30)
 
 
 def _is_public_url(url: str) -> bool:

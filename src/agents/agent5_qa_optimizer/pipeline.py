@@ -67,6 +67,12 @@ class ClipFactoryPipeline:
         time_range: Optional[Tuple[float, float]] = None,
         min_clip_duration: Optional[float] = None,
         max_clip_duration: Optional[float] = None,
+        progress_bar: bool = False,
+        color_filter: Optional[str] = "none",
+        dynamic_zoom: bool = False,
+        split_glow: Optional[bool] = None,
+        hook_headline: Optional[str] = None,
+        broll_theme: Optional[str] = "gameplay",
         progress_callback: Optional[Callable[[str], None]] = None,
         step_callback: Optional[StepCallback] = None,
     ) -> Tuple[str, List[ViralMomentCandidate]]:
@@ -259,6 +265,12 @@ class ClipFactoryPipeline:
                 layout_mode=layout_mode,
                 speed_mode=speed_mode,
                 hook_zoom=hook_zoom,
+                progress_bar=progress_bar,
+                color_filter=color_filter,
+                dynamic_zoom=dynamic_zoom,
+                split_glow=split_glow,
+                hook_headline=hook_headline,
+                broll_theme=broll_theme,
             )
             for cand in candidates:
                 res = results.get(cand.id)
@@ -294,6 +306,12 @@ class ClipFactoryPipeline:
         custom_fontsize: Optional[int] = None,
         subtitle_size: Optional[str] = None,
         custom_highlight: Optional[str] = None,
+        progress_bar: bool = False,
+        color_filter: Optional[str] = "none",
+        dynamic_zoom: bool = False,
+        split_glow: Optional[bool] = None,
+        hook_headline: Optional[str] = None,
+        broll_theme: Optional[str] = "gameplay",
     ) -> Path:
         """Vuelve a renderizar un clip con los tiempos/título actuales de la base de datos."""
         cand_row = db.get_candidate(candidate_id)
@@ -332,6 +350,9 @@ class ClipFactoryPipeline:
             aspect_ratio=aspect_ratio, use_scene_detection=False,
             subtitle_position=subtitle_position, custom_fontsize=custom_fontsize,
             subtitle_size=subtitle_size, custom_highlight=custom_highlight,
+            progress_bar=progress_bar, color_filter=color_filter,
+            dynamic_zoom=dynamic_zoom, split_glow=split_glow,
+            hook_headline=hook_headline, broll_theme=broll_theme,
         )
         db.update_candidate_clip_path(candidate_id, str(out.resolve()), dirty=False)
         return out

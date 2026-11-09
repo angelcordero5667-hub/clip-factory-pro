@@ -537,6 +537,39 @@ def test_ai_system_endpoints(tdb, monkeypatch):
     assert r_start.json()["status"] == "already_running"
 
 
+def test_create_job_con_efectos_virales(monkeypatch, tmp_path):
+    api_server.settings.inputs_dir.mkdir(parents=True, exist_ok=True)
+    video_file = api_server.settings.inputs_dir / "test_effects_dummy.mp4"
+    video_file.write_bytes(b"dummy")
+    try:
+        r = client.post("/api/jobs", json={
+            "source": video_file.name,
+            "max_clips": 3,
+            "subtitle_style": "beast",
+            "progress_bar": True,
+            "color_filter": "pop",
+            "dynamic_zoom": True,
+            "hook_headline": "HOOK VIRAL",
+            "broll_theme": "subway",
+            "split_glow": True,
+        })
+        assert r.status_code == 200
+        job_id = r.json()["job_id"]
+        job = api_server.db.get_job(job_id)
+        assert job is not None
+        opts = job["options"]
+        assert opts["progress_bar"] is True
+        assert opts["color_filter"] == "pop"
+        assert opts["dynamic_zoom"] is True
+        assert opts["hook_headline"] == "HOOK VIRAL"
+        assert opts["broll_theme"] == "subway"
+        assert opts["split_glow"] is True
+    finally:
+        if video_file.exists():
+            video_file.unlink()
+
+
+
 
 
 

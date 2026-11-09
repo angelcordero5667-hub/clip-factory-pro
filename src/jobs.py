@@ -85,6 +85,12 @@ class JobWorker:
                     custom_fontsize=opts.get("custom_fontsize"),
                     subtitle_size=opts.get("subtitle_size"),
                     custom_highlight=opts.get("custom_highlight"),
+                    progress_bar=bool(opts.get("progress_bar", False)),
+                    color_filter=opts.get("color_filter", "none"),
+                    dynamic_zoom=bool(opts.get("dynamic_zoom", False)),
+                    split_glow=opts.get("split_glow"),
+                    hook_headline=opts.get("hook_headline"),
+                    broll_theme=opts.get("broll_theme", "gameplay"),
                 )
                 self.db.update_job(job_id, status="done", progress=1.0, message="Clip actualizado.")
                 return
@@ -136,6 +142,12 @@ class JobWorker:
                 custom_fontsize=opts.get("custom_fontsize"),
                 subtitle_size=opts.get("subtitle_size"),
                 custom_highlight=opts.get("custom_highlight"),
+                progress_bar=bool(opts.get("progress_bar", False)),
+                color_filter=opts.get("color_filter", "none"),
+                dynamic_zoom=bool(opts.get("dynamic_zoom", False)),
+                split_glow=opts.get("split_glow"),
+                hook_headline=opts.get("hook_headline"),
+                broll_theme=opts.get("broll_theme", "gameplay"),
             )
             self.db.update_job(job_id, status="done", progress=1.0, video_id=video_id,
                                step_index=len(STEPS) - 1, step_label=STEPS[-1],

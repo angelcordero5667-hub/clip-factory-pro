@@ -261,6 +261,7 @@ PlayResY: {h}
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
 Style: Default,{font},{size},{primary},{secondary},&H00000000,&H96000000,{bold},0,0,0,100,100,0,0,1,{s['outline']},{s['shadow']},{align},{margin_lr},{margin_lr},{margin_v},1
+Style: Headline,Montserrat ExtraBold,60,&H00FFFFFF,&H00FFFFFF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,5,3,8,80,80,180,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
@@ -305,6 +306,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         watermark_text: Optional[str] = None,
         aspect_ratio: str = "9:16",
         subtitle_size: Optional[str] = None,
+        hook_headline: Optional[str] = None,
     ) -> Path:
         output_path = Path(output_path)
         output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -335,6 +337,13 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
             events.append(
                 f"Dialogue: 1,0:00:00.00,{self._format_time(total)},Default,,0,0,0,,"
                 f"{{\\an9\\pos({res[0] - 60},70)\\fs30\\c&H00FFFFFF&\\3c&H80000000&\\bord3}}{wm}")
+
+        if hook_headline and str(hook_headline).strip():
+            clean_hl = _ass_escape(str(hook_headline).strip().upper())
+            hl_end = min(total, 6.0)
+            events.append(
+                f"Dialogue: 2,0:00:00.00,{self._format_time(hl_end)},Headline,,0,0,0,,{{\\an8}}{clean_hl}"
+            )
 
         def render_word(w: WordTimestamp) -> str:
             text = _ass_escape(w.word.strip())

@@ -4796,7 +4796,83 @@
         </div>
       </div>
 
-      <!-- FILA 5: BOTÓN PRINCIPAL PROCESAR VIDEO -->
+      <!-- FILA 5: EFECTOS VIRALES Y RETENCIÓN (TIKTOK / REELS / SHORTS) -->
+      <div class="studio-card-box" style="margin-bottom:16px;">
+        <div class="studio-card-header-row" style="margin-bottom:12px;">
+          <div class="studio-card-title-wrap">
+            <svg viewBox="0 0 24 24" stroke="#a855f7"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+            <span style="font-weight:700;">Efectos Virales y Retención</span>
+            <span class="pill-tag" style="font-size:10px; margin-left:6px; background:rgba(168,85,247,0.18); border-color:var(--neon-purple); color:#c084fc;">Algoritmo 2026</span>
+          </div>
+          <span style="font-size:11px; color:var(--text-muted);">Optimizaciones de enganche y dinamismo para TikTok, Reels y Shorts</span>
+        </div>
+
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:14px; margin-bottom:12px;">
+          <!-- Toggles principales de retención -->
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <label class="retention-check-line">
+              <input type="checkbox" id="progress-bar-check" checked>
+              <span><b>⚡ Barra de Progreso Inferior</b> — <span style="color:#94a3b8; font-size:11px;">Línea neón animada de 0 a 100% para maximizar la retención</span></span>
+            </label>
+
+            <label class="retention-check-line">
+              <input type="checkbox" id="dynamic-zoom-check" checked>
+              <span><b>🔍 Zooms Rítmicos (Punch-In cada 12s)</b> — <span style="color:#94a3b8; font-size:11px;">Reajuste periódico de atención (1.12x) estilo MrBeast / TikTok</span></span>
+            </label>
+
+            <label class="retention-check-line">
+              <input type="checkbox" id="split-glow-check">
+              <span><b>✨ Marco Neón en Split-Screen</b> — <span style="color:#94a3b8; font-size:11px;">Línea divisoria iluminada entre hablantes en entrevistas 9:16</span></span>
+            </label>
+          </div>
+
+          <!-- Titular de Gancho Superior (Hook Headline) -->
+          <div style="display:flex; flex-direction:column; gap:6px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span style="font-size:11.5px; font-weight:600; color:#fff; display:flex; align-items:center; gap:5px;">
+                📌 Titular Superior de Gancho (Headline):
+              </span>
+              <button type="button" class="sub-pill-btn" onclick="autoGenerateHeadline()" style="font-size:10.5px; padding:2px 8px;" title="Usa el gancho detectado por IA como titular superior">Gancho IA</button>
+            </div>
+            <input type="text" id="hook-headline-input" class="studio-inline-input" placeholder="Ej: ESTE SECRETO CAMBIÓ TODO 🤯 (o deja en blanco para automático)..." maxlength="90" autocomplete="off" style="width:100%; font-size:12px;">
+          </div>
+        </div>
+
+        <!-- Filtros de Color / Color Grading -->
+        <div style="display:flex; flex-direction:column; gap:6px; margin-top:8px; border-top:1px solid rgba(255,255,255,0.06); padding-top:10px;">
+          <div style="display:flex; align-items:center; gap:6px;">
+            <span style="font-size:11.5px; font-weight:600; color:var(--text-secondary); display:flex; align-items:center; gap:5px;">
+              🎨 Filtro de Color / Color Grading:
+            </span>
+          </div>
+          <div style="display:flex; gap:6px; flex-wrap:wrap;">
+            <button type="button" class="sub-pill-btn color-filter-pill active" data-colorfilter="none" onclick="selectColorFilter(this, 'none')" title="Color original de la cámara sin alteraciones">🌿 Original (Natural)</button>
+            <button type="button" class="sub-pill-btn color-filter-pill" data-colorfilter="pop" onclick="selectColorFilter(this, 'pop')" title="Saturación y contraste elevados para colores vibrantes en el feed">🔥 Pop TikTok / MrBeast</button>
+            <button type="button" class="sub-pill-btn color-filter-pill" data-colorfilter="cinema" onclick="selectColorFilter(this, 'cinema')" title="Grading cinematográfico Teal & Orange">🎬 Cinema Teal & Orange</button>
+            <button type="button" class="sub-pill-btn color-filter-pill" data-colorfilter="vignette" onclick="selectColorFilter(this, 'vignette')" title="Viñeta suave envolvente en los bordes para centrar la mirada">👁️ Viñeta Suave</button>
+            <button type="button" class="sub-pill-btn color-filter-pill" data-colorfilter="warm" onclick="selectColorFilter(this, 'warm')" title="Tonos cálidos de piel ideales para podcasts y entrevistas">🎙️ Cálido Podcast</button>
+          </div>
+        </div>
+
+        <!-- Tema de B-Roll / Metraje Inferior -->
+        <div id="broll-theme-selector-line" style="display:flex; flex-direction:column; gap:6px; margin-top:10px; border-top:1px solid rgba(255,255,255,0.06); padding-top:10px;">
+          <div style="display:flex; align-items:center; gap:6px;">
+            <span style="font-size:11.5px; font-weight:600; color:var(--text-secondary); display:flex; align-items:center; gap:5px;">
+              🎮 Tema de B-Roll / Metraje Secundario (TikTok Split):
+            </span>
+            <span style="font-size:10.5px; color:var(--text-muted);">(Utilizado en modo B-Roll Gameplay o Gaming)</span>
+          </div>
+          <div style="display:flex; gap:6px; flex-wrap:wrap;">
+            <button type="button" class="sub-pill-btn broll-theme-pill active" data-brolltheme="gameplay" onclick="selectBrollTheme(this, 'gameplay')" title="Gameplay relajante de retención">🎮 Gameplay Universal</button>
+            <button type="button" class="sub-pill-btn broll-theme-pill" data-brolltheme="minecraft" onclick="selectBrollTheme(this, 'minecraft')" title="Parkour / Metraje de Minecraft">⛏️ Minecraft Parkour</button>
+            <button type="button" class="sub-pill-btn broll-theme-pill" data-brolltheme="subway" onclick="selectBrollTheme(this, 'subway')" title="Gameplay de Subway Surfers">🛹 Subway Surfers</button>
+            <button type="button" class="sub-pill-btn broll-theme-pill" data-brolltheme="gta" onclick="selectBrollTheme(this, 'gta')" title="Rampas y carreras GTA V">🚗 GTA V Mega Ramp</button>
+            <button type="button" class="sub-pill-btn broll-theme-pill" data-brolltheme="satisfying" onclick="selectBrollTheme(this, 'satisfying')" title="Animaciones cinéticas y ASMR visual">✨ Satisfactorio ASMR</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- BOTÓN PRINCIPAL PROCESAR VIDEO -->
       <button type="button" class="studio-btn-process" id="btn-submit-process" onclick="submitCreation()">
         <svg viewBox="0 0 24 24"><polygon points="6 3 20 12 6 21 6 3"/></svg>
         <span>Procesar Video</span>
@@ -4889,7 +4965,37 @@
               </div>
             </div>
 
-            <button class="btn-outline btn-ico" onclick="rerenderActiveClip()" style="grid-column:span 2;" title="Vuelve a renderizar el clip con el estilo de subtítulos elegido"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>Re-renderizar con este estilo</button>
+            <!-- Efectos Virales en el Editor -->
+            <div style="grid-column:span 2; display:flex; flex-direction:column; gap:6px; background:rgba(0,0,0,0.35); padding:8px 10px; border-radius:6px; border:1px solid rgba(255,255,255,0.06); margin-top:2px;">
+              <span style="font-size:11.5px; font-weight:600; color:var(--neon-purple); display:flex; align-items:center; gap:5px;">
+                ⚡ Efectos y Color Grading
+              </span>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
+                <div>
+                  <label for="editor-color-filter" style="font-size:10.5px; color:var(--text-muted); display:block; margin-bottom:2px;">Color Grading:</label>
+                  <select id="editor-color-filter" class="studio-select-dropdown" style="width:100%; font-size:11.5px; padding:3px 6px;">
+                    <option value="none">Original (Natural)</option>
+                    <option value="pop">Pop TikTok / MrBeast</option>
+                    <option value="cinema">Cinema Teal & Orange</option>
+                    <option value="vignette">Viñeta Suave</option>
+                    <option value="warm">Cálido Podcast</option>
+                  </select>
+                </div>
+                <div style="display:flex; flex-direction:column; justify-content:center; gap:4px;">
+                  <label style="display:flex; align-items:center; gap:6px; font-size:11px; color:#fff; cursor:pointer;">
+                    <input type="checkbox" id="editor-progress-bar" checked style="accent-color:#a855f7;"> Barra dinámica
+                  </label>
+                  <label style="display:flex; align-items:center; gap:6px; font-size:11px; color:#fff; cursor:pointer;">
+                    <input type="checkbox" id="editor-dynamic-zoom" checked style="accent-color:#a855f7;"> Zoom rítmico
+                  </label>
+                </div>
+              </div>
+              <div>
+                <input type="text" id="editor-hook-headline" class="studio-inline-input" placeholder="Titular superior (opcional)..." maxlength="90" style="width:100%; font-size:11.5px; padding:3px 6px;">
+              </div>
+            </div>
+
+            <button class="btn-outline btn-ico" onclick="rerenderActiveClip()" style="grid-column:span 2;" title="Vuelve a renderizar el clip con el estilo y efectos elegidos"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>Re-renderizar con este estilo y efectos</button>
           </div>
           <div id="clip-status-line" style="font-size:12px; color:var(--text-muted); margin-bottom:12px;">Selecciona un clip para ver sus acciones.</div>
 
@@ -5540,6 +5646,8 @@
   let currentView = 'inicio';
   let activeFormat = '9:16';
   let activeSubStyle = 'hormozi';
+  let activeColorFilter = 'none';
+  let activeBrollTheme = 'gameplay';
   let loadedClips = [];
   let currentActiveClip = null;
   let activeJobId = null;
@@ -6527,12 +6635,74 @@
     if (typeof saveLastSettings === 'function') saveLastSettings();
   }
 
+  function selectColorFilter(btn, filter) {
+    activeColorFilter = filter;
+    document.querySelectorAll('.color-filter-pill').forEach(b => {
+      b.classList.toggle('active', (b.getAttribute('data-colorfilter') || 'none') === filter);
+    });
+    const edSel = document.getElementById('editor-color-filter');
+    if (edSel) edSel.value = filter;
+    if (typeof saveLastSettings === 'function') saveLastSettings();
+  }
+
+  function selectBrollTheme(btn, theme) {
+    activeBrollTheme = theme;
+    document.querySelectorAll('.broll-theme-pill').forEach(b => {
+      b.classList.toggle('active', (b.getAttribute('data-brolltheme') || 'gameplay') === theme);
+    });
+    if (typeof saveLastSettings === 'function') saveLastSettings();
+  }
+
+  function autoGenerateHeadline() {
+    const input = document.getElementById('hook-headline-input');
+    if (!input) return;
+    if (currentActiveClip && (currentActiveClip.hook_text || currentActiveClip.title)) {
+      input.value = (currentActiveClip.hook_text || currentActiveClip.title).toUpperCase();
+      showToast('Titular tomado del gancho del clip actual');
+    } else {
+      input.value = 'MIRA ESTO HASTA EL FINAL 😱';
+      showToast('Titular de alta retención aplicado');
+    }
+    if (typeof saveLastSettings === 'function') saveLastSettings();
+  }
+
   function selectSubPos(el, pos) {
     activeSubPos = pos;
     document.querySelectorAll('.sub-pos-pill').forEach(b => b.classList.toggle('active', b.getAttribute('data-pos') === pos));
     const sel = document.getElementById('editor-sub-pos');
     if (sel) sel.value = pos;
     updateSubOverlayPreview();
+    if (typeof saveLastSettings === 'function') saveLastSettings();
+  }
+
+  function selectColorFilter(btn, filter) {
+    activeColorFilter = filter;
+    document.querySelectorAll('.color-filter-pill').forEach(b => {
+      b.classList.toggle('active', (b.getAttribute('data-colorfilter') || 'none') === filter);
+    });
+    const edSel = document.getElementById('editor-color-filter');
+    if (edSel) edSel.value = filter;
+    if (typeof saveLastSettings === 'function') saveLastSettings();
+  }
+
+  function selectBrollTheme(btn, theme) {
+    activeBrollTheme = theme;
+    document.querySelectorAll('.broll-theme-pill').forEach(b => {
+      b.classList.toggle('active', (b.getAttribute('data-brolltheme') || 'gameplay') === theme);
+    });
+    if (typeof saveLastSettings === 'function') saveLastSettings();
+  }
+
+  function autoGenerateHeadline() {
+    const input = document.getElementById('hook-headline-input');
+    if (!input) return;
+    if (currentActiveClip && (currentActiveClip.hook_text || currentActiveClip.title)) {
+      input.value = (currentActiveClip.hook_text || currentActiveClip.title).toUpperCase();
+      showToast('Titular tomado del gancho del clip actual');
+    } else {
+      input.value = 'MIRA ESTO HASTA EL FINAL 😱';
+      showToast('Titular de alta retención aplicado');
+    }
     if (typeof saveLastSettings === 'function') saveLastSettings();
   }
 
@@ -6570,6 +6740,26 @@
   // RECORDAR AJUSTES Y PRESETS (TAREA 4)
   // ==========================================================================
   const DEFAULT_PRESETS = {
+    'TikTok Viral': {
+      format: '9:16',
+      sub_style: 'beast',
+      sub_size: 'medium',
+      sub_pos: 'bottom',
+      layout: 'auto',
+      speed: 'turbo',
+      hook_zoom: true,
+      fast: false,
+      language: 'es',
+      target_duration: 'short',
+      clips: 5,
+      watermark: '',
+      focus_prompt: 'Ganchos impactantes, humor, sorpresas y momentos de alta retención',
+      progress_bar: true,
+      dynamic_zoom: true,
+      color_filter: 'pop',
+      broll_theme: 'gameplay',
+      split_glow: false
+    },
     'Podcast': {
       format: '9:16',
       sub_style: 'minimal',
@@ -6583,7 +6773,12 @@
       target_duration: 'medium',
       clips: 5,
       watermark: '',
-      focus_prompt: 'Momentos clave, reflexiones y anécdotas impactantes'
+      focus_prompt: 'Momentos clave, reflexiones y anécdotas impactantes',
+      progress_bar: true,
+      dynamic_zoom: false,
+      color_filter: 'warm',
+      broll_theme: 'gameplay',
+      split_glow: false
     },
     'Gaming': {
       format: '9:16',
@@ -6598,14 +6793,19 @@
       target_duration: 'short',
       clips: 5,
       watermark: '',
-      focus_prompt: 'Clips divertidos, reacciones épicas y jugadas destacadas'
+      focus_prompt: 'Clips divertidos, reacciones épicas y jugadas destacadas',
+      progress_bar: true,
+      dynamic_zoom: true,
+      color_filter: 'pop',
+      broll_theme: 'gameplay',
+      split_glow: false
     },
     'Entrevista': {
       format: '9:16',
       sub_style: 'hormozi',
       sub_size: 'medium',
       sub_pos: 'bottom',
-      layout: 'auto',
+      layout: 'split',
       speed: 'turbo',
       hook_zoom: true,
       fast: false,
@@ -6613,7 +6813,12 @@
       target_duration: 'long',
       clips: 4,
       watermark: '',
-      focus_prompt: 'Declaraciones reveladoras, preguntas intensas y lecciones'
+      focus_prompt: 'Declaraciones reveladoras, preguntas intensas y lecciones',
+      progress_bar: true,
+      dynamic_zoom: false,
+      color_filter: 'cinema',
+      broll_theme: 'gameplay',
+      split_glow: true
     }
   };
 
@@ -6633,7 +6838,13 @@
       clips: parseInt(document.getElementById('clips-range')?.value || '5', 10),
       watermark: document.getElementById('watermark-input')?.value || '',
       focus_prompt: document.getElementById('focus-prompt-input')?.value || '',
-      focus_prompt_type: document.getElementById('focus-prompt-type')?.value || 'theme'
+      focus_prompt_type: document.getElementById('focus-prompt-type')?.value || 'theme',
+      progress_bar: !!document.getElementById('progress-bar-check')?.checked,
+      dynamic_zoom: !!document.getElementById('dynamic-zoom-check')?.checked,
+      split_glow: !!document.getElementById('split-glow-check')?.checked,
+      color_filter: activeColorFilter || 'none',
+      broll_theme: activeBrollTheme || 'gameplay',
+      hook_headline: document.getElementById('hook-headline-input')?.value || ''
     };
   }
 
@@ -6654,6 +6865,21 @@
     const fastEl = document.getElementById('fast-mode-check');
     if (fastEl && typeof s.fast === 'boolean') fastEl.checked = s.fast;
 
+    const pbEl = document.getElementById('progress-bar-check');
+    if (pbEl && typeof s.progress_bar === 'boolean') pbEl.checked = s.progress_bar;
+
+    const dzEl = document.getElementById('dynamic-zoom-check');
+    if (dzEl && typeof s.dynamic_zoom === 'boolean') dzEl.checked = s.dynamic_zoom;
+
+    const sgEl = document.getElementById('split-glow-check');
+    if (sgEl && typeof s.split_glow === 'boolean') sgEl.checked = s.split_glow;
+
+    if (s.color_filter) selectColorFilter(null, s.color_filter);
+    if (s.broll_theme) selectBrollTheme(null, s.broll_theme);
+
+    const hlEl = document.getElementById('hook-headline-input');
+    if (hlEl && typeof s.hook_headline === 'string') hlEl.value = s.hook_headline;
+
     const langEl = document.getElementById('clip-language-select');
     if (langEl && s.language) langEl.value = s.language;
 
@@ -6672,6 +6898,9 @@
 
     const fptEl = document.getElementById('focus-prompt-type');
     if (fptEl && s.focus_prompt_type) fptEl.value = s.focus_prompt_type;
+
+    if (!silent) saveLastSettings();
+  }
 
     if (!silent) saveLastSettings();
   }
@@ -6751,6 +6980,7 @@
     } catch (e) {}
 
     let html = '';
+    html += `<button type="button" class="preset-chip" data-preset="TikTok Viral" onclick="applyPreset('TikTok Viral')" title="Efectos virales: barra dinámica, zooms y pop TikTok">🔥 TikTok Viral</button>`;
     html += `<button type="button" class="preset-chip" data-preset="Podcast" onclick="applyPreset('Podcast')" title="Ajustes ideales para podcasts y entrevistas">🎙️ Podcast</button>`;
     html += `<button type="button" class="preset-chip" data-preset="Gaming" onclick="applyPreset('Gaming')" title="Layout gaming, subtítulos discretos y clips cortos">🎮 Gaming</button>`;
     html += `<button type="button" class="preset-chip" data-preset="Entrevista" onclick="applyPreset('Entrevista')" title="Hormozi Neón y clips largos de 60-90s">💬 Entrevista</button>`;
@@ -6808,7 +7038,13 @@
       focus_prompt: document.getElementById('focus-prompt-input')?.value.trim() || null,
       subtitle_position: activeSubPos || 'bottom',
       subtitle_size: activeSubSize || 'medium',
-      custom_highlight: activeHighlightColor || null
+      custom_highlight: activeHighlightColor || null,
+      progress_bar: !!document.getElementById('progress-bar-check')?.checked,
+      color_filter: activeColorFilter || 'none',
+      dynamic_zoom: !!document.getElementById('dynamic-zoom-check')?.checked,
+      split_glow: !!document.getElementById('split-glow-check')?.checked,
+      hook_headline: document.getElementById('hook-headline-input')?.value.trim() || null,
+      broll_theme: activeBrollTheme || 'gameplay'
     };
     addRecentUrl(url, document.getElementById('url-preview-title')?.innerText || '');
 
@@ -7731,9 +7967,24 @@
     const size = document.getElementById('editor-sub-size')?.value || activeSubSize || 'medium';
     const pos = document.getElementById('editor-sub-pos')?.value || activeSubPos || 'bottom';
     const hl = activeHighlightColor || '';
+    const prog = !!document.getElementById('editor-progress-bar')?.checked;
+    const zoom = !!document.getElementById('editor-dynamic-zoom')?.checked;
+    const cf = document.getElementById('editor-color-filter')?.value || activeColorFilter || 'none';
+    const head = document.getElementById('editor-hook-headline')?.value.trim() || '';
     try {
-      const data = await apiJson(`/api/clips/${encodeURIComponent(c.id)}/rerender?style=${encodeURIComponent(style)}&aspect=${encodeURIComponent(activeFormat || '9:16')}&position=${encodeURIComponent(pos)}&size=${encodeURIComponent(size)}&highlight=${encodeURIComponent(hl)}`, { method: 'POST' });
-      showToast(`Re-renderizando con tamaño y posición elegidos (trabajo #${data.job_id})`);
+      const q = new URLSearchParams({
+        style: style,
+        aspect: activeFormat || '9:16',
+        position: pos,
+        size: size,
+        highlight: hl,
+        progress_bar: prog,
+        dynamic_zoom: zoom,
+        color_filter: cf,
+        hook_headline: head
+      });
+      const data = await apiJson(`/api/clips/${encodeURIComponent(c.id)}/rerender?${q.toString()}`, { method: 'POST' });
+      showToast(`Re-renderizando con estilo y efectos (trabajo #${data.job_id})`);
       activeJobId = data.job_id;
       trackJobProgress(data.job_id);
     } catch (e) {
@@ -8408,8 +8659,22 @@
       const size = document.getElementById('editor-sub-size')?.value || activeSubSize || 'medium';
       const pos = document.getElementById('editor-sub-pos')?.value || activeSubPos || 'bottom';
       const aspect = activeFormat || '9:16';
+      const prog = !!document.getElementById('editor-progress-bar')?.checked;
+      const zoom = !!document.getElementById('editor-dynamic-zoom')?.checked;
+      const cf = document.getElementById('editor-color-filter')?.value || activeColorFilter || 'none';
+      const head = document.getElementById('editor-hook-headline')?.value.trim() || '';
 
-      const data = await apiJson(`/api/clips/${encodeURIComponent(c.id)}/rerender?style=${encodeURIComponent(style)}&aspect=${encodeURIComponent(aspect)}&position=${encodeURIComponent(pos)}&size=${encodeURIComponent(size)}`, {
+      const q = new URLSearchParams({
+        style: style,
+        aspect: aspect,
+        position: pos,
+        size: size,
+        progress_bar: prog,
+        dynamic_zoom: zoom,
+        color_filter: cf,
+        hook_headline: head
+      });
+      const data = await apiJson(`/api/clips/${encodeURIComponent(c.id)}/rerender?${q.toString()}`, {
         method: 'POST'
       });
 
@@ -8524,13 +8789,13 @@
     }
   } catch (e) {}
 
-  // Auto-guardado de ajustes del panel Crear
-  ['hook-zoom-check', 'fast-mode-check', 'clip-language-select', 'focus-prompt-type'].forEach(id => {
+  // Auto-guardado de ajustes del panel Crear y Editor
+  ['hook-zoom-check', 'fast-mode-check', 'clip-language-select', 'focus-prompt-type', 'progress-bar-check', 'dynamic-zoom-check', 'split-glow-check', 'editor-progress-bar', 'editor-dynamic-zoom', 'editor-color-filter'].forEach(id => {
     document.getElementById(id)?.addEventListener('change', () => {
       if (typeof saveLastSettings === 'function') saveLastSettings();
     });
   });
-  ['watermark-input', 'focus-prompt-input', 'clips-range'].forEach(id => {
+  ['watermark-input', 'focus-prompt-input', 'clips-range', 'hook-headline-input', 'editor-hook-headline'].forEach(id => {
     document.getElementById(id)?.addEventListener('input', () => {
       if (typeof saveLastSettings === 'function') saveLastSettings();
     });

@@ -95,3 +95,32 @@ def test_render_real_con_cada_encoder(maker, tmp_path, monkeypatch, encoder):
                             "-show_entries", "stream=width,height,codec_name", "-of", "csv=p=0", str(out)],
                            capture_output=True, text=True).stdout.strip()
     assert probe == "h264,1080,1920"
+
+
+def test_efectos_barra_progreso_y_zoom(maker):
+    f, label = maker.build_filter_complex(1080, 1920, progress_bar=True, clip_duration=25.0, dynamic_zoom=True)
+    assert "drawbox=x=0:y=ih-8:w=iw:h=8:color=white@0.22:t=fill" in f
+    assert "drawbox=x=0:y=ih-8:w='iw*min(1,t/25.000)':h=8:color=0xa855f7@0.95:t=fill[v_prog]" in f
+    assert "between(mod(t,12),0,2.2)" in f
+    assert label == "[v_prog]"
+
+
+@pytest.mark.parametrize("preset,expected", [
+    ("pop", "eq=contrast=1.12:saturation=1.28:brightness=0.02"),
+    ("cinema", "colorbalance=rs=0.08:gs=0.02:bs=-0.08"),
+    ("vignette", "vignette=angle=PI/5"),
+    ("warm", "colorbalance=rs=0.09:gs=0.03:bs=-0.06"),
+])
+def test_filtros_color_grading(maker, preset, expected):
+    f, label = maker.build_filter_complex(1080, 1920, color_filter=preset)
+    assert expected in f
+    assert label == "[v_color]"
+
+
+def test_split_glow_en_framing(maker):
+    from src.agents.agent3_clip_generator.framing import Framing
+    fr = Framing(mode="split", crop_w=608, split_xs=(100, 700))
+    f, label = maker.build_filter_complex(1080, 1920, framing=fr, split_glow=True)
+    assert "drawbox=x=0:y=956:w=iw:h=8:color=0xa855f7@0.45:t=fill" in f
+    assert label == "[sp_glow]"
+

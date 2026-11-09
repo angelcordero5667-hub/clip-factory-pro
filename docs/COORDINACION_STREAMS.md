@@ -84,6 +84,15 @@ Pendientes para Antigravity: restaurar "Subtítulos" y "Plantillas" en el menú 
   4. Modelo Faster-Whisper actualizado por defecto a `small` (pre-descargado en `data/cache/whisper_models` y configurable con `CLIP_WHISPER_MODEL`) para máxima precisión fonética en español.
 
 ## Pendiente / ideas (reclamar aquí antes de empezar)
+- [x] **COMPLETADO POR ANTIGRAVITY (09-nov ~01:45):** Tarea 18: Suite Completa de Efectos Virales y Retención (TikTok / Shorts / Reels):
+  1. ⚡ **Barra de Progreso Dinámica:** Línea neón animada en FFmpeg (`drawbox`) de 0% a 100% que avanza con la duración exacta del clip.
+  2. 🔍 **Zooms Rítmicos (Punch-In cada 12s):** Reajuste de atención dinámico (1.12x centrado durante 2.2s) para elevar retención visual.
+  3. 🎨 **Color Grading Viral:** Presets `pop` (TikTok MrBeast saturado), `cinema` (Teal & Orange), `vignette` (viñeta envolvente suave) y `warm` (cálido podcast).
+  4. 📌 **Titular Superior de Gancho (Hook Headline):** Capa ASS en formato cartelera superior (`Alignment=8`) para capturar la mirada en los primeros 6 segundos.
+  5. ✨ **Borde Glow Neón en Split:** Línea divisoria luminosa entre hablantes en pantalla dividida 9:16.
+  6. 🎮 **Selector de Temas B-Roll:** Soporte para gameplay universal, Minecraft parkour, Subway Surfers, GTA V y ASMR satisfactorio con fallback procedural.
+  7. 🎛️ **Controles en UI y Re-render:** Sección dedicada "Efectos Virales y Retención" en panel Crear y en barra lateral del Editor con soporte de re-renderizado en caliente y presets.
+  Tests: 228 tests unitarios pasando al 100% y validación Playwright con 0 overflow horizontal en móviles.
 - [x] **COMPLETADO POR ANTIGRAVITY (09-nov ~00:55):** Tarea 17: Menús Reales, Vistas Dedicadas y Navegación Completa:
   1. 📁 **Vista REAL "Mis Proyectos" (`#view-proyectos`)**: Carga los 27 proyectos desde `/api/videos`, con buscador en tiempo real, selector de orden (recientes/clips/duración), KPIs de proyectos y botones de acción ("Ver Clips", "Descargar ZIP" y "Exportar Guion TXT").
   2. 🕒 **Vista REAL "Historial de Trabajos" (`#view-historial`)**: Lista dinámica de tareas desde `/api/jobs`, tarjeta destacada para el trabajo activo con barra de progreso en vivo, chips de filtro (Todos, En Curso, Listos, Errores/Cancelados) y acciones de cancelación y reintento.
