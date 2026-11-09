@@ -3631,6 +3631,269 @@
     color: #fff;
   }
 
+  /* ==========================================================================
+     MENÚS REALES: VISTAS PROYECTOS, HISTORIAL, ANALYTICS Y DROPDOWN USUARIO
+     ========================================================================== */
+  .avatar-menu-wrapper {
+    position: relative;
+  }
+  .user-dropdown-menu {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 12px);
+    width: 250px;
+    background: rgba(14, 17, 30, 0.96);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 14px;
+    padding: 8px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.75), 0 0 25px rgba(168, 85, 247, 0.18);
+    z-index: 150;
+    display: none;
+    flex-direction: column;
+    gap: 3px;
+    animation: fadeInDropdown 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .user-dropdown-menu.active {
+    display: flex;
+  }
+  @keyframes fadeInDropdown {
+    from { opacity: 0; transform: translateY(-8px) scale(0.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .user-dropdown-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 10px;
+    margin-bottom: 4px;
+  }
+  .avatar-sm {
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 13px !important;
+  }
+  .user-dropdown-info .user-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.2;
+  }
+  .user-dropdown-info .user-role {
+    font-size: 10.5px;
+    color: var(--neon-cyan);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 2px;
+  }
+  .status-dot-pulse {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #10b981;
+    display: inline-block;
+    box-shadow: 0 0 8px #10b981;
+  }
+  .user-dropdown-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.08);
+    margin: 4px 6px;
+  }
+  .user-dropdown-group-title {
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    padding: 5px 10px 2px 10px;
+    text-transform: uppercase;
+  }
+  .user-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    color: var(--text-secondary);
+    font-size: 12px;
+    cursor: pointer;
+    text-align: left;
+    width: 100%;
+    transition: all 0.15s ease;
+    text-decoration: none;
+    box-sizing: border-box;
+  }
+  .user-dropdown-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    transform: translateX(2px);
+  }
+  .user-dropdown-item svg {
+    flex-shrink: 0;
+    stroke: var(--neon-purple);
+  }
+
+  /* Tarjetas de Proyectos */
+  .project-card {
+    background: rgba(18, 22, 38, 0.72);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    position: relative;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .project-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(168, 85, 247, 0.35);
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.5), 0 0 16px rgba(168, 85, 247, 0.12);
+  }
+  .project-card-header {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .project-card-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(34, 211, 238, 0.15));
+    border: 1px solid rgba(168, 85, 247, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--neon-purple);
+    flex-shrink: 0;
+  }
+  .project-card-title {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #fff;
+    line-height: 1.4;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+  .project-card-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    font-size: 11.5px;
+  }
+  .project-card-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: auto;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    flex-wrap: wrap;
+  }
+
+  /* Tarjetas de Trabajos / Historial */
+  .job-item-card {
+    background: rgba(16, 20, 34, 0.75);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+  .job-item-card:hover {
+    border-color: rgba(255, 255, 255, 0.18);
+    background: rgba(20, 25, 42, 0.85);
+  }
+  .job-item-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+    flex: 1 1 300px;
+  }
+  .job-status-badge {
+    padding: 4px 9px;
+    border-radius: 9999px;
+    font-size: 11px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+  }
+  .job-badge-running {
+    background: rgba(34, 211, 238, 0.15);
+    color: var(--neon-cyan);
+    border: 1px solid rgba(34, 211, 238, 0.35);
+  }
+  .job-badge-done {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.35);
+  }
+  .job-badge-error {
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.35);
+  }
+  .job-badge-cancelled {
+    background: rgba(148, 163, 184, 0.12);
+    color: #94a3b8;
+    border: 1px solid rgba(148, 163, 184, 0.25);
+  }
+  .job-badge-queued {
+    background: rgba(245, 158, 11, 0.15);
+    color: #fbbf24;
+    border: 1px solid rgba(245, 158, 11, 0.35);
+  }
+
+  /* Hoja / Modal para "Más" en móvil */
+  .mobile-more-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: 120;
+    display: none;
+    align-items: flex-end;
+  }
+  .mobile-more-overlay.active {
+    display: flex;
+  }
+  .mobile-more-sheet {
+    background: #0d101d;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 20px 20px 0 0;
+    width: 100%;
+    padding: 20px 16px 28px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.8);
+    animation: slideUpSheet 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  @keyframes slideUpSheet {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+
   .mobile-bottom-nav {
     display: none;
   }
@@ -3654,6 +3917,10 @@
       width: 100% !important;
       max-width: 100vw !important;
       min-width: 0 !important;
+    }
+
+    .chat-floating-btn {
+      display: none !important;
     }
 
     /* 1. Header en móvil: compacto sin desbordamientos */
@@ -3981,28 +4248,28 @@
           Mis Proyectos
         </button>
       </li>
-      <li class="nav-item" id="nav-historial">
-        <button onclick="showJobsHistory()">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/></svg>
-          Historial
-        </button>
-      </li>
-      <li class="nav-item" id="nav-settings">
-        <button onclick="openSettingsModal()">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-          Configuración
-        </button>
-      </li>
-      <li class="nav-item" id="nav-ayuda">
-        <button onclick="openHelpModal()">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-          Ayuda
-        </button>
-      </li>
       <li class="nav-item" id="nav-editor">
         <button onclick="switchView('editor')">
           <svg viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg>
           Editor de Video
+        </button>
+      </li>
+      <li class="nav-item" id="nav-ffmpeg">
+        <button onclick="switchView('ffmpeg')">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Monitor FFmpeg
+        </button>
+      </li>
+      <li class="nav-item" id="nav-historial">
+        <button onclick="switchView('historial')">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/></svg>
+          Historial
+        </button>
+      </li>
+      <li class="nav-item" id="nav-analytics">
+        <button onclick="switchView('analytics')">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          Analytics
         </button>
       </li>
       <li class="nav-item" id="nav-subtitulos">
@@ -4017,10 +4284,16 @@
           Plantillas
         </button>
       </li>
-      <li class="nav-item" id="nav-analytics">
-        <button onclick="showAnalytics()">
-          <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-          Analytics
+      <li class="nav-item" id="nav-settings">
+        <button onclick="openSettingsModal()">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          Configuración
+        </button>
+      </li>
+      <li class="nav-item" id="nav-ayuda">
+        <button onclick="openHelpModal()">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          Ayuda
         </button>
       </li>
     </ul>
@@ -4048,9 +4321,12 @@
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
         </button>
         <nav class="header-tabs" aria-label="Pestañas superiores">
-          <a href="#" class="header-tab active" id="tab-nav-inicio" onclick="switchView('inicio'); return false;">Inicio</a>
-          <a href="#" class="header-tab" id="tab-nav-proyectos" onclick="switchView('inicio'); return false;">Proyectos</a>
-          <a href="#" class="header-tab" id="tab-nav-audios" onclick="switchView('ffmpeg'); return false;">Audios v</a>
+          <a href="#" class="header-tab active" id="tab-nav-inicio" onclick="switchView('inicio'); return false;">Crear</a>
+          <a href="#" class="header-tab" id="tab-nav-proyectos" onclick="switchView('proyectos'); return false;">Proyectos</a>
+          <a href="#" class="header-tab" id="tab-nav-editor" onclick="switchView('editor'); return false;">Editor</a>
+          <a href="#" class="header-tab" id="tab-nav-ffmpeg" onclick="switchView('ffmpeg'); return false;">Monitor</a>
+          <a href="#" class="header-tab" id="tab-nav-historial" onclick="switchView('historial'); return false;">Historial</a>
+          <a href="#" class="header-tab" id="tab-nav-analytics" onclick="switchView('analytics'); return false;">Analytics</a>
         </nav>
       </div>
 
@@ -4059,14 +4335,62 @@
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <input type="text" id="global-search-input" placeholder="Buscar..." oninput="handleGlobalSearch(this.value)" aria-label="Buscar en la aplicación">
         </div>
-        <button class="icon-btn" onclick="showJobsHistory()" aria-label="Notificaciones" title="Historial de Trabajos">
+        <button class="icon-btn" onclick="switchView('historial')" aria-label="Historial de trabajos" title="Historial de Trabajos">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
           <span class="badge-dot" id="header-notif-dot"></span>
         </button>
         <button class="icon-btn" onclick="openHelpModal()" aria-label="Ayuda" title="Ayuda y Atajos">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
         </button>
-        <div class="avatar" onclick="openSettingsModal()" title="Perfil de Usuario">A</div>
+        <div class="avatar-menu-wrapper">
+          <div class="avatar" onclick="toggleUserDropdown(event)" title="Menú de Usuario y Sistema" style="cursor:pointer;" id="header-user-avatar">A</div>
+          <!-- DROPDOWN REAL DEL USUARIO -->
+          <div class="user-dropdown-menu" id="user-dropdown-menu">
+            <div class="user-dropdown-header">
+              <div class="avatar avatar-sm">A</div>
+              <div class="user-dropdown-info">
+                <div class="user-name">Angel</div>
+                <div class="user-role"><span class="status-dot-pulse"></span> Administrador (Local)</div>
+              </div>
+            </div>
+            <div class="user-dropdown-divider"></div>
+            <div class="user-dropdown-group-title">Vistas Principales</div>
+            <button type="button" class="user-dropdown-item" onclick="switchView('inicio'); toggleUserDropdown(false);">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              <span>Crear Clips (Inicio)</span>
+            </button>
+            <button type="button" class="user-dropdown-item" onclick="switchView('proyectos'); toggleUserDropdown(false);">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+              <span>Mis Proyectos</span>
+            </button>
+            <button type="button" class="user-dropdown-item" onclick="switchView('editor'); toggleUserDropdown(false);">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+              <span>Editor de Video</span>
+            </button>
+            <button type="button" class="user-dropdown-item" onclick="switchView('ffmpeg'); toggleUserDropdown(false);">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              <span>Monitor FFmpeg</span>
+            </button>
+            <button type="button" class="user-dropdown-item" onclick="switchView('historial'); toggleUserDropdown(false);">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>
+              <span>Historial de Trabajos</span>
+            </button>
+            <button type="button" class="user-dropdown-item" onclick="switchView('analytics'); toggleUserDropdown(false);">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+              <span>Analytics y Rendimiento</span>
+            </button>
+            <div class="user-dropdown-divider"></div>
+            <div class="user-dropdown-group-title">Sistema & Acciones</div>
+            <button type="button" class="user-dropdown-item" onclick="openSettingsModal(); toggleUserDropdown(false);">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+              <span>Configuración y Hardware</span>
+            </button>
+            <button type="button" class="user-dropdown-item" onclick="openHelpModal(); toggleUserDropdown(false);">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              <span>Atajos de Teclado (?)</span>
+            </button>
+          </div>
+        </div>
         <button class="btn-outline" onclick="shareNative()" title="Compartir el clip abierto">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
           Compartir
@@ -4875,6 +5199,161 @@
       </div>
     </section>
 
+    <!-- =========================================================================
+         VISTA 4: MIS PROYECTOS (VIDEOS PROCESADOS, BIBLIOTECA Y PAQUETES)
+         ========================================================================= -->
+    <section class="view-section" id="view-proyectos">
+      <div class="view-title-row" style="flex-wrap:wrap; gap:12px; margin-bottom:18px;">
+        <div>
+          <h1 class="view-title" style="display:flex; align-items:center; gap:10px;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--neon-purple)" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+            Mis Proyectos
+          </h1>
+          <p style="font-size:12px; color:var(--text-secondary); margin-top:4px;">
+            Videos analizados, biblioteca de clips y paquetes ZIP descargables
+          </p>
+        </div>
+        <div class="view-actions-bar" style="flex-wrap:wrap; gap:8px;">
+          <input type="text" id="proyectos-search-input" class="input-action" placeholder="🔍 Buscar proyectos..." oninput="filterProjectsList(this.value)" style="width:190px;">
+          <select id="proyectos-sort-select" class="input-action" onchange="loadProjectsView()" style="cursor:pointer;" aria-label="Ordenar proyectos">
+            <option value="recent">Más recientes</option>
+            <option value="clips">Más clips</option>
+            <option value="duration">Mayor duración</option>
+          </select>
+          <button type="button" class="btn-sm-action" onclick="loadProjectsView()" title="Actualizar lista">↻ Actualizar</button>
+          <button type="button" class="btn-gradient" onclick="switchView('inicio')" style="padding:6px 14px; font-size:12px;">+ Nuevo Proyecto</button>
+        </div>
+      </div>
+
+      <!-- Resumen estadístico rápido -->
+      <div class="projects-stats-bar" id="projects-stats-bar" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:12px; margin-bottom:20px;">
+        <!-- Inyectado por JS -->
+      </div>
+
+      <!-- Grid de Proyectos -->
+      <div class="projects-cards-grid" id="projects-cards-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); gap:16px;">
+        <div style="grid-column: 1 / -1; text-align:center; padding:40px 20px; color:var(--text-muted);">
+          Cargando proyectos desde el servidor...
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================================
+         VISTA 5: HISTORIAL DE TRABAJOS (COLA Y RENDERIZADO EN VIVO)
+         ========================================================================= -->
+    <section class="view-section" id="view-historial">
+      <div class="view-title-row" style="flex-wrap:wrap; gap:12px; margin-bottom:18px;">
+        <div>
+          <h1 class="view-title" style="display:flex; align-items:center; gap:10px;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--neon-cyan)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Historial de Trabajos
+          </h1>
+          <p style="font-size:12px; color:var(--text-secondary); margin-top:4px;">
+            Registro en tiempo real de tareas de transcripción, IA y codificación FFmpeg
+          </p>
+        </div>
+        <div class="view-actions-bar" style="flex-wrap:wrap; gap:8px;">
+          <div class="filter-chips-row" style="display:flex; gap:6px; flex-wrap:wrap;">
+            <button type="button" class="pill-tag active" id="job-filter-all" onclick="filterJobsByStatus('all')">Todos</button>
+            <button type="button" class="pill-tag" id="job-filter-running" onclick="filterJobsByStatus('running')">⚡ En curso</button>
+            <button type="button" class="pill-tag" id="job-filter-done" onclick="filterJobsByStatus('done')">✔ Listos</button>
+            <button type="button" class="pill-tag" id="job-filter-error" onclick="filterJobsByStatus('error')">✕ Errores / Cancelados</button>
+          </div>
+          <button type="button" class="btn-sm-action" onclick="loadJobsHistoryView()" title="Actualizar historial">↻ Actualizar</button>
+        </div>
+      </div>
+
+      <!-- Banner de Trabajo Activo (si hay uno en ejecución) -->
+      <div id="historial-active-banner" style="display:none; margin-bottom:18px;"></div>
+
+      <!-- Lista de Trabajos -->
+      <div class="jobs-list-container" id="jobs-list-container" style="display:flex; flex-direction:column; gap:10px;">
+        <div style="text-align:center; padding:40px 20px; color:var(--text-muted);">
+          Cargando historial de trabajos...
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================================
+         VISTA 6: ANALYTICS Y RENDIMIENTO
+         ========================================================================= -->
+    <section class="view-section" id="view-analytics">
+      <div class="view-title-row" style="flex-wrap:wrap; gap:12px; margin-bottom:18px;">
+        <div>
+          <h1 class="view-title" style="display:flex; align-items:center; gap:10px;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--neon-pink)" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            Analytics y Rendimiento
+          </h1>
+          <p style="font-size:12px; color:var(--text-secondary); margin-top:4px;">
+            Métricas de clips generados, retención de ganchos virales y horas de trabajo ahorradas
+          </p>
+        </div>
+        <div class="view-actions-bar">
+          <button type="button" class="btn-sm-action" onclick="loadAnalyticsView()">↻ Actualizar Métricas</button>
+        </div>
+      </div>
+
+      <!-- 4 KPI Cards -->
+      <div class="analytics-kpi-grid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(210px, 1fr)); gap:14px; margin-bottom:20px;">
+        <div class="card" style="border-left: 3px solid var(--neon-purple);">
+          <div style="font-size:11.5px; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:6px;">VIDEOS ANALIZADOS</div>
+          <div style="font-size:28px; font-weight:800; color:#fff;" id="an-total-videos">--</div>
+          <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">En base de datos SQLite</div>
+        </div>
+        <div class="card" style="border-left: 3px solid var(--neon-cyan);">
+          <div style="font-size:11.5px; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:6px;">CLIPS VIRALES LISTOS</div>
+          <div style="font-size:28px; font-weight:800; color:var(--neon-cyan);" id="an-total-clips">--</div>
+          <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">Formato vertical 9:16 para TikTok/Shorts</div>
+        </div>
+        <div class="card" style="border-left: 3px solid var(--neon-pink);">
+          <div style="font-size:11.5px; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:6px;">VIRAL SCORE PROMEDIO</div>
+          <div style="font-size:28px; font-weight:800; color:var(--neon-pink);" id="an-avg-score">--</div>
+          <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">Ganchos evaluados por IA</div>
+        </div>
+        <div class="card" style="border-left: 3px solid #10b981;">
+          <div style="font-size:11.5px; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:6px;">TIEMPO AHORRADO</div>
+          <div style="font-size:28px; font-weight:800; color:#10b981;" id="an-time-saved">--</div>
+          <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">Equivalente a edición manual</div>
+        </div>
+      </div>
+
+      <!-- Sección de Desglose de Categorías y Rendimiento de Clips -->
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(340px, 1fr)); gap:18px; margin-bottom:20px;">
+        <!-- Distribución de Categorías -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Distribución por Categorías Virales</span>
+            <span style="font-size:11px; color:var(--text-muted);">Basado en transcripción</span>
+          </div>
+          <div id="analytics-categories-bars" style="display:flex; flex-direction:column; gap:12px;">
+            <!-- Barras inyectadas por JS -->
+          </div>
+        </div>
+
+        <!-- Salud y Hardware del Sistema -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Rendimiento de Hardware & Modelos</span>
+            <button type="button" class="btn-sm-action" onclick="openSettingsModal()" style="font-size:11px; padding:3px 8px;">Ajustes</button>
+          </div>
+          <div id="analytics-system-summary" style="display:flex; flex-direction:column; gap:10px; font-size:12.5px;">
+            <!-- Inyectado por JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Top 5 Clips Más Virales -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">🏆 Top Clips con Mayor Puntaje Viral</span>
+          <button type="button" class="btn-sm-action" onclick="switchView('editor')" style="font-size:11px; padding:3px 8px;">Ir al Editor</button>
+        </div>
+        <div id="analytics-top-clips-list" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:12px;">
+          <!-- Inyectado por JS -->
+        </div>
+      </div>
+    </section>
+
   </div>
 
   <!-- MODAL INFORMATIVO (historial, métricas, ajustes, ayuda) -->
@@ -5110,7 +5589,6 @@
   }
 
   function switchView(viewName) {
-    if (viewName === 'proyectos') viewName = 'ffmpeg';
     currentView = viewName;
     document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
     document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
@@ -5126,10 +5604,453 @@
     const mobNav = document.getElementById('mob-nav-' + viewName);
     if (mobNav) mobNav.classList.add('active');
 
-    const tab = document.getElementById('tab-nav-' + (viewName === 'ffmpeg' ? 'audios' : 'inicio'));
+    const tab = document.getElementById('tab-nav-' + viewName);
     if (tab) tab.classList.add('active');
 
+    // Carga de datos dinámica según la vista activa
+    if (viewName === 'proyectos') loadProjectsView();
+    if (viewName === 'historial') loadJobsHistoryView();
+    if (viewName === 'analytics') loadAnalyticsView();
+    if (viewName === 'ffmpeg') loadClips(false);
+
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // =========================================================================
+  // DROPDOWN DE USUARIO Y MENÚ MÓVIL "MÁS"
+  // =========================================================================
+  function toggleUserDropdown(e) {
+    if (e && e.stopPropagation) e.stopPropagation();
+    const m = document.getElementById('user-dropdown-menu');
+    if (!m) return;
+    const isOpen = m.classList.contains('active');
+    m.classList.toggle('active', !isOpen);
+  }
+
+  document.addEventListener('click', (e) => {
+    const m = document.getElementById('user-dropdown-menu');
+    if (m && m.classList.contains('active')) {
+      if (!e.target.closest('.avatar-menu-wrapper')) {
+        m.classList.remove('active');
+      }
+    }
+  });
+
+  function toggleMobileMoreMenu(force) {
+    const o = document.getElementById('mobile-more-overlay');
+    if (!o) return;
+    const open = typeof force === 'boolean' ? force : !o.classList.contains('active');
+    o.classList.toggle('active', open);
+  }
+
+  // =========================================================================
+  // VISTA REAL: MIS PROYECTOS (VIDEOS Y PAQUETES)
+  // =========================================================================
+  let cachedProjectsList = [];
+  async function loadProjectsView() {
+    const grid = document.getElementById('projects-cards-grid');
+    const statsBar = document.getElementById('projects-stats-bar');
+    if (!grid) return;
+    try {
+      const videos = await apiJson('/api/videos');
+      cachedProjectsList = Array.isArray(videos) ? videos : [];
+      renderProjectsList(cachedProjectsList);
+    } catch (e) {
+      grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:30px; color:#f87171;">
+        Error al cargar proyectos: ${esc(e.message)}
+        <div style="margin-top:10px;"><button class="btn-sm-action" onclick="loadProjectsView()">↻ Reintentar</button></div>
+      </div>`;
+    }
+  }
+
+  function filterProjectsList(query) {
+    const q = (query || '').toLowerCase().trim();
+    if (!q) {
+      renderProjectsList(cachedProjectsList);
+      return;
+    }
+    const filtered = cachedProjectsList.filter(v => 
+      (v.title || '').toLowerCase().includes(q) || (v.id || '').toLowerCase().includes(q)
+    );
+    renderProjectsList(filtered);
+  }
+
+  function renderProjectsList(videos) {
+    const grid = document.getElementById('projects-cards-grid');
+    const statsBar = document.getElementById('projects-stats-bar');
+    if (!grid) return;
+
+    const sortMode = document.getElementById('proyectos-sort-select')?.value || 'recent';
+    let list = [...videos];
+    if (sortMode === 'clips') {
+      list.sort((a, b) => (b.clips || 0) - (a.clips || 0));
+    } else if (sortMode === 'duration') {
+      list.sort((a, b) => parseInt(b.duration || 0) - parseInt(a.duration || 0));
+    }
+
+    if (statsBar) {
+      const totalVids = cachedProjectsList.length;
+      const totalClips = cachedProjectsList.reduce((acc, v) => acc + (v.clips || 0), 0);
+      statsBar.innerHTML = `
+        <div class="card" style="padding:12px 16px;">
+          <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase;">TOTAL PROYECTOS</div>
+          <div style="font-size:20px; font-weight:800; color:#fff;">${totalVids}</div>
+        </div>
+        <div class="card" style="padding:12px 16px;">
+          <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase;">CLIPS DISPONIBLES</div>
+          <div style="font-size:20px; font-weight:800; color:var(--neon-cyan);">${totalClips}</div>
+        </div>
+        <div class="card" style="padding:12px 16px;">
+          <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase;">FORMATO PREDOMINANTE</div>
+          <div style="font-size:20px; font-weight:800; color:var(--neon-purple);">9:16 Vertical</div>
+        </div>
+      `;
+    }
+
+    if (!list.length) {
+      grid.innerHTML = `
+        <div class="card" style="grid-column: 1 / -1; text-align:center; padding:50px 20px;">
+          <div style="font-size:36px; margin-bottom:12px;">📁</div>
+          <h3 style="font-size:16px; color:#fff; margin-bottom:6px;">No se encontraron proyectos</h3>
+          <p style="font-size:12.5px; color:var(--text-secondary); max-width:400px; margin:0 auto 16px auto;">
+            Pega un enlace de YouTube o sube un video para comenzar a extraer momentos virales con IA.
+          </p>
+          <button class="btn-gradient" onclick="switchView('inicio')" style="padding:8px 18px; font-size:13px;">Crear Mi Primer Proyecto</button>
+        </div>
+      `;
+      return;
+    }
+
+    grid.innerHTML = list.map(v => `
+      <div class="project-card">
+        <div class="project-card-header">
+          <div class="project-card-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 8-6 4 6 4V8Z"/><rect width="14" height="12" x="2" y="6" rx="2"/></svg>
+          </div>
+          <div style="min-width:0; flex:1;">
+            <div class="project-card-title" title="${esc(v.title)}">${esc(v.title || 'Video sin título')}</div>
+            <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">ID: ${esc(v.id)}</div>
+          </div>
+        </div>
+        <div class="project-card-meta">
+          <span class="pill-tag" style="font-size:10.5px; padding:2px 7px;">⏱️ ${esc(v.duration || '0m')}</span>
+          <span class="pill-tag" style="font-size:10.5px; padding:2px 7px; border-color:rgba(34,211,238,0.3); color:var(--neon-cyan);">✂️ ${v.clips || 0} clips</span>
+          ${v.approved ? `<span class="pill-tag" style="font-size:10.5px; padding:2px 7px; border-color:rgba(16,185,129,0.3); color:#10b981;">✔ ${v.approved} aprobados</span>` : ''}
+        </div>
+        <div class="project-card-actions">
+          <button type="button" class="btn-gradient" onclick="openProjectClips('${v.id}')" style="padding:6px 12px; font-size:11px; flex:1;">
+            🎬 Ver Clips
+          </button>
+          <button type="button" class="btn-outline" onclick="downloadProjectZip('${v.id}')" style="padding:6px 10px; font-size:11px;" title="Descargar paquete ZIP">
+            📦 ZIP
+          </button>
+          <button type="button" class="btn-sm-action" onclick="exportProjectTranscript('${v.id}')" style="padding:6px 8px; font-size:11px;" title="Exportar transcripción en TXT">
+            📄 Guion
+          </button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function openProjectClips(videoId) {
+    switchView('ffmpeg');
+    setTimeout(() => {
+      const searchBox = document.getElementById('clip-search-input');
+      if (searchBox) {
+        searchBox.value = videoId;
+        onClipSearchOrSortChange();
+      }
+      showToast(`Mostrando clips del proyecto ${videoId}`);
+    }, 150);
+  }
+
+  function downloadProjectZip(videoId) {
+    showToast('Iniciando descarga del paquete ZIP...');
+    const token = getStoredToken();
+    const tokenParam = token ? `?token=${encodeURIComponent(token)}` : '';
+    window.location.href = `/api/videos/${videoId}/zip${tokenParam}`;
+  }
+
+  function exportProjectTranscript(videoId) {
+    showToast('Descargando transcripción del video...');
+    const token = getStoredToken();
+    const tokenParam = token ? `?token=${encodeURIComponent(token)}` : '';
+    window.location.href = `/api/videos/${videoId}/transcript/export?format=txt${token ? `&token=${encodeURIComponent(token)}` : ''}`;
+  }
+
+  // =========================================================================
+  // VISTA REAL: HISTORIAL DE TRABAJOS Y RENDERIZADO
+  // =========================================================================
+  let cachedJobsList = [];
+  let currentJobsFilter = 'all';
+
+  async function loadJobsHistoryView() {
+    const container = document.getElementById('jobs-list-container');
+    const activeBanner = document.getElementById('historial-active-banner');
+    if (!container) return;
+    try {
+      const jobs = await apiJson('/api/jobs?limit=50');
+      cachedJobsList = Array.isArray(jobs) ? jobs : [];
+      renderJobsHistoryView();
+    } catch (e) {
+      container.innerHTML = `<div style="text-align:center; padding:30px; color:#f87171;">
+        Error al cargar trabajos: ${esc(e.message)}
+        <div style="margin-top:10px;"><button class="btn-sm-action" onclick="loadJobsHistoryView()">↻ Reintentar</button></div>
+      </div>`;
+    }
+  }
+
+  function filterJobsByStatus(status) {
+    currentJobsFilter = status;
+    document.querySelectorAll('.filter-chips-row .pill-tag').forEach(b => b.classList.remove('active'));
+    const btn = document.getElementById(`job-filter-${status}`);
+    if (btn) btn.classList.add('active');
+    renderJobsHistoryView();
+  }
+
+  function renderJobsHistoryView() {
+    const container = document.getElementById('jobs-list-container');
+    const activeBanner = document.getElementById('historial-active-banner');
+    if (!container) return;
+
+    let filtered = [...cachedJobsList];
+    if (currentJobsFilter === 'running') {
+      filtered = filtered.filter(j => j.status === 'running' || j.status === 'queued');
+    } else if (currentJobsFilter === 'done') {
+      filtered = filtered.filter(j => j.status === 'done');
+    } else if (currentJobsFilter === 'error') {
+      filtered = filtered.filter(j => j.status === 'error' || j.status === 'cancelled');
+    }
+
+    const runningJob = cachedJobsList.find(j => j.status === 'running' || j.status === 'queued');
+    if (runningJob && activeBanner) {
+      activeBanner.style.display = 'block';
+      const pct = Math.round((runningJob.progress || 0) * 100);
+      activeBanner.innerHTML = `
+        <div class="card" style="border:1px solid rgba(34,211,238,0.4); background:linear-gradient(135deg, rgba(14,26,45,0.9), rgba(10,14,28,0.9));">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; flex-wrap:wrap; gap:8px;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span class="status-dot-pulse"></span>
+              <strong style="color:#fff; font-size:14px;">TRABAJO EN CURSO #${runningJob.id}</strong>
+              <span class="job-status-badge job-badge-running">⚡ ${esc(runningJob.step_label || 'Procesando')} (${pct}%)</span>
+            </div>
+            <button class="btn-outline" onclick="cancelJob(${runningJob.id}, '${runningJob.status}')" style="padding:4px 10px; font-size:11px; color:#f87171; border-color:rgba(239,68,68,0.3);">
+              🛑 Detener Trabajo
+            </button>
+          </div>
+          <div style="font-size:12.5px; color:var(--text-secondary); margin-bottom:8px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+            ${esc(runningJob.source || '')}
+          </div>
+          <div style="background:rgba(255,255,255,0.08); border-radius:9999px; height:8px; overflow:hidden;">
+            <div style="background:linear-gradient(90deg, #a855f7, #22d3ee); height:100%; width:${pct}%; transition:width 0.3s ease;"></div>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text-muted); margin-top:6px;">
+            <span>${esc(runningJob.message || 'Ejecutando pipeline con IA...')}</span>
+            <span>Inicio: ${esc(runningJob.created_at || '')}</span>
+          </div>
+        </div>
+      `;
+    } else if (activeBanner) {
+      activeBanner.style.display = 'none';
+    }
+
+    if (!filtered.length) {
+      container.innerHTML = `
+        <div class="card" style="text-align:center; padding:40px 20px;">
+          <div style="font-size:32px; margin-bottom:10px;">🕒</div>
+          <div style="color:#fff; font-weight:600; font-size:14px;">No hay trabajos en este filtro</div>
+          <div style="color:var(--text-muted); font-size:12px; margin-top:4px;">Los trabajos de procesamiento aparecerán aquí automáticamente.</div>
+        </div>
+      `;
+      return;
+    }
+
+    const badgeClass = {
+      running: 'job-badge-running',
+      queued: 'job-badge-queued',
+      done: 'job-badge-done',
+      error: 'job-badge-error',
+      cancelled: 'job-badge-cancelled'
+    };
+
+    container.innerHTML = filtered.map(j => {
+      const cls = badgeClass[j.status] || 'job-badge-queued';
+      const statusText = JOB_LABEL[j.status] || j.status;
+      const isComplete = j.status === 'done';
+      const isFailed = j.status === 'error' || j.status === 'cancelled';
+      const isRunning = j.status === 'running' || j.status === 'queued';
+
+      return `
+        <div class="job-item-card">
+          <div class="job-item-left">
+            <div style="font-family:monospace; font-weight:700; color:var(--neon-purple); font-size:13px; min-width:40px;">
+              #${j.id}
+            </div>
+            <div style="min-width:0; flex:1;">
+              <div style="color:#fff; font-size:13px; font-weight:500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                ${esc(j.kind === 'rerender' ? 'Re-renderizado de clip: ' + j.source : j.source || 'Proceso de video')}
+              </div>
+              <div style="font-size:11.5px; color:var(--text-muted); display:flex; gap:8px; align-items:center; margin-top:3px; flex-wrap:wrap;">
+                <span>🕒 ${esc(j.created_at || '')}</span>
+                ${j.step_label ? `<span>• Paso: <b style="color:var(--text-secondary);">${esc(j.step_label)}</b></span>` : ''}
+                ${j.error ? `<span style="color:#f87171;">• ${esc(j.error)}</span>` : ''}
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span class="job-status-badge ${cls}">${statusText}</span>
+            ${isRunning ? `
+              <button type="button" class="btn-outline" onclick="cancelJob(${j.id}, '${j.status}')" style="padding:4px 9px; font-size:11px; color:#f87171; border-color:rgba(239,68,68,0.3);">
+                Cancelar
+              </button>
+            ` : ''}
+            ${isComplete && j.video_id ? `
+              <button type="button" class="btn-gradient" onclick="openProjectClips('${j.video_id}')" style="padding:4px 10px; font-size:11px;">
+                Ver Clips
+              </button>
+            ` : ''}
+            ${isFailed && j.source && j.source.startsWith('http') ? `
+              <button type="button" class="btn-outline" onclick="retryJobUrl('${esc(j.source)}')" style="padding:4px 10px; font-size:11px;">
+                🔁 Reintentar
+              </button>
+            ` : ''}
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function retryJobUrl(url) {
+    switchView('inicio');
+    const input = document.getElementById('yt-url-input');
+    if (input) {
+      input.value = url;
+      onUrlInput(url);
+    }
+    showToast('Enlace cargado en el panel Crear para reintentar.');
+  }
+
+  // =========================================================================
+  // VISTA REAL: ANALYTICS Y RENDIMIENTO
+  // =========================================================================
+  async function loadAnalyticsView() {
+    try {
+      const [an, clips, deps] = await Promise.all([
+        apiJson('/api/analytics').catch(() => ({})),
+        apiJson('/api/clips').catch(() => []),
+        apiJson('/api/health/deps').catch(() => ({}))
+      ]);
+
+      const anVideos = document.getElementById('an-total-videos');
+      if (anVideos) anVideos.textContent = an.total_videos || 0;
+      const anClips = document.getElementById('an-total-clips');
+      if (anClips) anClips.textContent = an.total_clips || 0;
+      const anAvg = document.getElementById('an-avg-score');
+      if (anAvg) anAvg.textContent = (an.avg_score || 0) + ' pts';
+      const anTime = document.getElementById('an-time-saved');
+      if (anTime) anTime.textContent = (an.time_saved_hours || 0) + ' h';
+
+      const catCount = { humor: 0, reaccion: 0, discusion: 0, sorpresa: 0, ensenanza: 0 };
+      const totalClips = Array.isArray(clips) ? clips.length : 0;
+      if (totalClips > 0) {
+        clips.forEach(c => {
+          const cat = (c.category || '').toLowerCase();
+          if (catCount[cat] !== undefined) catCount[cat]++;
+          else catCount.humor++;
+        });
+      }
+
+      const catLabels = {
+        humor: { name: 'Humor y Reacciones Divertidas', color: '#ec4899', icon: '😂' },
+        reaccion: { name: 'Momentos Épicos / Picos de Audio', color: '#f59e0b', icon: '⚡' },
+        discusion: { name: 'Debates y Puntos de Tensión', color: '#8b5cf6', icon: '💬' },
+        sorpresa: { name: 'Revelaciones y Hechos Impactantes', color: '#22d3ee', icon: '😲' },
+        ensenanza: { name: 'Consejos, Datos y Lecciones', color: '#10b981', icon: '💡' }
+      };
+
+      const catBarsEl = document.getElementById('analytics-categories-bars');
+      if (catBarsEl) {
+        catBarsEl.innerHTML = Object.entries(catCount).map(([k, count]) => {
+          const info = catLabels[k] || { name: k, color: '#a855f7', icon: '📌' };
+          const pct = totalClips > 0 ? Math.round((count / totalClips) * 100) : 0;
+          return `
+            <div>
+              <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px;">
+                <span>${info.icon} ${info.name}</span>
+                <span style="color:#fff; font-weight:600;">${count} clips (${pct}%)</span>
+              </div>
+              <div style="background:rgba(255,255,255,0.06); height:6px; border-radius:9999px; overflow:hidden;">
+                <div style="background:${info.color}; width:${pct}%; height:100%; border-radius:9999px;"></div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      const sysEl = document.getElementById('analytics-system-summary');
+      if (sysEl) {
+        sysEl.innerHTML = `
+          <div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.06);">
+            <span>Codificador de Video:</span>
+            <b style="color:var(--neon-cyan);">${deps.encoder || 'h264_amf (GPU AMD)'}</b>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.06);">
+            <span>Modelo de Transcripción:</span>
+            <b style="color:#10b981;">Faster-Whisper (Small, INT8)</b>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.06);">
+            <span>Detector de Rostros 9:16:</span>
+            <b style="color:#a855f7;">OpenCV YuNet ONNX</b>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.06);">
+            <span>Motor de Detección Viral:</span>
+            <b style="color:#f59e0b;">IA Híbrida (Ollama + Heurístico + Audio)</b>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding:6px 0;">
+            <span>Ahorro Estimado por Clip:</span>
+            <b style="color:#fff;">~27 minutos de edición</b>
+          </div>
+        `;
+      }
+
+      const topClipsEl = document.getElementById('analytics-top-clips-list');
+      if (topClipsEl) {
+        const sorted = [...(Array.isArray(clips) ? clips : [])].sort((a, b) => (b.virality_score || 0) - (a.virality_score || 0)).slice(0, 6);
+        if (!sorted.length) {
+          topClipsEl.innerHTML = '<div style="grid-column:1/-1; color:var(--text-muted); font-size:12px;">Aún no hay clips generados.</div>';
+        } else {
+          topClipsEl.innerHTML = sorted.map((c, idx) => `
+            <div class="card" style="padding:12px; display:flex; flex-direction:column; gap:8px;">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-weight:800; font-size:13px; color:var(--neon-purple);">#${idx + 1}</span>
+                <span class="pill-tag" style="border-color:rgba(236,72,153,0.3); color:var(--neon-pink); font-size:11px;">
+                  🔥 ${c.virality_score || 0} pts
+                </span>
+              </div>
+              <div style="font-size:12.5px; font-weight:600; color:#fff; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;">
+                ${esc(c.title || c.hook_text || 'Clip viral')}
+              </div>
+              <div style="font-size:11px; color:var(--text-muted);">
+                ⏱️ ${(c.duration || 0).toFixed(1)}s · ${esc(c.category || 'general')}
+              </div>
+              <button type="button" class="btn-gradient" onclick="loadClipAndOpenEditor('${c.id}')" style="margin-top:auto; padding:5px 8px; font-size:11px;">
+                Editar en Estudio
+              </button>
+            </div>
+          `).join('');
+        }
+      }
+    } catch (e) {
+      console.error('Error loading analytics:', e);
+    }
+  }
+
+  function loadClipAndOpenEditor(clipId) {
+    switchView('editor');
+    setTimeout(() => {
+      selectClip(clipId);
+    }, 150);
   }
 
   function toggleSidebar() {
@@ -6923,22 +7844,7 @@
   const JOB_LABEL = { queued: 'En cola', running: 'En curso', done: 'Listo', error: 'Error', cancelled: 'Cancelado' };
 
   async function showJobsHistory() {
-    try {
-      const jobs = await apiJson('/api/jobs?limit=20');
-      const dot = document.getElementById('header-notif-dot');
-      if (dot) dot.style.display = jobs.some(j => j.status === 'running' || j.status === 'queued') ? '' : 'none';
-      const rows = jobs.length ? jobs.map(j => `
-        <div style="display:flex; justify-content:space-between; gap:10px; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.06);">
-          <div style="min-width:0;">
-            <div style="color:#fff; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">#${j.id} · ${esc(j.kind === 'rerender' ? 'Re-render' : j.source)}</div>
-            <div style="font-size:11px;">${JOB_LABEL[j.status] || esc(j.status)}${j.step_label ? ' · ' + esc(j.step_label) : ''}${j.error ? ' · ' + esc(j.error) : ''}${j.status === 'running' && j.idle_seconds >= 120 ? ` · <span style="color:#fbbf24;">sin novedades hace ${Math.floor(j.idle_seconds / 60)} min (un paso largo, como detectar escenas, puede tardar)</span>` : ''}</div>
-          </div>
-          ${(j.status === 'queued' || j.status === 'running') ? `<button class="btn-outline" style="padding:4px 10px; font-size:11px;" onclick="cancelJob(${j.id}, '${j.status}')">Cancelar</button>` : ''}
-        </div>`).join('') : 'Todavía no hay trabajos.';
-      openInfoModal('Historial de trabajos', rows);
-    } catch (e) {
-      showToast('No se pudo cargar el historial: ' + e.message);
-    }
+    switchView('historial');
   }
 
   async function cancelJob(id, status) {
@@ -6946,22 +7852,14 @@
     try {
       await apiJson(`/api/jobs/${id}/cancel${status === 'running' ? '?force=true' : ''}`, { method: 'POST' });
       showToast(status === 'running' ? `Trabajo #${id}: cancelando al terminar el paso actual` : `Trabajo #${id} cancelado`);
-      showJobsHistory();
+      if (typeof loadJobsHistoryView === 'function') loadJobsHistoryView();
     } catch (e) {
       showToast(e.message);
     }
   }
 
   async function showAnalytics() {
-    try {
-      const a = await apiJson('/api/analytics');
-      const item = (label, val) => `<div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.06);"><span>${label}</span><strong style="color:#fff;">${val}</strong></div>`;
-      openInfoModal('Métricas', item('Videos procesados', a.total_videos) + item('Clips generados', a.total_clips) +
-        item('Clips aprobados', a.approved_clips) + item('Puntaje medio', a.avg_score + '/100') +
-        item('Tiempo ahorrado (estimado)', a.time_saved_hours + ' h'));
-    } catch (e) {
-      showToast('No se pudieron cargar las métricas: ' + e.message);
-    }
+    switchView('analytics');
   }
 
   async function openSettingsModal() {
@@ -7816,6 +8714,12 @@
       </svg>
       <span>Crear</span>
     </button>
+    <button class="mobile-nav-btn" id="mob-nav-proyectos" onclick="switchView('proyectos')" aria-label="Mis Proyectos">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+      </svg>
+      <span>Proyectos</span>
+    </button>
     <button class="mobile-nav-btn" id="mob-nav-editor" onclick="switchView('editor')" aria-label="Editor de Video">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <polygon points="23 7 16 12 23 17 23 7"/>
@@ -7823,20 +8727,47 @@
       </svg>
       <span>Editor</span>
     </button>
-    <button class="mobile-nav-btn" id="mob-nav-ffmpeg" onclick="switchView('ffmpeg')" aria-label="Monitor y Proyectos">
+    <button class="mobile-nav-btn" id="mob-nav-ffmpeg" onclick="switchView('ffmpeg')" aria-label="Monitor FFmpeg">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="12" cy="12" r="10"/>
         <polyline points="12 6 12 12 16 14"/>
       </svg>
       <span>Monitor</span>
     </button>
-    <button class="mobile-nav-btn" id="mob-nav-ajustes" onclick="openSettingsModal()" aria-label="Configuración y Diagnóstico">
+    <button class="mobile-nav-btn" id="mob-nav-mas" onclick="toggleMobileMoreMenu(true)" aria-label="Más opciones">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
-        <circle cx="12" cy="12" r="3"/>
+        <circle cx="12" cy="12" r="1"/>
+        <circle cx="19" cy="12" r="1"/>
+        <circle cx="5" cy="12" r="1"/>
       </svg>
-      <span>Ajustes</span>
+      <span>Más</span>
     </button>
   </nav>
+
+  <!-- BOTTOM SHEET MÓVIL PARA "MÁS OPCIONES" -->
+  <div class="mobile-more-overlay" id="mobile-more-overlay" onclick="if(event.target===this) toggleMobileMoreMenu(false)">
+    <div class="mobile-more-sheet">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+        <span style="font-size:14px; font-weight:700; color:#fff;">Menú Completo</span>
+        <button type="button" onclick="toggleMobileMoreMenu(false)" style="background:none; border:none; color:var(--text-muted); font-size:18px; cursor:pointer;">✕</button>
+      </div>
+      <button type="button" class="user-dropdown-item" onclick="switchView('historial'); toggleMobileMoreMenu(false);" style="padding:12px 10px; font-size:13.5px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--neon-cyan)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span>Historial de Trabajos</span>
+      </button>
+      <button type="button" class="user-dropdown-item" onclick="switchView('analytics'); toggleMobileMoreMenu(false);" style="padding:12px 10px; font-size:13.5px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--neon-pink)" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        <span>Analytics y Rendimiento</span>
+      </button>
+      <button type="button" class="user-dropdown-item" onclick="openSettingsModal(); toggleMobileMoreMenu(false);" style="padding:12px 10px; font-size:13.5px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--neon-purple)" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span>Ajustes y Hardware</span>
+      </button>
+      <button type="button" class="user-dropdown-item" onclick="openHelpModal(); toggleMobileMoreMenu(false);" style="padding:12px 10px; font-size:13.5px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#e2e8f0" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <span>Ayuda y Atajos de Teclado</span>
+      </button>
+    </div>
+  </div>
 </body>
 </html>

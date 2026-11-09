@@ -84,6 +84,14 @@ Pendientes para Antigravity: restaurar "Subtítulos" y "Plantillas" en el menú 
   4. Modelo Faster-Whisper actualizado por defecto a `small` (pre-descargado en `data/cache/whisper_models` y configurable con `CLIP_WHISPER_MODEL`) para máxima precisión fonética en español.
 
 ## Pendiente / ideas (reclamar aquí antes de empezar)
+- [x] **COMPLETADO POR ANTIGRAVITY (09-nov ~00:55):** Tarea 17: Menús Reales, Vistas Dedicadas y Navegación Completa:
+  1. 📁 **Vista REAL "Mis Proyectos" (`#view-proyectos`)**: Carga los 27 proyectos desde `/api/videos`, con buscador en tiempo real, selector de orden (recientes/clips/duración), KPIs de proyectos y botones de acción ("Ver Clips", "Descargar ZIP" y "Exportar Guion TXT").
+  2. 🕒 **Vista REAL "Historial de Trabajos" (`#view-historial`)**: Lista dinámica de tareas desde `/api/jobs`, tarjeta destacada para el trabajo activo con barra de progreso en vivo, chips de filtro (Todos, En Curso, Listos, Errores/Cancelados) y acciones de cancelación y reintento.
+  3. 📊 **Vista REAL "Analytics y Rendimiento" (`#view-analytics`)**: Panel con 4 KPI cards (Videos procesados, Clips listos, Score promedio 94.6, Horas ahorradas), distribución de ganchos virales con barras de colores, resumen de hardware/modelos y ranking de Top 6 Clips más virales con acceso directo al editor.
+  4. 👤 **Dropdown Menu REAL en Avatar del Usuario (`#user-dropdown-menu`)**: Al pulsar el avatar se despliega un menú flotante con estado de sesión, accesos directos a todas las vistas, configuración de hardware, atajos de teclado y limpieza de caché.
+  5. 🧭 **Pestañas Superiores y Menú Lateral 100% Funcionales**: Se eliminaron los enlaces ficticios ("Audios v" y redirecciones al inicio); ahora cada pestaña (`Crear`, `Proyectos`, `Editor`, `Monitor`, `Historial`, `Analytics`) navega a su vista real correspondiente.
+  6. 📱 **Navegación Móvil con Bottom Sheet ("Más")**: El bottom nav incluye botón "Más" que abre un menú deslizante inferior para acceder fluidamente a Historial, Analytics, Ajustes y Ayuda sin sobrecargar la pantalla.
+  Verificado: 100% de tests unitarios pasando y suite Playwright visual en `docs/captured_screenshots/menus/`.
 - [x] **COMPLETADO POR ANTIGRAVITY (08-nov ~09:18):** Tarea 16: Optimización y experiencia móvil completa (Mobile Responsiveness & Bottom Navigation):
   1. 📱 Cero desbordamientos horizontales (`scrollWidth == innerWidth`) en todos los tamaños móviles (Android 360px, iPhone SE 375px, iPhone 14 390px, Pixel 7 412px).
   2. 🧭 Barra de navegación inferior móvil tipo app nativa (`.mobile-bottom-nav`) con 4 accesos rápidos ergonómicos: Crear, Editor, Monitor y Ajustes, sincronizados con `switchView`.
