@@ -194,7 +194,7 @@ class SubtitleGenerator:
 
     @staticmethod
     def play_res(aspect_ratio: str = "9:16") -> Tuple[int, int]:
-        return {"1:1": (1080, 1080), "16:9": (1920, 1080)}.get(aspect_ratio, (1080, 1920))
+        return {"1:1": (1080, 1080), "16:9": (1920, 1080), "4:5": (1080, 1350)}.get(aspect_ratio, (1080, 1920))
 
     def _margins(self, position: str, res: Tuple[int, int]) -> Tuple[int, int, int]:
         """(alineación, marginV, marginLR) en la zona segura según el formato."""

@@ -4248,6 +4248,358 @@
     }
   }
 
+  /* ==========================================================================
+     OPUS CLIP ULTRA SAAS DESIGN SYSTEM (2-COLUMN STUDIO)
+     ========================================================================== */
+  body .sidebar .nav-item.active button,
+  body aside.sidebar ul.nav-list li.nav-item.active button,
+  .sidebar .nav-item.active button {
+    background: rgba(6, 182, 212, 0.08) !important;
+    color: #22d3ee !important;
+    border: 1.5px solid #06b6d4 !important;
+    box-shadow: 0 0 16px rgba(6, 182, 212, 0.25) !important;
+    font-weight: 600 !important;
+  }
+  body .sidebar .nav-item.active button svg,
+  .sidebar .nav-item.active button svg {
+    stroke: #22d3ee !important;
+    color: #22d3ee !important;
+    fill: none !important;
+  }
+  body .sidebar .nav-item button svg {
+    stroke: #94a3b8;
+    color: #94a3b8;
+    fill: none;
+  }
+  .header-tabs {
+    opacity: 0.85;
+    font-size: 13px;
+  }
+  .header-tab.active {
+    color: #22d3ee !important;
+    border-bottom: 2px solid #06b6d4 !important;
+  }
+  .opus-dashboard-container {
+    display: grid;
+    grid-template-columns: 1.55fr 1.05fr;
+    gap: 24px;
+    margin-top: 10px;
+    align-items: start;
+  }
+  @media (max-width: 980px) {
+    .opus-dashboard-container {
+      grid-template-columns: 1fr;
+      gap: 18px;
+    }
+  }
+
+  .opus-col-left, .opus-col-right {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .opus-section-title {
+    font-size: 19px;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: -0.3px;
+    margin: 0 0 6px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* Drag & Drop Zone */
+  .opus-dropzone {
+    border: 1.5px dashed rgba(6, 182, 212, 0.4);
+    background: radial-gradient(circle at 50% 25%, rgba(6, 182, 212, 0.08), rgba(13, 16, 31, 0.85));
+    border-radius: 18px;
+    padding: 42px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    user-select: none;
+    position: relative;
+    overflow: hidden;
+  }
+  .opus-dropzone:hover, .opus-dropzone.dragover {
+    border-color: #00f2fe;
+    background: radial-gradient(circle at 50% 25%, rgba(6, 182, 212, 0.18), rgba(15, 19, 38, 0.95));
+    box-shadow: 0 0 28px rgba(0, 242, 254, 0.22);
+    transform: translateY(-2px);
+  }
+  .opus-cloud-wrap {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: rgba(6, 182, 212, 0.12);
+    border: 1px solid rgba(6, 182, 212, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #22d3ee;
+    margin-bottom: 4px;
+    transition: transform 0.25s ease;
+  }
+  .opus-dropzone:hover .opus-cloud-wrap {
+    transform: scale(1.08);
+    box-shadow: 0 0 16px rgba(6, 182, 212, 0.4);
+  }
+  .opus-drop-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #ffffff;
+  }
+  .opus-drop-sub {
+    font-size: 12.5px;
+    color: #94a3b8;
+  }
+  .opus-browse-highlight {
+    color: #22d3ee;
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  /* YouTube Link Section */
+  .opus-url-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 4px;
+  }
+  .opus-field-label {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #ffffff;
+  }
+  .opus-url-box {
+    display: flex;
+    align-items: center;
+    background: rgba(14, 17, 33, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 12px;
+    padding: 6px 6px 6px 14px;
+    gap: 10px;
+    transition: all 0.2s ease;
+  }
+  .opus-url-box:focus-within {
+    border-color: #06b6d4;
+    box-shadow: 0 0 18px rgba(6, 182, 212, 0.3);
+  }
+  .opus-url-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #fff;
+    font-size: 13px;
+  }
+  .opus-url-input::placeholder {
+    color: #64748b;
+  }
+  .opus-btn-getclips {
+    background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%) !important;
+    color: #041019 !important;
+    font-weight: 700 !important;
+    font-size: 13px !important;
+    padding: 10px 22px !important;
+    border-radius: 9px !important;
+    border: none !important;
+    cursor: pointer !important;
+    box-shadow: 0 4px 16px rgba(0, 242, 254, 0.45) !important;
+    transition: all 0.2s ease !important;
+    white-space: nowrap !important;
+    letter-spacing: 0.2px !important;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .opus-btn-getclips:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 22px rgba(0, 242, 254, 0.65) !important;
+  }
+  .opus-btn-getclips:active {
+    transform: scale(0.97) !important;
+  }
+  .opus-supported-text {
+    font-size: 11px;
+    color: #64748b;
+    margin-top: 2px;
+  }
+
+  /* Opus Right Column Cards */
+  .opus-card {
+    background: rgba(14, 18, 34, 0.78);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 18px 20px;
+  }
+  .opus-card-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .opus-sub-label {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #94a3b8;
+    margin-bottom: 7px;
+  }
+  .opus-setting-group {
+    margin-bottom: 14px;
+  }
+  .opus-setting-group:last-child {
+    margin-bottom: 0;
+  }
+  .opus-pills-row {
+    display: flex;
+    gap: 8px;
+  }
+  .opus-pill {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 12px;
+    color: #cbd5e1;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    text-align: center;
+    user-select: none;
+  }
+  .opus-pill:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+  .opus-pill.active {
+    background: rgba(6, 182, 212, 0.15) !important;
+    border-color: #06b6d4 !important;
+    color: #22d3ee !important;
+    font-weight: 700 !important;
+    box-shadow: 0 0 12px rgba(6, 182, 212, 0.35) !important;
+  }
+  .opus-select {
+    width: 100%;
+    background: rgba(10, 13, 26, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 12.5px;
+    color: #ffffff;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.2s ease;
+  }
+  .opus-select:focus {
+    border-color: #06b6d4;
+  }
+
+  /* Opus Switches */
+  .opus-toggle-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 9px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  }
+  .opus-toggle-row:last-child {
+    border-bottom: none;
+  }
+  .opus-toggle-label {
+    font-size: 12.5px;
+    font-weight: 500;
+    color: #e2e8f0;
+  }
+  .opus-switch {
+    position: relative;
+    display: inline-block;
+    width: 38px;
+    height: 22px;
+    flex-shrink: 0;
+  }
+  .opus-switch input {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    opacity: 0.001;
+    z-index: 2;
+    cursor: pointer;
+    margin: 0;
+  }
+  .opus-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(255, 255, 255, 0.16);
+    transition: .25s ease;
+    border-radius: 22px;
+  }
+  .opus-slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .25s ease;
+    border-radius: 50%;
+  }
+  .opus-switch input:checked + .opus-slider {
+    background: linear-gradient(135deg, #00f2fe 0%, #06b6d4 100%);
+    box-shadow: 0 0 10px rgba(6, 182, 212, 0.5);
+  }
+  .opus-switch input:checked + .opus-slider:before {
+    transform: translateX(16px);
+  }
+
+  /* Accordion for Power Options */
+  .opus-accordion-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 11px 16px;
+    color: #94a3b8;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+    margin-top: 4px;
+  }
+  .opus-accordion-toggle:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.15);
+  }
+  .opus-accordion-content {
+    display: none;
+    margin-top: 10px;
+    animation: fadeIn 0.2s ease;
+  }
+  .opus-accordion-content.active {
+    display: block;
+  }
 </style>
 </head>
 <body>
@@ -4257,98 +4609,87 @@
 
   <!-- SIDEBAR LATERAL -->
     <!-- SIDEBAR LATERAL FUTURISTA SAAS -->
-  <aside class="sidebar" id="sidebar" aria-label="Navegación principal">
-    <div class="logo-box" onclick="switchView('inicio')">
-      <div class="logo-icon-neon">
-        <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+    <!-- SIDEBAR LATERAL ULTRA SAAS (ESTILO OPUS CLIP) -->
+  <aside class="sidebar" id="sidebar" aria-label="Navegacion principal">
+    <div class="logo-box" onclick="switchView('inicio')" style="cursor:pointer;">
+      <div class="logo-icon-neon" style="background:none; filter:drop-shadow(0 0 8px rgba(0, 242, 254, 0.65));">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
           <defs>
-            <linearGradient id="neonPlayGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#ec4899"/>
-              <stop offset="50%" stop-color="#a855f7"/>
-              <stop offset="100%" stop-color="#6366f1"/>
+            <linearGradient id="opusPlayGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#00f2fe"/>
+              <stop offset="50%" stop-color="#4facfe"/>
+              <stop offset="100%" stop-color="#a855f7"/>
             </linearGradient>
           </defs>
-          <polygon points="6 4 20 12 6 20 6 4" fill="url(#neonPlayGrad)"/>
+          <polygon points="6 4 20 12 6 20 6 4" fill="url(#opusPlayGrad)"/>
         </svg>
       </div>
       <div class="logo-titles">
-        <span class="logo-title-main">Clip Factory AI</span>
-        <span class="logo-subtitle-desc">Crea Clips Virales con IA</span>
+        <span class="logo-title-main" style="font-size:16.5px; font-weight:700; color:#fff; letter-spacing:-0.2px;">Opus Clip</span>
+        <span class="logo-subtitle-desc" style="font-size:10px; color:#64748b;">AI Video Repurposing</span>
       </div>
     </div>
 
     <ul class="nav-list">
       <li class="nav-item active" id="nav-inicio">
         <button onclick="switchView('inicio')">
-          <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-          Inicio
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
+          <span>Dashboard</span>
         </button>
       </li>
       <li class="nav-item" id="nav-proyectos">
         <button onclick="switchView('proyectos')">
-          <svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-          Mis Proyectos
+          <svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+          <span>My Clips</span>
+          <span class="nav-badge-pill" id="sidebar-clips-badge">14 clips</span>
+        </button>
+      </li>
+      <li class="nav-item" id="nav-plantillas">
+        <button onclick="goToPlantillas()">
+          <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+          <span>Brand Templates</span>
         </button>
       </li>
       <li class="nav-item" id="nav-editor">
         <button onclick="switchView('editor')">
-          <svg viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg>
-          Editor de Video
-        </button>
-      </li>
-      <li class="nav-item" id="nav-ffmpeg">
-        <button onclick="switchView('ffmpeg')">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          Monitor FFmpeg
-        </button>
-      </li>
-      <li class="nav-item" id="nav-historial">
-        <button onclick="switchView('historial')">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/></svg>
-          Historial
+          <svg viewBox="0 0 24 24"><path d="m18 2 4 4-12 12H6v-4L18 2z"/><path d="M14 6l4 4"/></svg>
+          <span>AI Co-pilot</span>
         </button>
       </li>
       <li class="nav-item" id="nav-analytics">
         <button onclick="switchView('analytics')">
           <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-          Analytics
-        </button>
-      </li>
-      <li class="nav-item" id="nav-subtitulos">
-        <button onclick="goToSubtitulos()">
-          <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M7 15h4M15 15h2M7 11h2M13 11h4"/></svg>
-          Subtítulos
-        </button>
-      </li>
-      <li class="nav-item" id="nav-plantillas">
-        <button onclick="goToPlantillas()">
-          <svg viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
-          Plantillas
+          <span>Analytics</span>
         </button>
       </li>
       <li class="nav-item" id="nav-settings">
         <button onclick="openSettingsModal()">
           <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-          Configuración
+          <span>Settings</span>
         </button>
       </li>
       <li class="nav-item" id="nav-ayuda">
         <button onclick="openHelpModal()">
           <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-          Ayuda
+          <span>Help Center</span>
         </button>
       </li>
+      <li class="nav-item" id="nav-subtitulos" style="display:none;"><button onclick="goToSubtitulos()">Subtitulos</button></li>
+      <li class="nav-item" id="nav-ffmpeg" style="display:none;"><button onclick="switchView('ffmpeg')">FFmpeg</button></li>
+      <li class="nav-item" id="nav-historial" style="display:none;"><button onclick="switchView('historial')">Historial</button></li>
     </ul>
 
-    <div class="sidebar-pro-card">
-      <div class="pro-bolt-icon">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+    <!-- PERFIL DE USUARIO ESTILO OPUS CLIP -->
+    <div class="sidebar-user-bottom" style="margin-top:auto; padding:16px 14px; border-top:1px solid rgba(255,255,255,0.06); display:flex; flex-direction:column; gap:10px;">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <div class="avatar avatar-sm" style="width:34px; height:34px; font-size:13.5px; background:linear-gradient(135deg, #a855f7, #6366f1); border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700;">A</div>
+        <div style="display:flex; flex-direction:column; overflow:hidden;">
+          <span style="font-size:12.5px; font-weight:600; color:#fff; white-space:nowrap; text-overflow:ellipsis; overflow:hidden;">Angel C.</span>
+          <span style="font-size:10.5px; color:#22d3ee; display:flex; align-items:center; gap:4px;"><span style="width:5px; height:5px; border-radius:50%; background:#22d3ee; display:inline-block; box-shadow:0 0 6px #22d3ee;"></span> Plan Pro Activo</span>
+        </div>
       </div>
-      <div class="pro-card-title">Actualiza a Pro</div>
-      <div class="pro-card-sub">Cuentas, planes y más límites (próximamente)</div>
-      <button type="button" class="pro-card-btn" onclick="openProModal()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M2 4l3 12h14l3-12-5 6-5-6-5 6z"/></svg>
-        Ver qué viene
+      <button type="button" class="btn-outline" onclick="openSettingsModal()" style="width:100%; font-size:11.5px; padding:6px 10px; border-radius:8px; border-color:rgba(6, 182, 212, 0.45); color:#22d3ee; background:rgba(6,182,212,0.06); cursor:pointer; font-weight:600;">
+        Upgrade Plan
       </button>
     </div>
   </aside>
@@ -4485,440 +4826,388 @@
     </div>
 
     <!-- VISTA 1: AUDIOVISUAL (DASHBOARD) -->
+        <!-- VISTA 1: AUDIOVISUAL (DASHBOARD) - OPUS CLIP ULTRA SAAS 2-COLUMN -->
     <main class="view-section active" id="view-inicio">
-      <!-- FILA 1: URL DEL VIDEO + MODO RÁPIDO + THEME / AVATAR -->
-      <div class="studio-row-1">
-        <div class="studio-url-box">
-          <svg class="link-ico" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-          <input type="text" id="yt-url-input" value="" autocomplete="off" spellcheck="false"
-                 placeholder="Introduce la URL del video o directo"
-                 aria-label="URL del video o directo" oninput="validateInputUrl(this.value)">
-          <button type="button" class="studio-upload-chip" onclick="triggerLocalFileUpload()" title="Subir un archivo de video local de tu equipo (MP4/MOV)">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-            <span>Subir MP4</span>
-          </button>
-        </div>
-        <div class="studio-top-actions">
-          <button type="button" class="studio-theme-btn" onclick="toggleTheme()" title="Cambiar tema">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-          </button>
-          <div class="studio-user-avatar" onclick="openSettingsModal()" title="Perfil de Usuario (Ajustes)">A</div>
-        </div>
-      </div>
-
-      <div class="studio-subrow-fast">
-        <label class="studio-checkbox-clean">
-          <input type="checkbox" id="fast-mode-check">
-          <span>Modo rápido (sin IA/LLM, solo heurístico)...</span>
-        </label>
-        <label class="studio-checkbox-clean" style="margin-left: 14px;">
-          <input type="checkbox" id="notify-on-finish-check" onchange="toggleNotifyOnFinish(this.checked)">
-          <span>🔔 Avisarme al terminar</span>
-        </label>
-        <div class="validation-badge" id="val-badge" style="display:none;" role="status">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-          <span id="val-badge-text">URL validada</span>
-        </div>
-      </div>
-
-      <!-- Historial de URLs recientes -->
-      <div id="recent-urls-box" style="display:none; margin: 4px 0 10px 0;">
-        <div style="font-size:11px; color:var(--text-muted); margin-bottom:4px; display:flex; align-items:center; gap:5px;">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          <span>Recientes:</span>
-        </div>
-        <div id="recent-urls-chips" style="display:flex; gap:6px; flex-wrap:wrap;"></div>
-      </div>
-
-      <!-- VISTA PREVIA DEL ENLACE Y ESTIMACIÓN DE TIEMPO (TAREA 1) -->
-      <div id="url-preview-card" class="url-preview-card" style="display: none;" aria-live="polite">
-        <div class="url-preview-thumb-wrap">
-          <img id="url-preview-thumb" src="" alt="Miniatura del video" class="url-preview-thumb" style="display: none;" onerror="this.style.display='none'; document.getElementById('url-preview-placeholder').style.display='flex';">
-          <div id="url-preview-placeholder" class="url-preview-thumb-placeholder" style="display: none;">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="4"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
-          </div>
-          <span id="url-preview-dur-badge" class="url-preview-dur-badge">00:00</span>
-        </div>
-        <div class="url-preview-info">
-          <div class="url-preview-header">
-            <span id="url-preview-platform" class="url-preview-tag">YouTube</span>
-            <span id="url-preview-live-badge" class="pill-tag" style="display:none; background:rgba(239,68,68,0.22); color:#f87171; border:1px solid rgba(239,68,68,0.45); font-size:10px; padding:2px 7px; font-weight:700;">🔴 EN VIVO</span>
-            <span id="url-preview-channel" class="url-preview-channel">Canal</span>
-          </div>
-          <h4 id="url-preview-title" class="url-preview-title">Título del video</h4>
-          <div class="url-preview-metrics">
-            <div class="preview-metric-item" title="Calculado con el historial real de trabajos completados">
-              <span class="preview-metric-label">⏱️ Tiempo estimado:</span>
-              <strong id="url-preview-estimate" class="preview-metric-val">Calculando...</strong>
-            </div>
-            <div class="preview-metric-item">
-              <span class="preview-metric-label">Duración:</span>
-              <span id="url-preview-duration-text" class="preview-metric-val">—</span>
+      <div class="opus-dashboard-container">
+        
+        <!-- COLUMNA IZQUIERDA: UPLOAD VIDEO (~60%) -->
+        <div class="opus-col-left">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h1 class="opus-section-title">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--opus-cyan-bright)" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Upload Video
+            </h1>
+            <div class="validation-badge" id="val-badge" style="display:none;" role="status">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              <span id="val-badge-text">URL validada</span>
             </div>
           </div>
-          <div id="url-preview-live-warning" class="url-preview-warning" style="display: none; background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.35); color: #fca5a5;">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            <span id="url-preview-live-text">🔴 <strong>Emisión en directo:</strong> La transmisión sigue en vivo (no tiene fin definido). Espera a que termine o usa un directo ya finalizado (VOD) para poder crear clips.</span>
-          </div>
-          <div id="url-preview-long-warning" class="url-preview-warning" style="display: none;">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-            <span>Video de más de 30 min: te sugerimos indicar <strong>Desde</strong> y <strong>Hasta</strong> abajo para extraer clips de tu momento favorito más rápido.</span>
-          </div>
-        </div>
-      </div>
 
-      <!-- BARRA DE PRESETS Y AJUSTES RÁPIDOS (TAREA 4) -->
-      <div class="studio-presets-bar">
-        <div class="presets-bar-title">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2.2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-          <span>Presets:</span>
-        </div>
-        <div class="presets-chips-container" id="presets-chips-container">
-          <!-- Renderizado dinámico de chips de presets -->
-        </div>
-      </div>
-
-      <!-- FILA 2: DOS COLUMNAS (DIRECTOS/STREAMS Y GAMING / VELOCIDAD & RETENCIÓN) -->
-      <div class="studio-grid-2col">
-        <!-- Columna Izquierda: Directos / Streams y Gaming -->
-        <div class="studio-card-box">
-          <div class="studio-card-header-row">
-            <div class="studio-card-title-neon">
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2.2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
-              <span>Directos / Streams y Gaming (Opcional)</span>
+          <!-- DRAG & DROP ZONE -->
+          <div class="opus-dropzone" id="opus-dropzone" onclick="triggerLocalFileUpload()" title="Arrastra tu video aquí o haz clic para seleccionarlo">
+            <div class="opus-cloud-wrap">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>
+                <polyline points="12 13 12 8 9 11"/>
+                <polyline points="12 8 15 11"/>
+              </svg>
             </div>
-            <span class="studio-card-badge-info" title="Descarga solo el tramo exacto en segundos">Surgical Slice ⓘ</span>
+            <div class="opus-drop-title">Drag &amp; Drop video file here</div>
+            <div class="opus-drop-sub">or <span class="opus-browse-highlight">browse files</span> from your computer</div>
+            <div id="opus-file-selected-badge" style="display:none; font-size:12px; color:#22d3ee; font-weight:600; padding:4px 10px; background:rgba(6,182,212,0.15); border-radius:6px;"></div>
           </div>
 
-          <div class="slice-inputs-row">
-            <div class="slice-field">
-              <label for="stream-start-time">Desde (ej. 01:15:00)</label>
-              <div class="slice-input-wrap">
-                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/></svg>
-                <input type="text" id="stream-start-time" placeholder="00:00:00" autocomplete="off">
+          <!-- PASTE YOUTUBE LINK SECTION -->
+          <div class="opus-url-section">
+            <label for="yt-url-input" class="opus-field-label">Paste YouTube Link</label>
+            <div class="opus-url-box">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+              <input type="text" id="yt-url-input" class="opus-url-input" value="" autocomplete="off" spellcheck="false"
+                     placeholder="e.g., https://www.youtube.com/watch?v=dQw4w9WgXcQ..."
+                     aria-label="URL del video o directo" oninput="validateInputUrl(this.value)">
+              <button type="button" class="opus-btn-getclips" id="btn-submit-process" onclick="submitCreation()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+                <span>Get Clips</span>
+              </button>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
+              <div class="opus-supported-text">Supported: YouTube, Zoom, Google Drive, MP4, MKV (up to 2hr)</div>
+              <div id="recent-urls-chips" style="display:flex; gap:6px; flex-wrap:wrap;"></div>
+            </div>
+          </div>
+
+          <!-- VISTA PREVIA DEL ENLACE Y ESTIMACIÓN DE TIEMPO (TAREA 1) -->
+          <div id="url-preview-card" class="url-preview-card" style="display: none;" aria-live="polite">
+            <div class="url-preview-thumb-wrap">
+              <img id="url-preview-thumb" src="" alt="Miniatura del video" class="url-preview-thumb" style="display: none;" onerror="this.style.display='none'; document.getElementById('url-preview-placeholder').style.display='flex';">
+              <div id="url-preview-placeholder" class="url-preview-thumb-placeholder" style="display: none;">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="4"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
               </div>
+              <span id="url-preview-dur-badge" class="url-preview-dur-badge">00:00</span>
             </div>
-            <div class="slice-field">
-              <label for="stream-end-time">Hasta (ej. 01:35:00)</label>
-              <div class="slice-input-wrap">
-                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/></svg>
-                <input type="text" id="stream-end-time" placeholder="00:20:00" autocomplete="off">
+            <div class="url-preview-info">
+              <div class="url-preview-header">
+                <span id="url-preview-platform" class="url-preview-tag">YouTube</span>
+                <span id="url-preview-live-badge" class="pill-tag" style="display:none; background:rgba(239,68,68,0.22); color:#f87171; border:1px solid rgba(239,68,68,0.45); font-size:10px; padding:2px 7px; font-weight:700;">🔴 EN VIVO</span>
+                <span id="url-preview-channel" class="url-preview-channel">Canal</span>
+              </div>
+              <h4 id="url-preview-title" class="url-preview-title">Título del video</h4>
+              <div class="url-preview-metrics">
+                <div class="preview-metric-item" title="Calculado con el historial real de trabajos completados">
+                  <span class="preview-metric-label">⏱️ Tiempo estimado:</span>
+                  <strong id="url-preview-estimate" class="preview-metric-val">Calculando...</strong>
+                </div>
+                <div class="preview-metric-item">
+                  <span class="preview-metric-label">Duración:</span>
+                  <span id="url-preview-duration-text" class="preview-metric-val">—</span>
+                </div>
+              </div>
+              <div id="url-preview-live-warning" class="url-preview-warning" style="display: none; background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.35); color: #fca5a5;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span id="url-preview-live-text">🔴 <strong>Emisión en directo:</strong> La transmisión sigue en vivo (no tiene fin definido). Espera a que termine o usa un directo ya finalizado (VOD) para poder crear clips.</span>
+              </div>
+              <div id="url-preview-long-warning" class="url-preview-warning" style="display: none;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                <span>Video de más de 30 min: te sugerimos indicar <strong>Desde</strong> y <strong>Hasta</strong> abajo para extraer clips de tu momento favorito más rápido.</span>
               </div>
             </div>
           </div>
 
-          <div class="stream-alert-hint">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-            <span>Para directos de varias horas (Twitch/YouTube/Kick), descarga solo este tramo en segmentos.</span>
-          </div>
-
-          <div class="layout-label">Diseña la Pantalla (Layout):</div>
-          <div class="layout-buttons-group">
-            <div class="layout-card active" id="layout-card-auto" onclick="selectLayoutMode('auto')">
-              <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-              Automático (IA)
+          <!-- BARRA DE PRESETS Y AJUSTES RÁPIDOS -->
+          <div class="studio-presets-bar" style="margin-top:6px;">
+            <div class="presets-bar-title">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2.2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              <span>Presets:</span>
             </div>
-            <div class="layout-card" id="layout-card-gaming" onclick="selectLayoutMode('gaming')">
-              <svg viewBox="0 0 24 24"><line x1="6" y1="12" x2="10" y2="12"/><line x1="8" y1="10" x2="8" y2="14"/><circle cx="15" cy="13" r="1"/><circle cx="18" cy="11" r="1"/><path d="M17.32 5H6.68a4 4 0 0 0-3.98 3.59L2 15a3 3 0 0 0 5.2 2l1.3-1.5h7l1.3 1.5A3 3 0 0 0 22 15l-.7-6.41A4 4 0 0 0 17.32 5z"/></svg>
-              Gaming / Streamer
-            </div>
-            <div class="layout-card" id="layout-card-split" onclick="selectLayoutMode('split')">
-              <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="12" x2="21" y2="12"/></svg>
-              Podcast Split
-            </div>
-            <div class="layout-card" id="layout-card-broll" onclick="selectLayoutMode('broll')">
-              <svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="9" rx="1"/><rect x="2" y="13" width="20" height="9" rx="1"/><polygon points="10,16 15,17.5 10,19" fill="currentColor"/></svg>
-              B-Roll / Gameplay
-            </div>
-            <div class="layout-card" id="layout-card-blur" onclick="selectLayoutMode('blur')">
-              <svg viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
-              Desenfoque
-            </div>
-          </div>
-        </div>
-
-        <!-- Columna Derecha: Velocidad de Render y Efectos de Retención -->
-        <div class="studio-card-box">
-          <div class="studio-card-header-row">
-            <div class="studio-card-title-neon">
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-              <span>Velocidad de Render y Efectos de Retención</span>
+            <div class="presets-chips-container" id="presets-chips-container">
+              <!-- Renderizado dinámico de chips de presets -->
             </div>
           </div>
 
-          <div class="speed-cards-group">
-            <div class="speed-card-item active" id="speed-card-turbo" onclick="selectSpeedMode('turbo')">
-              <div class="speed-title-line">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-                <span>Modo Turbo (3x)</span>
-              </div>
-              <div class="speed-desc-line">Render ultrarrápido</div>
-            </div>
-            <div class="speed-card-item" id="speed-card-studio" onclick="selectSpeedMode('studio')">
-              <div class="speed-title-line">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="2"><path d="M6 3h12l4 6-10 12L2 9z"/></svg>
-                <span>Calidad Studio</span>
-              </div>
-              <div class="speed-desc-line">Máxima fidelidad</div>
-            </div>
-          </div>
-
-          <label class="retention-check-line">
-            <input type="checkbox" id="hook-zoom-check" checked>
-            <span><b>Auto-Hook Zoom (0-2.5x)</b> — <span style="color:#94a3b8; font-size:11px;">Punch-in que dispara retención</span></span>
-          </label>
-        </div>
-      </div>
-
-      <!-- FILA 3: FORMATOS DE SALIDA & ESTILOS DE SUBTÍTULOS -->
-      <div class="studio-grid-row3">
-        <!-- Formato de salida -->
-        <div class="studio-card-box">
-          <div class="studio-card-header-row">
-            <div class="studio-card-title-neon">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/></svg>
-              <span>Formato de salida ⓘ</span>
-            </div>
-          </div>
-          <div class="format-options-row">
-            <div class="format-card active" onclick="selectFormat(this, '9:16')">
-              <svg viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
-              <span>9:16</span>
-            </div>
-            <div class="format-card" onclick="selectFormat(this, '1:1')">
-              <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
-              <span>1:1</span>
-            </div>
-            <div class="format-card" onclick="selectFormat(this, '16:9')">
-              <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/></svg>
-              <span>16:9</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Estilos de subtítulos -->
-        <div class="studio-card-box" id="sec-subtitle-styles">
-          <div class="studio-card-header-row">
-            <div class="studio-card-title-neon">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ec4899" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M7 15h4M15 15h2M7 11h2M13 11h4"/></svg>
-              <span>Estilos de subtítulos ⓘ</span>
-            </div>
-          </div>
-          <div class="subtitle-cards-row">
-            <div class="sub-style-card active" onclick="selectSubStyle(this, 'hormozi')">
-              <div class="sub-badge-preview sub-badge-neon">Hormozi<br>Neón</div>
-              <div class="sub-name-label">Hormozi Neón</div>
-            </div>
-            <div class="sub-style-card" onclick="selectSubStyle(this, 'beast')">
-              <div class="sub-badge-preview sub-badge-lime">MrBeast<br>Lime</div>
-              <div class="sub-name-label">MrBeast Lime</div>
-            </div>
-            <div class="sub-style-card" onclick="selectSubStyle(this, 'bounce')">
-              <div class="sub-badge-preview sub-badge-bounce">Pop<br>Bounce</div>
-              <div class="sub-name-label">Pop Bouncing</div>
-            </div>
-            <div class="sub-style-card" onclick="selectSubStyle(this, 'glow')">
-              <div class="sub-badge-preview sub-badge-glow">Cyber<br>Glow</div>
-              <div class="sub-name-label">Cyber Glow</div>
-            </div>
-            <div class="sub-style-card" onclick="selectSubStyle(this, 'minimal')">
-              <div class="sub-badge-preview sub-badge-minimal">Minimal<br>&nbsp;</div>
-              <div class="sub-name-label">Minimal</div>
-            </div>
-          </div>
-
-          <!-- Ajuste de Posición y Tamaño de subtítulos para evitar tapar caras -->
-          <div class="sub-adjust-bar" id="sub-adjust-bar">
-            <div style="display:flex; align-items:center; gap:8px;">
-              <span style="font-size:12px; font-weight:600; color:var(--text-secondary); display:flex; align-items:center; gap:5px;">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
-                Tamaño:
-              </span>
-              <div style="display:flex; gap:5px;">
-                <button type="button" class="sub-pill-btn sub-size-pill" data-size="small" onclick="selectSubSize(this, 'small')" title="Texto pequeño y discreto para dejar libre la pantalla">Pequeño</button>
-                <button type="button" class="sub-pill-btn sub-size-pill active" data-size="medium" onclick="selectSubSize(this, 'medium')" title="Tamaño estándar">Normal</button>
-                <button type="button" class="sub-pill-btn sub-size-pill" data-size="large" onclick="selectSubSize(this, 'large')" title="Texto grande e impactante">Grande</button>
-              </div>
-            </div>
-
-            <div style="display:flex; align-items:center; gap:8px;">
-              <span style="font-size:12px; font-weight:600; color:var(--text-secondary); display:flex; align-items:center; gap:5px;">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="7 10 12 15 17 10"/><polyline points="17 14 12 9 7 14"/></svg>
-                Posición:
-              </span>
-              <div style="display:flex; gap:5px;">
-                <button type="button" class="sub-pill-btn sub-pos-pill" data-pos="bottom_low" onclick="selectSubPos(this, 'bottom_low')" title="Abajo bajo: libre de rostros y torsos de hablantes">Abajo bajo (Libre de caras)</button>
-                <button type="button" class="sub-pill-btn sub-pos-pill active" data-pos="bottom" onclick="selectSubPos(this, 'bottom')" title="Posición inferior clásica">Estándar</button>
-                <button type="button" class="sub-pill-btn sub-pos-pill" data-pos="middle" onclick="selectSubPos(this, 'middle')" title="Centro de la pantalla">Centro</button>
-                <button type="button" class="sub-pill-btn sub-pos-pill" data-pos="top" onclick="selectSubPos(this, 'top')" title="Superior">Arriba</button>
-              </div>
-            </div>
-
-            <div style="display:flex; align-items:center; gap:8px;">
-              <span style="font-size:12px; font-weight:600; color:var(--text-secondary); display:flex; align-items:center; gap:5px;">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24"/></svg>
-                Resalte:
-              </span>
-              <div id="hl-color-palette" style="display:flex; gap:6px; align-items:center;">
-                <button type="button" class="hl-color-btn active" data-color="" onclick="selectHighlightColor('', this)" style="width:19px; height:19px; border-radius:50%; background:#facc15; border:2px solid #fff; cursor:pointer;" title="Amarillo Neón (Estilo original)"></button>
-                <button type="button" class="hl-color-btn" data-color="&H0000FF00" onclick="selectHighlightColor('&H0000FF00', this)" style="width:19px; height:19px; border-radius:50%; background:#22c55e; border:2px solid transparent; cursor:pointer;" title="Verde Lima"></button>
-                <button type="button" class="hl-color-btn" data-color="&H00FFFF00" onclick="selectHighlightColor('&H00FFFF00', this)" style="width:19px; height:19px; border-radius:50%; background:#06b6d4; border:2px solid transparent; cursor:pointer;" title="Cian Eléctrico"></button>
-                <button type="button" class="hl-color-btn" data-color="&H00FF00FF" onclick="selectHighlightColor('&H00FF00FF', this)" style="width:19px; height:19px; border-radius:50%; background:#ec4899; border:2px solid transparent; cursor:pointer;" title="Fucsia TikTok"></button>
-                <button type="button" class="hl-color-btn" data-color="&H000080FF" onclick="selectHighlightColor('&H000080FF', this)" style="width:19px; height:19px; border-radius:50%; background:#f97316; border:2px solid transparent; cursor:pointer;" title="Naranja Fuego"></button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- FILA 4: MARCA DE AGUA, ENFOQUE IA, CANTIDAD DE CLIPS, IDIOMA Y DURACIÓN (TAREA 2) -->
-      <div class="studio-row-4-card">
-        <!-- SELECTOR DE IDIOMA (TAREA 2) -->
-        <div class="studio-form-line">
-          <div class="studio-form-label">
-            <svg viewBox="0 0 24 24" stroke="#22d3ee"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-            <span>Idioma del video / transcripción</span>
-          </div>
-          <select id="clip-language-select" class="studio-select-dropdown" aria-label="Idioma del video">
-            <option value="auto">Automático (Detección IA)</option>
-            <option value="es" selected>Español (ES)</option>
-            <option value="en">Inglés (EN)</option>
-            <option value="pt">Portugués (PT)</option>
-          </select>
-        </div>
-
-        <!-- DURACIÓN OBJETIVO DEL CLIP (TAREA 2) -->
-        <div class="studio-form-line">
-          <div class="studio-form-label">
-            <svg viewBox="0 0 24 24" stroke="#b6f23a"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            <span>Duración del clip</span>
-          </div>
-          <div class="clip-duration-pills" id="clip-duration-group" role="radiogroup" aria-label="Duración objetivo del clip">
-            <button type="button" class="sub-pill-btn clip-dur-pill" data-dur="short" onclick="selectClipDuration('short')" role="radio" aria-checked="false" title="15 a 30 segundos (TikTok / Shorts dinámicos)">Corto (15-30 s)</button>
-            <button type="button" class="sub-pill-btn clip-dur-pill active" data-dur="medium" onclick="selectClipDuration('medium')" role="radio" aria-checked="true" title="30 a 60 segundos (Reels / Historias completas)">Medio (30-60 s)</button>
-            <button type="button" class="sub-pill-btn clip-dur-pill" data-dur="long" onclick="selectClipDuration('long')" role="radio" aria-checked="false" title="60 a 90 segundos (Explicaciones y debates a fondo)">Largo (60-90 s)</button>
-          </div>
-          <input type="hidden" id="clip-target-duration" value="medium">
-        </div>
-
-        <div class="studio-form-line">
-          <div class="studio-form-label">
-            <svg viewBox="0 0 24 24" stroke="#f59e0b"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
-            <span>Marca de agua / Creador (Opcional)</span>
-          </div>
-          <input type="text" id="watermark-input" class="studio-inline-input" placeholder="@tu_canal o marca..." maxlength="50" autocomplete="off">
-          <select id="watermark-pos-select" class="studio-select-dropdown">
-            <option value="top">Esquina superior</option>
-            <option value="bottom">Esquina inferior</option>
-          </select>
-        </div>
-
-        <div class="studio-form-line">
-          <div class="studio-form-label">
-            <svg viewBox="0 0 24 24" stroke="#ec4899"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg>
-            <span>Enfoque IA del Clip (Opcional)</span>
-          </div>
-          <input type="text" id="focus-prompt-input" class="studio-inline-input" placeholder="Ej: Momentos divertidos, dinero y negocios, historias..." maxlength="200" autocomplete="off">
-          <select id="focus-prompt-type" class="studio-select-dropdown">
-            <option value="theme">Instrucción o temática</option>
-            <option value="keywords">Palabras clave</option>
-            <option value="speaker">Hablante específico</option>
-          </select>
-        </div>
-
-        <div class="studio-form-line">
-          <div class="studio-form-label">
-            <svg viewBox="0 0 24 24" stroke="#a855f7"><rect x="2" y="2" width="20" height="20" rx="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
-            <span>Cantidad de clips a generar</span>
-          </div>
-          <div class="studio-range-wrap">
-            <input type="range" id="clips-range" class="studio-range-slider" min="1" max="10" value="5" aria-label="Cantidad de clips" oninput="document.getElementById('clips-count-val').innerText = this.value">
-            <div class="studio-badge-count" id="clips-count-val">5</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- FILA 5: EFECTOS VIRALES Y RETENCIÓN (TIKTOK / REELS / SHORTS) -->
-      <div class="studio-card-box" style="margin-bottom:16px;">
-        <div class="studio-card-header-row" style="margin-bottom:12px;">
-          <div class="studio-card-title-wrap">
-            <svg viewBox="0 0 24 24" stroke="#a855f7"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
-            <span style="font-weight:700;">Efectos Virales y Retención</span>
-            <span class="pill-tag" style="font-size:10px; margin-left:6px; background:rgba(168,85,247,0.18); border-color:var(--neon-purple); color:#c084fc;">Algoritmo 2026</span>
-          </div>
-          <span style="font-size:11px; color:var(--text-muted);">Optimizaciones de enganche y dinamismo para TikTok, Reels y Shorts</span>
-        </div>
-
-        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:14px; margin-bottom:12px;">
-          <!-- Toggles principales de retención -->
-          <div style="display:flex; flex-direction:column; gap:8px;">
-            <label class="retention-check-line">
-              <input type="checkbox" id="progress-bar-check" checked>
-              <span><b>⚡ Barra de Progreso Inferior</b> — <span style="color:#94a3b8; font-size:11px;">Línea neón animada de 0 a 100% para maximizar la retención</span></span>
-            </label>
-
-            <label class="retention-check-line">
-              <input type="checkbox" id="dynamic-zoom-check" checked>
-              <span><b>🔍 Zooms Rítmicos (Punch-In cada 12s)</b> — <span style="color:#94a3b8; font-size:11px;">Reajuste periódico de atención (1.12x) estilo MrBeast / TikTok</span></span>
-            </label>
-
-            <label class="retention-check-line">
-              <input type="checkbox" id="split-glow-check">
-              <span><b>✨ Marco Neón en Split-Screen</b> — <span style="color:#94a3b8; font-size:11px;">Línea divisoria iluminada entre hablantes en entrevistas 9:16</span></span>
-            </label>
-          </div>
-
-          <!-- Titular de Gancho Superior (Hook Headline) -->
-          <div style="display:flex; flex-direction:column; gap:6px;">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-              <span style="font-size:11.5px; font-weight:600; color:#fff; display:flex; align-items:center; gap:5px;">
-                📌 Titular Superior de Gancho (Headline):
-              </span>
-              <button type="button" class="sub-pill-btn" onclick="autoGenerateHeadline()" style="font-size:10.5px; padding:2px 8px;" title="Usa el gancho detectado por IA como titular superior">Gancho IA</button>
-            </div>
-            <input type="text" id="hook-headline-input" class="studio-inline-input" placeholder="Ej: ESTE SECRETO CAMBIÓ TODO 🤯 (o deja en blanco para automático)..." maxlength="90" autocomplete="off" style="width:100%; font-size:12px;">
-          </div>
-        </div>
-
-        <!-- Filtros de Color / Color Grading -->
-        <div style="display:flex; flex-direction:column; gap:6px; margin-top:8px; border-top:1px solid rgba(255,255,255,0.06); padding-top:10px;">
-          <div style="display:flex; align-items:center; gap:6px;">
-            <span style="font-size:11.5px; font-weight:600; color:var(--text-secondary); display:flex; align-items:center; gap:5px;">
-              🎨 Filtro de Color / Color Grading:
+          <!-- ACORDEÓN DE OPCIONES AVANZADAS Y ESTILOS -->
+          <div class="opus-accordion-toggle" onclick="toggleAdvancedStudioOptions()">
+            <span style="display:flex; align-items:center; gap:8px;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+              <span>Personalización Avanzada &amp; Subtítulos (Opcional)</span>
             </span>
+            <span id="opus-acc-arrow" style="font-size:11px;">▼</span>
           </div>
-          <div style="display:flex; gap:6px; flex-wrap:wrap;">
-            <button type="button" class="sub-pill-btn color-filter-pill active" data-colorfilter="none" onclick="selectColorFilter(this, 'none')" title="Color original de la cámara sin alteraciones">🌿 Original (Natural)</button>
-            <button type="button" class="sub-pill-btn color-filter-pill" data-colorfilter="pop" onclick="selectColorFilter(this, 'pop')" title="Saturación y contraste elevados para colores vibrantes en el feed">🔥 Pop TikTok / MrBeast</button>
-            <button type="button" class="sub-pill-btn color-filter-pill" data-colorfilter="cinema" onclick="selectColorFilter(this, 'cinema')" title="Grading cinematográfico Teal & Orange">🎬 Cinema Teal & Orange</button>
-            <button type="button" class="sub-pill-btn color-filter-pill" data-colorfilter="vignette" onclick="selectColorFilter(this, 'vignette')" title="Viñeta suave envolvente en los bordes para centrar la mirada">👁️ Viñeta Suave</button>
-            <button type="button" class="sub-pill-btn color-filter-pill" data-colorfilter="warm" onclick="selectColorFilter(this, 'warm')" title="Tonos cálidos de piel ideales para podcasts y entrevistas">🎙️ Cálido Podcast</button>
+
+          <div class="opus-accordion-content" id="opus-advanced-content">
+            <!-- Directos / Streams y Gaming -->
+            <div class="studio-card-box" style="margin-bottom:12px;">
+              <div class="studio-card-header-row">
+                <div class="studio-card-title-neon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2.2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+                  <span>Directos / Streams (Recorte Quirúrgico)</span>
+                </div>
+                <span class="studio-card-badge-info" title="Descarga solo el tramo exacto en segundos">Surgical Slice ⓘ</span>
+              </div>
+              <div class="slice-inputs-row">
+                <div class="slice-field">
+                  <label for="stream-start-time">Desde (ej. 01:15:00)</label>
+                  <div class="slice-input-wrap">
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/></svg>
+                    <input type="text" id="stream-start-time" placeholder="00:00:00" autocomplete="off">
+                  </div>
+                </div>
+                <div class="slice-field">
+                  <label for="stream-end-time">Hasta (ej. 01:35:00)</label>
+                  <div class="slice-input-wrap">
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/></svg>
+                    <input type="text" id="stream-end-time" placeholder="00:20:00" autocomplete="off">
+                  </div>
+                </div>
+              </div>
+              <div class="layout-label" style="margin-top:10px;">Diseña la Pantalla (Layout):</div>
+              <div class="layout-buttons-group">
+                <div class="layout-card active" id="layout-card-auto" onclick="selectLayoutMode('auto')">
+                  <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                  Automático (IA)
+                </div>
+                <div class="layout-card" id="layout-card-gaming" onclick="selectLayoutMode('gaming')">
+                  <svg viewBox="0 0 24 24"><line x1="6" y1="12" x2="10" y2="12"/><line x1="8" y1="10" x2="8" y2="14"/><circle cx="15" cy="13" r="1"/><circle cx="18" cy="11" r="1"/><path d="M17.32 5H6.68a4 4 0 0 0-3.98 3.59L2 15a3 3 0 0 0 5.2 2l1.3-1.5h7l1.3 1.5A3 3 0 0 0 22 15l-.7-6.41A4 4 0 0 0 17.32 5z"/></svg>
+                  Gaming / Streamer
+                </div>
+                <div class="layout-card" id="layout-card-split" onclick="selectLayoutMode('split')">
+                  <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="12" x2="21" y2="12"/></svg>
+                  Podcast Split
+                </div>
+                <div class="layout-card" id="layout-card-broll" onclick="selectLayoutMode('broll')">
+                  <svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="9" rx="1"/><rect x="2" y="13" width="20" height="9" rx="1"/><polygon points="10,16 15,17.5 10,19" fill="currentColor"/></svg>
+                  B-Roll / Gameplay
+                </div>
+                <div class="layout-card" id="layout-card-blur" onclick="selectLayoutMode('blur')">
+                  <svg viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+                  Desenfoque
+                </div>
+              </div>
+            </div>
+
+            <!-- Estilos de subtítulos -->
+            <div class="studio-card-box" id="sec-subtitle-styles" style="margin-bottom:12px;">
+              <div class="studio-card-header-row">
+                <div class="studio-card-title-neon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ec4899" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M7 15h4M15 15h2M7 11h2M13 11h4"/></svg>
+                  <span>Estilos de Subtítulos Karaoke</span>
+                </div>
+              </div>
+              <div class="subtitle-cards-row">
+                <div class="sub-style-card active" onclick="selectSubStyle(this, 'hormozi')">
+                  <div class="sub-badge-preview sub-badge-neon">Hormozi<br>Neón</div>
+                  <div class="sub-name-label">Hormozi Neón</div>
+                </div>
+                <div class="sub-style-card" onclick="selectSubStyle(this, 'beast')">
+                  <div class="sub-badge-preview sub-badge-lime">MrBeast<br>Lime</div>
+                  <div class="sub-name-label">MrBeast Lime</div>
+                </div>
+                <div class="sub-style-card" onclick="selectSubStyle(this, 'bounce')">
+                  <div class="sub-badge-preview sub-badge-bounce">Pop<br>Bounce</div>
+                  <div class="sub-name-label">Pop Bouncing</div>
+                </div>
+                <div class="sub-style-card" onclick="selectSubStyle(this, 'glow')">
+                  <div class="sub-badge-preview sub-badge-glow">Cyber<br>Glow</div>
+                  <div class="sub-name-label">Cyber Glow</div>
+                </div>
+                <div class="sub-style-card" onclick="selectSubStyle(this, 'minimal')">
+                  <div class="sub-badge-preview sub-badge-minimal">Minimal<br>&nbsp;</div>
+                  <div class="sub-name-label">Minimal</div>
+                </div>
+              </div>
+
+              <!-- Posición y Tamaño de subtítulos -->
+              <div class="sub-adjust-bar" id="sub-adjust-bar" style="margin-top:10px;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="font-size:11.5px; font-weight:600; color:var(--text-secondary);">Tamaño:</span>
+                  <div style="display:flex; gap:5px;">
+                    <button type="button" class="sub-pill-btn sub-size-pill" data-size="small" onclick="selectSubSize(this, 'small')">Pequeño</button>
+                    <button type="button" class="sub-pill-btn sub-size-pill active" data-size="medium" onclick="selectSubSize(this, 'medium')">Normal</button>
+                    <button type="button" class="sub-pill-btn sub-size-pill" data-size="large" onclick="selectSubSize(this, 'large')">Grande</button>
+                  </div>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="font-size:11.5px; font-weight:600; color:var(--text-secondary);">Posición:</span>
+                  <div style="display:flex; gap:5px;">
+                    <button type="button" class="sub-pill-btn sub-pos-pill" data-pos="bottom_low" onclick="selectSubPos(this, 'bottom_low')" title="Abajo bajo: libre de rostros">Abajo bajo</button>
+                    <button type="button" class="sub-pill-btn sub-pos-pill active" data-pos="bottom" onclick="selectSubPos(this, 'bottom')">Estándar</button>
+                    <button type="button" class="sub-pill-btn sub-pos-pill" data-pos="middle" onclick="selectSubPos(this, 'middle')">Centro</button>
+                    <button type="button" class="sub-pill-btn sub-pos-pill" data-pos="top" onclick="selectSubPos(this, 'top')">Arriba</button>
+                  </div>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="font-size:11.5px; font-weight:600; color:var(--text-secondary);">Resalte:</span>
+                  <div id="hl-color-palette" style="display:flex; gap:6px; align-items:center;">
+                    <button type="button" class="hl-color-btn active" data-color="" onclick="selectHighlightColor('', this)" style="width:18px; height:18px; border-radius:50%; background:#facc15; border:2px solid #fff; cursor:pointer;" title="Amarillo"></button>
+                    <button type="button" class="hl-color-btn" data-color="&H0000FF00" onclick="selectHighlightColor('&H0000FF00', this)" style="width:18px; height:18px; border-radius:50%; background:#22c55e; border:2px solid transparent; cursor:pointer;" title="Verde"></button>
+                    <button type="button" class="hl-color-btn" data-color="&H00FFFF00" onclick="selectHighlightColor('&H00FFFF00', this)" style="width:18px; height:18px; border-radius:50%; background:#06b6d4; border:2px solid transparent; cursor:pointer;" title="Cian"></button>
+                    <button type="button" class="hl-color-btn" data-color="&H00FF00FF" onclick="selectHighlightColor('&H00FF00FF', this)" style="width:18px; height:18px; border-radius:50%; background:#ec4899; border:2px solid transparent; cursor:pointer;" title="Fucsia"></button>
+                    <button type="button" class="hl-color-btn" data-color="&H000080FF" onclick="selectHighlightColor('&H000080FF', this)" style="width:18px; height:18px; border-radius:50%; background:#f97316; border:2px solid transparent; cursor:pointer;" title="Naranja"></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Filtros de Color y B-roll -->
+            <div class="studio-card-box" style="margin-bottom:12px;">
+              <div style="display:flex; flex-direction:column; gap:6px;">
+                <span style="font-size:11.5px; font-weight:600; color:#fff;">🎨 Filtro de Color / Color Grading:</span>
+                <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                  <button type="button" class="sub-pill-btn color-filter-pill active" data-colorfilter="none" onclick="selectColorFilter(this, 'none')">🌿 Original</button>
+                  <button type="button" class="sub-pill-btn color-filter-pill" data-colorfilter="pop" onclick="selectColorFilter(this, 'pop')">🔥 Pop TikTok</button>
+                  <button type="button" class="sub-pill-btn color-filter-pill" data-colorfilter="cinema" onclick="selectColorFilter(this, 'cinema')">🎬 Cinema Teal</button>
+                  <button type="button" class="sub-pill-btn color-filter-pill" data-colorfilter="vignette" onclick="selectColorFilter(this, 'vignette')">👁️ Viñeta</button>
+                  <button type="button" class="sub-pill-btn color-filter-pill" data-colorfilter="warm" onclick="selectColorFilter(this, 'warm')">🎙️ Cálido</button>
+                </div>
+              </div>
+
+              <div id="broll-theme-selector-line" style="display:flex; flex-direction:column; gap:6px; margin-top:12px; border-top:1px solid rgba(255,255,255,0.06); padding-top:10px;">
+                <span style="font-size:11.5px; font-weight:600; color:#fff;">🎮 Tema de B-Roll / Metraje Secundario:</span>
+                <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                  <button type="button" class="sub-pill-btn broll-theme-pill active" data-brolltheme="gameplay" onclick="selectBrollTheme(this, 'gameplay')">🎮 Gameplay</button>
+                  <button type="button" class="sub-pill-btn broll-theme-pill" data-brolltheme="minecraft" onclick="selectBrollTheme(this, 'minecraft')">⛏️ Minecraft</button>
+                  <button type="button" class="sub-pill-btn broll-theme-pill" data-brolltheme="subway" onclick="selectBrollTheme(this, 'subway')">🛹 Subway Surfers</button>
+                  <button type="button" class="sub-pill-btn broll-theme-pill" data-brolltheme="gta" onclick="selectBrollTheme(this, 'gta')">🚗 GTA V</button>
+                  <button type="button" class="sub-pill-btn broll-theme-pill" data-brolltheme="satisfying" onclick="selectBrollTheme(this, 'satisfying')">✨ ASMR</button>
+                </div>
+              </div>
+
+              <!-- Titular de Gancho y Marca de agua -->
+              <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-top:12px; border-top:1px solid rgba(255,255,255,0.06); padding-top:10px;">
+                <div>
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                    <span style="font-size:11px; font-weight:600; color:#fff;">📌 Titular Superior (Headline):</span>
+                    <button type="button" class="sub-pill-btn" onclick="autoGenerateHeadline()" style="font-size:10px; padding:1px 6px;">Gancho IA</button>
+                  </div>
+                  <input type="text" id="hook-headline-input" class="studio-inline-input" placeholder="Ej: MIRA ESTO HASTA EL FINAL 😱" maxlength="90" style="width:100%; font-size:11.5px;">
+                </div>
+                <div>
+                  <span style="font-size:11px; font-weight:600; color:#fff; display:block; margin-bottom:4px;">💧 Marca de agua / Canal:</span>
+                  <input type="text" id="watermark-input" class="studio-inline-input" placeholder="@tu_marca..." maxlength="50" style="width:100%; font-size:11.5px;">
+                  <select id="watermark-pos-select" style="display:none;"><option value="top">top</option></select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Cantidad de clips slider -->
+            <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:10px; padding:8px 14px;">
+              <span style="font-size:12px; color:var(--text-secondary);">Cantidad de clips a generar:</span>
+              <div class="studio-range-wrap" style="width:180px;">
+                <input type="range" id="clips-range" class="studio-range-slider" min="1" max="10" value="5" oninput="document.getElementById('clips-count-val').innerText = this.value">
+                <div class="studio-badge-count" id="clips-count-val">5</div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- Tema de B-Roll / Metraje Inferior -->
-        <div id="broll-theme-selector-line" style="display:flex; flex-direction:column; gap:6px; margin-top:10px; border-top:1px solid rgba(255,255,255,0.06); padding-top:10px;">
-          <div style="display:flex; align-items:center; gap:6px;">
-            <span style="font-size:11.5px; font-weight:600; color:var(--text-secondary); display:flex; align-items:center; gap:5px;">
-              🎮 Tema de B-Roll / Metraje Secundario (TikTok Split):
-            </span>
-            <span style="font-size:10.5px; color:var(--text-muted);">(Utilizado en modo B-Roll Gameplay o Gaming)</span>
+        <!-- COLUMNA DERECHA: CLIP GENERATION SETTINGS (~40%) -->
+        <div class="opus-col-right">
+          
+          <!-- CARD 1: GENERAL SETTINGS -->
+          <div class="opus-card">
+            <div class="opus-card-title">
+              <span>Clip Generation Settings</span>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--opus-cyan-bright)" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            </div>
+            
+            <!-- DURATION -->
+            <div class="opus-setting-group">
+              <div class="opus-sub-label">Duration</div>
+              <div class="opus-pills-row">
+                <button type="button" class="opus-pill clip-dur-pill" data-dur="short" onclick="selectClipDuration('short')">&lt;30s</button>
+                <button type="button" class="opus-pill clip-dur-pill active" data-dur="medium" onclick="selectClipDuration('medium')">30s-60s</button>
+                <button type="button" class="opus-pill clip-dur-pill" data-dur="long" onclick="selectClipDuration('long')">&gt;60s</button>
+              </div>
+              <input type="hidden" id="clip-target-duration" value="medium">
+            </div>
+
+            <!-- LANGUAGE -->
+            <div class="opus-setting-group">
+              <div class="opus-sub-label">Language</div>
+              <select id="clip-language-select" class="opus-select" aria-label="Idioma del video">
+                <option value="auto">English - US (Auto-detect)</option>
+                <option value="es" selected>Español (ES)</option>
+                <option value="en">English - US</option>
+                <option value="pt">Português (PT)</option>
+              </select>
+            </div>
+
+            <!-- ASPECT RATIO -->
+            <div class="opus-setting-group">
+              <div class="opus-sub-label">Aspect Ratio</div>
+              <div class="opus-pills-row">
+                <button type="button" class="opus-pill format-card active" onclick="selectFormat(this, '9:16')">9:16</button>
+                <button type="button" class="opus-pill format-card" onclick="selectFormat(this, '4:5')">4:5</button>
+                <button type="button" class="opus-pill format-card" onclick="selectFormat(this, '1:1')">1:1</button>
+                <button type="button" class="opus-pill format-card" onclick="selectFormat(this, '16:9')">16:9</button>
+              </div>
+            </div>
           </div>
-          <div style="display:flex; gap:6px; flex-wrap:wrap;">
-            <button type="button" class="sub-pill-btn broll-theme-pill active" data-brolltheme="gameplay" onclick="selectBrollTheme(this, 'gameplay')" title="Gameplay relajante de retención">🎮 Gameplay Universal</button>
-            <button type="button" class="sub-pill-btn broll-theme-pill" data-brolltheme="minecraft" onclick="selectBrollTheme(this, 'minecraft')" title="Parkour / Metraje de Minecraft">⛏️ Minecraft Parkour</button>
-            <button type="button" class="sub-pill-btn broll-theme-pill" data-brolltheme="subway" onclick="selectBrollTheme(this, 'subway')" title="Gameplay de Subway Surfers">🛹 Subway Surfers</button>
-            <button type="button" class="sub-pill-btn broll-theme-pill" data-brolltheme="gta" onclick="selectBrollTheme(this, 'gta')" title="Rampas y carreras GTA V">🚗 GTA V Mega Ramp</button>
-            <button type="button" class="sub-pill-btn broll-theme-pill" data-brolltheme="satisfying" onclick="selectBrollTheme(this, 'satisfying')" title="Animaciones cinéticas y ASMR visual">✨ Satisfactorio ASMR</button>
+
+          <!-- CARD 2: AI CO-PILOT FEATURES -->
+          <div class="opus-card" style="margin-top:14px;">
+            <div class="opus-card-title">
+              <span>AI Co-pilot Features</span>
+              <span style="font-size:11px; color:var(--opus-cyan-bright); background:rgba(6,182,212,0.15); padding:2px 8px; border-radius:10px; font-weight:700;">Pro Suite</span>
+            </div>
+
+            <div class="opus-toggle-row">
+              <span class="opus-toggle-label">AI Auto-Reframe (YuNet)</span>
+              <label class="opus-switch">
+                <input type="checkbox" id="ai-reframe-check" checked>
+                <span class="opus-slider"></span>
+              </label>
+            </div>
+
+            <div class="opus-toggle-row">
+              <span class="opus-toggle-label">AI Headline Generation</span>
+              <label class="opus-switch">
+                <input type="checkbox" id="ai-headline-check" checked>
+                <span class="opus-slider"></span>
+              </label>
+            </div>
+
+            <div class="opus-toggle-row">
+              <span class="opus-toggle-label">AI Highlights (Momentos Clave)</span>
+              <label class="opus-switch">
+                <input type="checkbox" id="fast-mode-check">
+                <span class="opus-slider"></span>
+              </label>
+            </div>
+
+            <div class="opus-toggle-row">
+              <span class="opus-toggle-label">Speaker Focus &amp; Dynamic Zoom</span>
+              <label class="opus-switch">
+                <input type="checkbox" id="dynamic-zoom-check" checked>
+                <span class="opus-slider"></span>
+              </label>
+            </div>
+
+            <div class="opus-toggle-row">
+              <span class="opus-toggle-label">Progress Bar Viral</span>
+              <label class="opus-switch">
+                <input type="checkbox" id="progress-bar-check" checked>
+                <span class="opus-slider"></span>
+              </label>
+            </div>
+
+            <div class="opus-toggle-row">
+              <span class="opus-toggle-label">Split-Screen Frame Glow</span>
+              <label class="opus-switch">
+                <input type="checkbox" id="split-glow-check">
+                <span class="opus-slider"></span>
+              </label>
+            </div>
+
+            <div class="opus-toggle-row">
+              <span class="opus-toggle-label">Color Grading Pop (MrBeast)</span>
+              <label class="opus-switch">
+                <input type="checkbox" id="color-pop-toggle" checked onchange="selectColorFilter(null, this.checked ? 'pop' : 'none')">
+                <span class="opus-slider"></span>
+              </label>
+            </div>
           </div>
         </div>
       </div>
-
-      <!-- BOTÓN PRINCIPAL PROCESAR VIDEO -->
-      <button type="button" class="studio-btn-process" id="btn-submit-process" onclick="submitCreation()">
-        <svg viewBox="0 0 24 24"><polygon points="6 3 20 12 6 21 6 3"/></svg>
-        <span>Procesar Video</span>
-      </button>
 
       <!-- PROYECTOS RECIENTES Y GALERÍA EN VIVO DEBAJO DEL ESTUDIO -->
       <div class="dashboard-grid-row2" style="margin-top: 14px;">
@@ -8976,6 +9265,46 @@
   }
   syncPressed();
 })();
+
+  function toggleAdvancedStudioOptions() {
+    const content = document.getElementById('opus-advanced-content');
+    const arrow = document.getElementById('opus-acc-arrow');
+    if (!content) return;
+    const isAct = content.classList.toggle('active');
+    if (arrow) arrow.innerText = isAct ? '▲' : '▼';
+  }
+
+  function setupOpusDropzone() {
+    const dz = document.getElementById('opus-dropzone');
+    if (!dz) return;
+    ['dragenter', 'dragover'].forEach(name => {
+      dz.addEventListener(name, (e) => {
+        e.preventDefault(); e.stopPropagation();
+        dz.classList.add('dragover');
+      }, false);
+    });
+    ['dragleave', 'drop'].forEach(name => {
+      dz.addEventListener(name, (e) => {
+        e.preventDefault(); e.stopPropagation();
+        dz.classList.remove('dragover');
+      }, false);
+    });
+    dz.addEventListener('drop', (e) => {
+      const dt = e.dataTransfer;
+      const files = dt.files;
+      if (files && files.length) {
+        const input = document.getElementById('local-file-input');
+        if (input) {
+          input.files = files;
+          handleLocalFileUpload({ target: input });
+        }
+      }
+    }, false);
+  }
+  document.addEventListener('DOMContentLoaded', setupOpusDropzone);
+  if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    setTimeout(setupOpusDropzone, 100);
+  }
 </script>
 
   <!-- BARRA DE NAVEGACIÓN INFERIOR PARA TELÉFONOS (ESTILO APP NATIVA) -->

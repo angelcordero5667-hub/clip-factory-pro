@@ -134,6 +134,8 @@ class VerticalClipMaker:
             return 1080, 1080
         if aspect_ratio == "16:9":
             return 1920, 1080
+        if aspect_ratio == "4:5":
+            return 1080, 1350
         return 1080, 1920  # 9:16 por defecto
 
     @staticmethod

@@ -11,6 +11,10 @@ def test_ui_effects_elements_and_mobile_layout():
         assert page.is_visible("#progress-bar-check")
         assert page.is_visible("#dynamic-zoom-check")
         assert page.is_visible("#split-glow-check")
+        acc = page.query_selector(".opus-accordion-toggle")
+        if acc:
+            acc.click()
+            page.wait_for_timeout(300)
         assert page.is_visible("#hook-headline-input")
         page.click(".color-filter-pill[data-colorfilter='pop']")
         page.click(".broll-theme-pill[data-brolltheme='minecraft']")
