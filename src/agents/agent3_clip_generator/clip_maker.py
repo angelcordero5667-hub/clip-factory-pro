@@ -169,14 +169,14 @@ class VerticalClipMaker:
         framing = framing or Framing()
         if framing.mode == "crop" and framing.crop_w > 0:
             parts = [f"[0:v]crop=w={framing.crop_w}:h=ih:x='{framing.x_expr}':y=0,"
-                     f"scale={w}:{h}:flags=bicubic[combined]"]
+                     f"scale={w}:{h}:flags=lanczos+accurate_rnd[combined]"]
         elif framing.mode == "split" and framing.crop_w > 0:
             half = h // 2
             xa, xb = framing.split_xs
             parts = [
                 "[0:v]split=2[sp_a][sp_b];",
-                f"[sp_a]crop=w={framing.crop_w}:h=ih:x={xa}:y=0,scale={w}:{half}:flags=bicubic[sp_top];",
-                f"[sp_b]crop=w={framing.crop_w}:h=ih:x={xb}:y=0,scale={w}:{half}:flags=bicubic[sp_bot];",
+                f"[sp_a]crop=w={framing.crop_w}:h=ih:x={xa}:y=0,scale={w}:{half}:flags=lanczos+accurate_rnd[sp_top];",
+                f"[sp_b]crop=w={framing.crop_w}:h=ih:x={xb}:y=0,scale={w}:{half}:flags=lanczos+accurate_rnd[sp_bot];",
                 "[sp_top][sp_bot]vstack=inputs=2[combined]",
             ]
             if split_glow:
@@ -191,8 +191,8 @@ class VerticalClipMaker:
             cx = framing.split_xs[0] if framing.split_xs else 0
             parts = [
                 "[0:v]split=2[cam_src][game_src];",
-                f"[cam_src]crop=w={cw}:h=ih:x={cx}:y=0,scale={w}:{top_h}:flags=bicubic[cam_top];",
-                f"[game_src]scale=-1:{bot_h}:flags=bicubic,crop={w}:{bot_h}:(iw-{w})/2:0[game_bot];",
+                f"[cam_src]crop=w={cw}:h=ih:x={cx}:y=0,scale={w}:{top_h}:flags=lanczos+accurate_rnd[cam_top];",
+                f"[game_src]scale=-1:{bot_h}:flags=lanczos+accurate_rnd,crop={w}:{bot_h}:(iw-{w})/2:0[game_bot];",
                 "[cam_top][game_bot]vstack=inputs=2[combined]",
             ]
         elif framing.mode == "broll":
@@ -212,14 +212,14 @@ class VerticalClipMaker:
             if broll_files:
                 broll_path = self._escape_filter_path(broll_files[0])
                 parts = [
-                    f"[0:v]crop=w={cw}:h=ih:x={cx}:y=0,scale={w}:{top_h}:flags=bicubic[cam_top];",
+                    f"[0:v]crop=w={cw}:h=ih:x={cx}:y=0,scale={w}:{top_h}:flags=lanczos+accurate_rnd[cam_top];",
                     f"movie='{broll_path}':loop=0[broll_raw];",
-                    f"[broll_raw]scale=-1:{bot_h}:flags=bicubic,crop={w}:{bot_h}:(iw-{w})/2:0[broll_bot];",
+                    f"[broll_raw]scale=-1:{bot_h}:flags=lanczos+accurate_rnd,crop={w}:{bot_h}:(iw-{w})/2:0[broll_bot];",
                     "[cam_top][broll_bot]vstack=inputs=2[combined]",
                 ]
             else:
                 parts = [
-                    f"[0:v]crop=w={cw}:h=ih:x={cx}:y=0,scale={w}:{top_h}:flags=bicubic[cam_top];",
+                    f"[0:v]crop=w={cw}:h=ih:x={cx}:y=0,scale={w}:{top_h}:flags=lanczos+accurate_rnd[cam_top];",
                     f"mandelbrot=s={w}x{bot_h}:r=30,format=yuv420p[broll_bot];",
                     "[cam_top][broll_bot]vstack=inputs=2[combined]",
                 ]
@@ -229,14 +229,14 @@ class VerticalClipMaker:
             parts = [
                 "[0:v]split=2[v_bg][v_fg];",
                 f"[v_bg]scale={bw}:{bh}:force_original_aspect_ratio=increase,crop={bw}:{bh},boxblur=8:2,scale={w}:{h}[bg_blur];",
-                f"[v_fg]scale={w}:{h}:force_original_aspect_ratio=decrease:force_divisible_by=2[fg_scaled];",
+                f"[v_fg]scale={w}:{h}:force_original_aspect_ratio=decrease:force_divisible_by=2:flags=lanczos+accurate_rnd[fg_scaled];",
                 "[bg_blur][fg_scaled]overlay=(W-w)/2:(H-h)/2[combined]",
             ]
         label = "[sp_glow]" if (framing.mode == "split" and split_glow) else "[combined]"
         if hook_zoom:
             parts.append(
                 f";{label}split=2[v_base][v_hook];"
-                f"[v_hook]crop=w=iw/1.08:h=ih/1.08,scale={w}:{h}[v_punch];"
+                f"[v_hook]crop=w=iw/1.08:h=ih/1.08,scale={w}:{h}:flags=lanczos+accurate_rnd[v_punch];"
                 f"[v_base][v_punch]overlay=x=0:y=0:enable='between(t,0,2.5)'[v_hooked]"
             )
             label = "[v_hooked]"
@@ -245,7 +245,7 @@ class VerticalClipMaker:
                 f";{label}crop=w='if(between(mod(t,12),0,2.2),iw/1.12,iw)':"
                 f"h='if(between(mod(t,12),0,2.2),ih/1.12,ih)':"
                 f"x='(in_w-out_w)/2':y='(in_h-out_h)/2',"
-                f"scale={w}:{h}[v_dynzoom]"
+                f"scale={w}:{h}:flags=lanczos+accurate_rnd[v_dynzoom]"
             )
             label = "[v_dynzoom]"
         if punch_zooms:
@@ -253,7 +253,7 @@ class VerticalClipMaker:
                 f";{label}crop=w='if(between(mod(t,7.5),0,0.85),iw/1.14,iw)':"
                 f"h='if(between(mod(t,7.5),0,0.85),ih/1.14,ih)':"
                 f"x='(in_w-out_w)/2':y='(in_h-out_h)/2',"
-                f"scale={w}:{h}[v_pzooms]"
+                f"scale={w}:{h}:flags=lanczos+accurate_rnd[v_pzooms]"
             )
             label = "[v_pzooms]"
         if color_filter and color_filter not in ("none", "natural", ""):
@@ -296,19 +296,40 @@ class VerticalClipMaker:
     @staticmethod
     def video_codec_args(encoder: str, speed_mode: Optional[str] = None) -> List[str]:
         r = settings.render
-        if speed_mode == "turbo":
-            preset = "superfast"
-        elif speed_mode == "studio":
-            preset = "medium"
-        elif speed_mode == "fast":
-            preset = "veryfast"
+        mode = speed_mode or r.speed_mode
+        if mode == "studio":
+            preset = "slow"
+            crf_val = min(17, r.crf)
+        elif mode == "turbo":
+            preset = "fast"
+            crf_val = min(19, r.crf)
         else:
-            preset = r.preset
+            preset = "medium"
+            crf_val = r.crf  # 18 por defecto para calidad nítida sin pérdida visible
+
         if encoder == "h264_amf":
-            return ["-c:v", "h264_amf", "-quality", "speed", "-rc", "cqp",
-                    "-qp_i", str(r.crf), "-qp_p", str(r.crf + 2), "-qp_b", str(r.crf + 2),
-                    "-pix_fmt", "yuv420p"]
-        return ["-c:v", "libx264", "-preset", preset, "-crf", str(r.crf), "-pix_fmt", "yuv420p"]
+            # AMD AMF con máxima calidad visual: preset quality, perfil High, CQP ajustado y bitrate alto
+            return [
+                "-c:v", "h264_amf",
+                "-usage", "high_quality",
+                "-quality", "quality",
+                "-profile:v", "high",
+                "-rc", "cqp",
+                "-qp_i", str(crf_val),
+                "-qp_p", str(crf_val + 1),
+                "-qp_b", str(crf_val + 2),
+                "-maxrate", "20M",
+                "-bufsize", "25M",
+                "-pix_fmt", "yuv420p"
+            ]
+        return [
+            "-c:v", "libx264",
+            "-preset", preset,
+            "-crf", str(crf_val),
+            "-profile:v", "high",
+            "-level", "4.2",
+            "-pix_fmt", "yuv420p"
+        ]
 
     def build_ffmpeg_cmd(
         self,
@@ -389,7 +410,7 @@ class VerticalClipMaker:
             "-map", final_audio_map,
             *audio_filter,
             *self.video_codec_args(encoder, speed_mode=speed_mode),
-            "-c:a", "aac", "-b:a", "160k",
+            "-c:a", "aac", "-b:a", "256k",
             "-threads", str(settings.render.threads_per_clip),
             "-movflags", "+faststart",
             "-t", f"{duration:.3f}",
@@ -602,7 +623,7 @@ class VerticalClipMaker:
             audio_profile=audio_profile, target_lufs=target_lufs, target_lra=target_lra,
             target_tp=target_tp, master_limiter=master_limiter, true_peak_limit=true_peak_limit,
         ))
-        self.make_thumbnail(output_file)
+        # Miniatura omitida: los clips se muestran como video nativo limpio
         logger.info(f"Clip generado: {output_file}")
         return output_file
 

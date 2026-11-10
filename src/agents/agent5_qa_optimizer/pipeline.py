@@ -250,7 +250,7 @@ class ClipFactoryPipeline:
                     dl_video_kwargs["time_range"] = time_range
                 local_video, _ = download_youtube_video(
                     video_input,
-                    progress=lambda f: step_callback and step_callback(3, f * 0.15, f"⚡ Descargando video 720p... {f:.0%}"),
+                    progress=lambda f: step_callback and step_callback(3, f * 0.15, f"⚡ Descargando video 1080p Full HD... {f:.0%}"),
                     **dl_video_kwargs
                 )
                 render_source = Path(local_video)
@@ -322,16 +322,8 @@ class ClipFactoryPipeline:
                 if isinstance(res, Path):
                     cand.clip_path = str(res.resolve())
                     clip_paths[cand.id] = cand.clip_path
-                    try:
-                        from src.common.thumbnail_designer import auto_generate_viral_thumbnail_for_candidate
-                        auto_generate_viral_thumbnail_for_candidate(
-                            clip_path=res,
-                            title=cand.title or "MOMENTO VIRAL",
-                            transcript_text=cand.context_text or "",
-                            hook_text=cand.hook_text or ""
-                        )
-                    except Exception as e:
-                        logger.debug(f"No se pudo autogenerar miniatura viral para {cand.id}: {e}")
+                    # Clip limpio sin miniatura automática impuesta
+                    logger.debug(f"Clip renderizado en alta calidad: {res}")
                 elif isinstance(res, Exception):
                     logger.error(f"Clip {cand.id} no se pudo renderizar: {res}")
         else:
@@ -432,14 +424,6 @@ class ClipFactoryPipeline:
             master_limiter=master_limiter,
         )
         db.update_candidate_clip_path(candidate_id, str(out.resolve()), dirty=False)
-        try:
-            from src.common.thumbnail_designer import auto_generate_viral_thumbnail_for_candidate
-            auto_generate_viral_thumbnail_for_candidate(
-                clip_path=out,
-                title=cand.title or "",
-                transcript_text=cand.context_text or "",
-                hook_text=cand.hook_text or ""
-            )
-        except Exception as e:
-            logger.debug(f"Error generando miniatura viral para rerender {candidate_id}: {e}")
+        # Clip limpio sin miniatura automática impuesta
+        logger.debug(f"Clip re-renderizado en alta calidad: {out}")
         return out

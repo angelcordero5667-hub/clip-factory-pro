@@ -42,11 +42,11 @@ class VideoConfig(BaseModel):
 class RenderConfig(BaseModel):
     parallel_clips: int = 2           # clips renderizados en paralelo
     threads_per_clip: int = 4         # -threads de FFmpeg por clip
-    preset: str = "veryfast"          # preset base
-    speed_mode: str = "turbo"         # turbo (superfast), fast (veryfast), studio (medium)
-    crf: int = 24
+    preset: str = "medium"            # preset base de alta calidad (calidad de compresión y detalle)
+    speed_mode: str = "quality"       # quality (medium/crf 18), studio (slow/crf 17), fast (veryfast/crf 19)
+    crf: int = 18                     # CRF 18 = calidad de estudio visualmente sin pérdida (era 24)
     use_hw_encoder: bool = os.environ.get("CLIP_HW_ENCODER", "1") != "0"  # h264_amf si existe, con fallback a libx264
-    bg_scale_div: int = 4             # el fondo se desenfoca a 1/4 de resolución
+    bg_scale_div: int = 2             # desenfoque suave de alta resolución (era 4, producía pixelado)
     smart_framing: bool = os.environ.get("CLIP_SMART_FRAMING", "1") != "0"  # auto-encuadre al hablante
     trim_silences: bool = os.environ.get("CLIP_TRIM_SILENCES", "1") != "0"  # quita pausas largas y muletillas
     hook_zoom: bool = True            # punch-in zoom en los primeros 2.5s para retención estilo TikTok

@@ -66,10 +66,10 @@ def _resolve_file(ydl, info) -> str:
     return filename
 
 
-def download_youtube_video(url: str, output_dir: Path = settings.inputs_dir, max_height: int = 720,
+def download_youtube_video(url: str, output_dir: Path = settings.inputs_dir, max_height: int = 1080,
                            progress: ProgressFn = None,
                            time_range: Optional[Tuple[float, float]] = None) -> Tuple[str, str]:
-    """Descarga el video UNA sola vez (por defecto 720p). Si time_range=(start, end), descarga quirúrgica."""
+    """Descarga el video UNA sola vez en alta definición (1080p por defecto). Si time_range=(start, end), descarga quirúrgica."""
     guard_url(url, time_range)  # directos en vivo / videos enormes sin tramo -> error claro antes de descargar
     output_dir.mkdir(parents=True, exist_ok=True)
     import yt_dlp
@@ -84,11 +84,12 @@ def download_youtube_video(url: str, output_dir: Path = settings.inputs_dir, max
 
     ydl_opts.update({
         'format': (f'bestvideo[height<={max_height}][ext=mp4]+bestaudio[ext=m4a]/'
+                   f'bestvideo[height<={max_height}]+bestaudio/'
                    f'best[height<={max_height}][ext=mp4]/best[height<={max_height}]/best'),
         'merge_output_format': 'mp4',
         'outtmpl': str(output_dir / f'%(title)s_%(id)s{range_tag}_video.%(ext)s'),
     })
-    logger.info(f"Descargando video {max_height}p: {url} {range_tag}")
+    logger.info(f"Descargando video en alta definición {max_height}p: {url} {range_tag}")
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=True)

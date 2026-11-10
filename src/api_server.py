@@ -260,15 +260,27 @@ def format_clip(c: Dict[str, Any]) -> Dict[str, Any]:
     hook_c = f"Esto te cambiará la perspectiva: {clean_title}"
 
     video_url = thumb_url = download_url = ""
+
+
     c_path = c.get("clip_path")
+
+
     if c_path and Path(c_path).exists():
+
+
         clip_file = Path(c_path)
+
+
         video_url = f"/clips_media/{clip_file.name}"
+
+
         download_url = f"/api/clips/{c['id']}/download"
-        thumb_path = clip_file.with_suffix(".jpg")
-        generate_thumbnail(clip_file, thumb_path)
-        if thumb_path.exists():
-            thumb_url = f"/clips_media/{thumb_path.name}"
+
+
+        # Ninguna miniatura automatica cubre el video: los clips se muestran como video nativo
+
+
+        thumb_url = ""
 
     return {
         "id": c["id"],
@@ -313,7 +325,8 @@ def get_home():
     html_file = WEB_DIR / "index.html"
     if not html_file.exists():
         raise HTTPException(status_code=404, detail="index.html no encontrado")
-    return html_file.read_text(encoding="utf-8")
+    # Sin caché: así el navegador siempre recibe la interfaz actual tras cada cambio.
+    return HTMLResponse(html_file.read_text(encoding="utf-8"), headers={"Cache-Control": "no-store"})
 
 
 @app.get("/api/health")
