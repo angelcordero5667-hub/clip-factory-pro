@@ -190,7 +190,7 @@ def test_subida_de_archivo(tdb, monkeypatch, tmp_path):
 
 def test_pagina_principal_en_espanol():
     r = client.get("/")
-    assert r.status_code == 200 and 'lang="es"' in r.text and "Tus clips" in r.text
+    assert r.status_code == 200 and 'lang="es"' in r.text and "Crea contenido viral" in r.text
 
 
 def test_system_metrics_endpoint():
@@ -567,6 +567,109 @@ def test_create_job_con_efectos_virales(monkeypatch, tmp_path):
     finally:
         if video_file.exists():
             video_file.unlink()
+
+
+def test_clipper_pro_features_en_jobs_y_rerender(tdb):
+    # 1. Job con los 4 pilares de Clipper Pro
+    r = client.post("/api/jobs", json={
+        "source": "https://www.youtube.com/watch?v=clipper_pro_test",
+        "aspect_ratio": "9:16",
+        "dominican_mode": True,
+        "seamless_loop": True,
+        "auto_broll": True,
+        "trim_silences": True,
+    })
+    assert r.status_code == 200
+    job_id = r.json()["job_id"]
+    job = tdb.get_job(job_id)
+    assert job["options"]["dominican_mode"] is True
+    assert job["options"]["seamless_loop"] is True
+    assert job["options"]["auto_broll"] is True
+    assert job["options"]["trim_silences"] is True
+
+    # 2. Rerender con los nuevos flags
+    r_re = client.post("/api/clips/v1_clip_1/rerender?seamless_loop=true&auto_broll=true&trim_silences=true")
+    assert r_re.status_code == 200
+    re_job = tdb.get_job(r_re.json()["job_id"])
+    assert re_job["options"]["seamless_loop"] is True
+    assert re_job["options"]["auto_broll"] is True
+    assert re_job["options"]["trim_silences"] is True
+
+
+def test_api_broll_y_sfx_endpoints(tdb):
+    # 1. Catálogos
+    r_bc = client.get("/api/broll/catalog")
+    assert r_bc.status_code == 200
+    assert "dinero" in r_bc.json()
+
+    r_sc = client.get("/api/sfx/catalog")
+    assert r_sc.status_code == 200
+    assert "impact" in r_sc.json()
+    assert "whoosh" in r_sc.json()
+
+    # 2. B-Roll del clip
+    r_bg = client.get("/api/clips/v1_clip_1/broll")
+    assert r_bg.status_code == 200
+    assert "items" in r_bg.json()
+
+    r_bp = client.post("/api/clips/v1_clip_1/broll", json=[
+        {
+            "id": "b1", "word": "dinero", "category": "dinero", "start": 1.0, "end": 3.5,
+            "media_path": "path.mp4", "media_url": "/url", "media_type": "video",
+            "layout": "overlay", "position": "bottom_right", "badge_text": "VIP", "enabled": True
+        }
+    ])
+    assert r_bp.status_code == 200
+    assert r_bp.json()["count"] == 1
+
+    r_bg2 = client.get("/api/clips/v1_clip_1/broll")
+    assert len(r_bg2.json()["items"]) == 1
+
+    # 3. SFX del clip
+    r_sg = client.get("/api/clips/v1_clip_1/sfx")
+    assert r_sg.status_code == 200
+    assert "items" in r_sg.json()
+
+    r_sp = client.post("/api/clips/v1_clip_1/sfx", json=[
+        {
+            "id": "s1", "name": "Bass Drop", "category": "impact", "time": 0.5,
+            "sfx_file": "impact/bass_drop.wav", "sfx_path": "bass_drop.wav", "sfx_url": "/url",
+            "volume": 0.35, "reason": "gancho", "enabled": True
+        }
+    ])
+    assert r_sp.status_code == 200
+    assert r_sp.json()["count"] == 1
+
+    r_sg2 = client.get("/api/clips/v1_clip_1/sfx")
+    assert len(r_sg2.json()["items"]) == 1
+
+
+def test_job_and_rerender_con_submagic_y_klap_options(tdb):
+    r_job = client.post("/api/jobs", json={
+        "source": "https://www.youtube.com/watch?v=submagic_klap_test",
+        "aspect_ratio": "9:16",
+        "broll_mode": "cutaway",
+        "broll_density": "high",
+        "auto_sfx": True,
+        "sfx_intensity": "aggressive",
+        "framing_mode": "podcast"
+    })
+    assert r_job.status_code == 200
+    job = tdb.get_job(r_job.json()["job_id"])
+    assert job["options"]["broll_mode"] == "cutaway"
+    assert job["options"]["broll_density"] == "high"
+    assert job["options"]["auto_sfx"] is True
+    assert job["options"]["sfx_intensity"] == "aggressive"
+    assert job["options"]["framing_mode"] == "podcast"
+
+    r_re = client.post("/api/clips/v1_clip_1/rerender?broll_mode=overlay&sfx_intensity=soft&framing_mode=active_speaker")
+    assert r_re.status_code == 200
+    re_job = tdb.get_job(r_re.json()["job_id"])
+    assert re_job["options"]["broll_mode"] == "overlay"
+    assert re_job["options"]["sfx_intensity"] == "soft"
+    assert re_job["options"]["framing_mode"] == "active_speaker"
+
+
 
 
 

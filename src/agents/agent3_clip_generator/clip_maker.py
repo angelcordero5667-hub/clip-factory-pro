@@ -4,12 +4,19 @@ import logging
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from functools import lru_cache
 from pathlib import Path
-from typing import Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from src.common.config import settings
 from src.common.models import ViralMomentCandidate, TranscriptSegment
+from src.agents.agent3_clip_generator.smart_broll import SmartBrollEngine, BrollItem, load_clip_broll, save_clip_broll
+from src.agents.agent3_clip_generator.smart_sfx import SmartSFXEngine, SFXItem, load_clip_sfx, save_clip_sfx
 from src.agents.agent3_clip_generator.subtitles import SubtitleGenerator, FONTS_DIR
 from src.agents.agent3_clip_generator.face_tracker import FaceTracker
+from src.common.viral_enhancements import (
+    build_audio_filter_chain,
+    detect_contextual_sticker,
+    get_sfx_path,
+)
 from src.agents.agent3_clip_generator.framing import Framing, choose_framing
 from src.agents.agent3_clip_generator.trimming import (
     build_keep_ranges, kept_duration, remap_segments, select_expr,
@@ -60,8 +67,9 @@ class VerticalClipMaker:
         self.target_height = target_height
         self.threads = threads or settings.render.threads_per_clip
         self.subtitle_generator = SubtitleGenerator()
-        
         self.face_tracker = FaceTracker()
+        self.broll_engine = SmartBrollEngine()
+        self.sfx_engine = SmartSFXEngine()
 
     def detect_scene_cuts(self, video_path: str, frame_skip: int = 8) -> List[float]:
         cuts = []
@@ -148,6 +156,7 @@ class VerticalClipMaker:
         cut_expr: Optional[str] = None, hook_zoom: bool = False,
         progress_bar: bool = False, clip_duration: float = 30.0,
         color_filter: Optional[str] = None, dynamic_zoom: bool = False,
+        punch_zooms: bool = False,
         split_glow: bool = False, broll_theme: Optional[str] = None,
     ) -> Tuple[str, str]:
         """Construye el filtro según el layout. Devuelve (filtro, etiqueta_final).
@@ -239,6 +248,14 @@ class VerticalClipMaker:
                 f"scale={w}:{h}[v_dynzoom]"
             )
             label = "[v_dynzoom]"
+        if punch_zooms:
+            parts.append(
+                f";{label}crop=w='if(between(mod(t,7.5),0,0.85),iw/1.14,iw)':"
+                f"h='if(between(mod(t,7.5),0,0.85),ih/1.14,ih)':"
+                f"x='(in_w-out_w)/2':y='(in_h-out_h)/2',"
+                f"scale={w}:{h}[v_pzooms]"
+            )
+            label = "[v_pzooms]"
         if color_filter and color_filter not in ("none", "natural", ""):
             cf = color_filter.lower().strip()
             cf_node = None
@@ -306,27 +323,76 @@ class VerticalClipMaker:
         normalize_audio: bool = True,
         cut_expr: Optional[str] = None,
         speed_mode: Optional[str] = None,
+        seamless_loop: bool = False,
+        sfx_items: Optional[List[Any]] = None,
+        audio_profile: str = "social",
+        target_lufs: float = -14.0,
+        target_lra: float = 11.0,
+        target_tp: float = -1.5,
+        master_limiter: bool = True,
+        true_peak_limit: float = 0.79,
     ) -> List[str]:
         seek_arg = ["-ss", "0.0"] if is_pretrimmed else ["-ss", f"{start_time:.3f}"]
-        af_parts = []
-        if cut_expr:
-            af_parts.append(f"aselect='{cut_expr}',asetpts=N/SR/TB")
-        if normalize_audio:
-            af_parts.append("loudnorm=I=-14:LRA=7:TP=-1")
+        af_parts = build_audio_filter_chain(
+            duration=duration,
+            normalize_audio=normalize_audio,
+            seamless_loop=seamless_loop,
+            cut_expr=cut_expr,
+            audio_profile=audio_profile,
+            target_lufs=target_lufs,
+            target_lra=target_lra,
+            target_tp=target_tp,
+            master_limiter=master_limiter,
+            true_peak_limit=true_peak_limit,
+        )
         audio_filter = ["-af", ",".join(af_parts)] if af_parts else []
+
+        extra_inputs: List[str] = []
+        extra_filter_complex = filter_str
+        final_audio_map = "0:a?"
+
+        active_sfx = [it for it in (sfx_items or []) if getattr(it, "enabled", True) and Path(getattr(it, "sfx_path", "")).exists()]
+        if active_sfx:
+            sfx_labels = []
+            audio_filter_complex_parts = []
+            for idx, item in enumerate(active_sfx):
+                extra_inputs.extend(["-i", str(Path(item.sfx_path).resolve())])
+                ms = max(0, int(item.time * 1000.0))
+                vol = max(0.05, min(0.9, getattr(item, "volume", 0.30)))
+                node = f"sfx_{idx}"
+                in_idx = idx + 1
+                audio_filter_complex_parts.append(f"[{in_idx}:a]adelay={ms}|{ms},volume={vol:.2f}[{node}]")
+                sfx_labels.append(f"[{node}]")
+            mix_label = "[a_sfx_mix]"
+            # Preserva la voz original con peso 1.0; micro-SFX subordinados a la voz (peso 0.70)
+            sfx_weights = "1.0 " + " ".join(["0.70"] * len(sfx_labels))
+            audio_filter_complex_parts.append(
+                f"[0:a]{''.join(sfx_labels)}amix=inputs={len(sfx_labels)+1}:duration=first:dropout_transition=2:weights='{sfx_weights}'{mix_label}"
+            )
+            if af_parts:
+                post_mix = f"{mix_label}{','.join(af_parts)}[a_final]"
+                audio_filter_complex_parts.append(post_mix)
+                final_audio_map = "[a_final]"
+            else:
+                final_audio_map = mix_label
+            extra_filter_complex = filter_str + ";" + ";".join(audio_filter_complex_parts)
+            audio_filter = []
+
         return [
             settings.ffmpeg_exe, "-y", "-hide_banner", "-loglevel", "error",
             *seek_arg,
             "-t", f"{duration:.3f}",
             "-i", str(Path(input_path).resolve()),
-            "-filter_complex", filter_str,
+            *extra_inputs,
+            "-filter_complex", extra_filter_complex,
             "-map", final_label,
-            "-map", "0:a?",
+            "-map", final_audio_map,
             *audio_filter,
             *self.video_codec_args(encoder, speed_mode=speed_mode),
             "-c:a", "aac", "-b:a", "160k",
             "-threads", str(settings.render.threads_per_clip),
             "-movflags", "+faststart",
+            "-t", f"{duration:.3f}",
             str(Path(output_file).resolve()),
         ]
 
@@ -368,9 +434,25 @@ class VerticalClipMaker:
         progress_bar: Optional[bool] = None,
         color_filter: Optional[str] = None,
         dynamic_zoom: Optional[bool] = None,
+        punch_zooms: Optional[bool] = None,
         split_glow: Optional[bool] = None,
         hook_headline: Optional[str] = None,
         broll_theme: Optional[str] = None,
+        seamless_loop: bool = True,
+        auto_broll: bool = True,
+        auto_sfx: bool = True,
+        sfx_intensity: str = "normal",
+        sfx_categories: Optional[List[str]] = None,
+        broll_mode: str = "smart_face_avoid",
+        broll_density: str = "medium",
+        broll_items: Optional[List[Any]] = None,
+        sfx_items: Optional[List[Any]] = None,
+        audio_profile: str = "social",
+        target_lufs: float = -14.0,
+        target_lra: float = 11.0,
+        target_tp: float = -1.5,
+        master_limiter: bool = True,
+        true_peak_limit: float = 0.79,
     ) -> Path:
         input_p = Path(video_path)
         if not input_p.exists():
@@ -382,7 +464,8 @@ class VerticalClipMaker:
         # Los cortes de escena se calculan UNA vez por video (pipeline) y se reutilizan aquí.
         if not is_pretrimmed:
             if scene_cuts is None and use_scene_detection:
-                scene_cuts = self.detect_scene_cuts(str(input_p))
+                # Detección ultra-rápida local (solo analiza ±2.5s alrededor del inicio/fin del clip)
+                scene_cuts = self.detect_scene_cuts_near(str(input_p), [start_time, end_time], margin=2.5)
             # Si ya se alineó a pausas del habla, no se vuelve a mover a un corte de escena
             # (podría cortar a mitad de frase).
             if scene_cuts and not candidate.pause_aligned:
@@ -461,16 +544,63 @@ class VerticalClipMaker:
         eff_zoom = bool(dynamic_zoom)
         eff_split_glow = bool(split_glow) if split_glow is not None else (framing.mode == "split")
 
+        stk = None
+        if auto_broll:
+            stk_text = f"{candidate.title} {candidate.hook_text} {candidate.context_text}"
+            stk = detect_contextual_sticker(stk_text)
+
         filter_str, final_label = self.build_filter_complex(
             w, h, ass_path, framing, cut_expr=cut_expr, hook_zoom=hook_zoom,
             progress_bar=eff_prog, clip_duration=duration, color_filter=color_filter,
             dynamic_zoom=eff_zoom, split_glow=eff_split_glow, broll_theme=broll_theme
         )
 
+        # Smart B-Roll Engine integration (Submagic-style)
+        broll_scheduled = broll_items
+        if broll_scheduled is None:
+            saved_b = load_clip_broll(candidate.id)
+            if saved_b is not None:
+                broll_scheduled = saved_b
+            elif auto_broll:
+                broll_scheduled = self.broll_engine.analyze_and_schedule(
+                    sub_segments, sub_start, sub_end,
+                    face_samples=samples if 'samples' in locals() else None,
+                    density=broll_density,
+                    theme=broll_theme or "auto",
+                    mode=broll_mode
+                )
+                save_clip_broll(candidate.id, broll_scheduled)
+
+        if broll_scheduled:
+            broll_filter, final_label = self.broll_engine.build_broll_filters(
+                broll_scheduled, w, h, final_label
+            )
+            filter_str += broll_filter
+
+        # Smart SFX Engine integration (Submagic-style)
+        sfx_scheduled = sfx_items
+        if sfx_scheduled is None:
+            saved_s = load_clip_sfx(candidate.id)
+            if saved_s is not None:
+                sfx_scheduled = saved_s
+            elif auto_sfx:
+                sfx_scheduled = self.sfx_engine.analyze_and_schedule(
+                    sub_segments, sub_start, sub_end,
+                    hook_text=getattr(candidate, "hook_text", ""),
+                    virality_score=getattr(candidate, "virality_score", 85.0),
+                    intensity=sfx_intensity,
+                    active_categories=sfx_categories,
+                    has_dynamic_zoom=eff_zoom
+                )
+                save_clip_sfx(candidate.id, sfx_scheduled)
+
         logger.info(f"Renderizando clip {aspect_ratio}: {output_file.name} ({duration:.1f}s)")
         self._run_ffmpeg(lambda enc: self.build_ffmpeg_cmd(
             input_p, output_file, start_time, duration, filter_str, final_label,
             encoder=enc, is_pretrimmed=is_pretrimmed, cut_expr=cut_expr, speed_mode=speed_mode,
+            seamless_loop=seamless_loop, sfx_items=sfx_scheduled,
+            audio_profile=audio_profile, target_lufs=target_lufs, target_lra=target_lra,
+            target_tp=target_tp, master_limiter=master_limiter, true_peak_limit=true_peak_limit,
         ))
         self.make_thumbnail(output_file)
         logger.info(f"Clip generado: {output_file}")

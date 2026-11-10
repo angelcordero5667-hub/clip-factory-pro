@@ -22,7 +22,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from fastapi import FastAPI, File, HTTPException, Request, UploadFile
+from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, PlainTextResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
@@ -30,6 +30,17 @@ from pydantic import BaseModel, Field
 from src.common.config import settings
 from src.common.database import db
 from src.common.models import TranscriptResult, TranscriptSegment, WordTimestamp
+from src.agents.agent1_transcription.dominican_slang import (
+    correct_dominican_text,
+    normalize_dominican_segments
+)
+from src.common.thumbnail_designer import (
+    get_gallery_manifest,
+    detect_mentioned_artists,
+    create_viral_composite_thumbnail,
+    INTERNAL_GALLERY_DIR as GALLERY_DIR,
+    DESKTOP_GALLERY_DIR
+)
 from src.jobs import JobWorker
 
 STATIC_DIR = Path(__file__).resolve().parent.parent / "static"
@@ -186,7 +197,22 @@ async def auth_verify(request: Request):
 
 if STATIC_DIR.exists():
     app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
+if (WEB_DIR / "studio").is_dir():
+    # Interfaz "AI Creative Studio" (archivos estáticos; se activa con ?ui=studio).
+    app.mount("/studio", StaticFiles(directory=str(WEB_DIR / "studio")), name="studio")
 app.mount("/clips_media", StaticFiles(directory=str(OUTPUTS_DIR)), name="clips_media")
+if GALLERY_DIR.exists():
+    app.mount("/gallery_media", StaticFiles(directory=str(GALLERY_DIR)), name="gallery_media")
+if DESKTOP_GALLERY_DIR.exists():
+    app.mount("/gallery_desktop", StaticFiles(directory=str(DESKTOP_GALLERY_DIR)), name="gallery_desktop")
+
+BROLL_DIR = Path("data/broll")
+if BROLL_DIR.exists():
+    app.mount("/broll_media", StaticFiles(directory=str(BROLL_DIR)), name="broll_media")
+
+SFX_DIR = Path("data/assets/sfx")
+if SFX_DIR.exists():
+    app.mount("/sfx_media", StaticFiles(directory=str(SFX_DIR)), name="sfx_media")
 
 
 # --------------------------------------------------------------------------- utilidades
@@ -312,7 +338,18 @@ def list_videos():
 def get_clips(video_id: Optional[str] = None):
     videos = db.get_all_videos()
     if not videos:
-        return {"source_title": "", "duration": "", "video_id": None, "clips": []}
+        return {"source_title": "", "duration": "", "video_id": None, "clips": [], "all_videos": []}
+
+    all_vids_meta = []
+    for v in videos:
+        c_list = db.get_candidates_by_video(v["id"])
+        if c_list:
+            all_vids_meta.append({
+                "id": v["id"],
+                "title": _clean_title(v["filename"]),
+                "clips_count": len(c_list),
+                "duration": _human_duration(v.get("duration", 0)),
+            })
 
     target = None
     cands: List[Dict[str, Any]] = []
@@ -335,6 +372,7 @@ def get_clips(video_id: Optional[str] = None):
         "duration": _human_duration(target["duration"]),
         "video_id": target["id"],
         "clips": [format_clip(c) for c in cands],
+        "all_videos": all_vids_meta,
     }
 
 
@@ -388,9 +426,18 @@ def rerender_clip(
     progress_bar: Optional[bool] = False,
     color_filter: Optional[str] = "none",
     dynamic_zoom: Optional[bool] = False,
+    punch_zooms: Optional[bool] = False,
     hook_headline: Optional[str] = None,
     broll_theme: Optional[str] = "gameplay",
     split_glow: Optional[bool] = False,
+    seamless_loop: Optional[bool] = True,
+    auto_broll: Optional[bool] = True,
+    auto_sfx: Optional[bool] = True,
+    sfx_intensity: Optional[str] = "normal",
+    broll_mode: Optional[str] = "smart_face_avoid",
+    broll_density: Optional[str] = "medium",
+    framing_mode: Optional[str] = "auto",
+    trim_silences: Optional[bool] = True,
 ):
     _get_clip_or_404(clip_id)
     if style not in SUBTITLE_STYLES or aspect not in ASPECT_RATIOS:
@@ -406,9 +453,18 @@ def rerender_clip(
                                "progress_bar": progress_bar,
                                "color_filter": color_filter,
                                "dynamic_zoom": dynamic_zoom,
+                               "punch_zooms": punch_zooms,
                                "hook_headline": hook_headline,
                                "broll_theme": broll_theme,
                                "split_glow": split_glow,
+                               "seamless_loop": seamless_loop,
+                               "auto_broll": auto_broll,
+                               "auto_sfx": auto_sfx,
+                               "sfx_intensity": sfx_intensity,
+                               "broll_mode": broll_mode,
+                               "broll_density": broll_density,
+                               "framing_mode": framing_mode,
+                               "trim_silences": trim_silences,
                            })
     return {"job_id": job_id}
 
@@ -554,6 +610,31 @@ def update_clip_transcript(clip_id: str, body: TranscriptUpdateBody):
     return {"ok": True, "message": "Transcripción actualizada para este clip."}
 
 
+@app.post("/api/clips/{clip_id}/dominicanize")
+def dominicanize_clip(clip_id: str):
+    """Aplica las reglas y diccionario de jerga dominicana al clip actual y actualiza subtítulos."""
+    cand = _get_clip_or_404(clip_id)
+    all_segments = _get_clip_segments(cand)
+    new_segments = normalize_dominican_segments(all_segments)
+
+    video = db.get_video(cand["video_id"]) or {}
+    duration = float(video.get("duration") or cand["end_time"])
+    language = str(video.get("language") or "es")
+    custom_res = TranscriptResult(
+        video_path=video.get("filepath") or "",
+        language=language,
+        duration=duration,
+        segments=new_segments,
+        full_text=" ".join(s.text for s in new_segments),
+    )
+    custom_path = settings.cache_dir / "transcripts" / f"{clip_id}_edited.json"
+    custom_path.parent.mkdir(parents=True, exist_ok=True)
+    custom_path.write_text(custom_res.model_dump_json(indent=2), encoding="utf-8")
+
+    db.update_candidate_fields(clip_id, dirty=1)
+    return {"ok": True, "message": "🇩🇴 Jerga dominicana aplicada con éxito. Subtítulos corregidos."}
+
+
 @app.get("/api/clips/{clip_id}/export_srt")
 def export_clip_srt(clip_id: str):
     cand = _get_clip_or_404(clip_id)
@@ -567,6 +648,131 @@ def export_clip_srt(clip_id: str):
         media_type="text/plain; charset=utf-8",
         headers={"Content-Disposition": f'attachment; filename="{safe}.srt"'}
     )
+
+
+@app.get("/api/gallery")
+def list_gallery_assets():
+    """Lista todos los recursos y artistas de la galería unificada (Escritorio + local)."""
+    items = get_gallery_manifest()
+    results = []
+    for it in items:
+        fn = it.get("filename")
+        src = it.get("source", "internal")
+        prefix = "/gallery_desktop" if src == "desktop" else "/gallery_media"
+        results.append({
+            **it,
+            "url": f"{prefix}/{fn}" if fn else None
+        })
+    return {"items": results}
+
+
+@app.post("/api/gallery/upload")
+async def upload_gallery_asset(
+    file: UploadFile = File(...),
+    name: str = Form(...),
+    category: str = Form("artista"),
+    badge: Optional[str] = Form(None),
+    tags: str = Form("")
+):
+    """Permite subir una nueva imagen de artista o tema guardándola en la carpeta de Escritorio y en local."""
+    clean_name = re.sub(r"[^\w\-]", "_", name.strip().lower())
+    ext = Path(file.filename or "image.jpg").suffix.lower() or ".jpg"
+    filename = f"{clean_name}{ext}"
+    dest_internal = GALLERY_DIR / filename
+    dest_desktop = DESKTOP_GALLERY_DIR / filename
+
+    content = await file.read()
+    dest_internal.write_bytes(content)
+    if DESKTOP_GALLERY_DIR.exists():
+        try:
+            dest_desktop.write_bytes(content)
+        except Exception:
+            pass
+
+    manifest_path = GALLERY_DIR / "manifest.json"
+    items = get_gallery_manifest()
+
+    tag_list = [t.strip().lower() for t in tags.split(",") if t.strip()]
+    if clean_name not in tag_list:
+        tag_list.append(clean_name)
+
+    new_item = {
+        "id": clean_name,
+        "name": name.strip(),
+        "category": category.strip().lower(),
+        "filename": filename,
+        "source": "desktop",
+        "tags": tag_list,
+        "badge": badge.strip() if badge else f"🔥 {name.strip().upper()}"
+    }
+    items = [it for it in items if it.get("id") != clean_name]
+    items.append(new_item)
+    manifest_path.write_text(json.dumps(items, indent=2, ensure_ascii=False), encoding="utf-8")
+
+    return {"ok": True, "message": f"Imagen '{name}' guardada en la galería y en tu Escritorio", "item": new_item}
+
+
+@app.get("/api/clips/{clip_id}/suggest_artists")
+def suggest_artists_for_clip(clip_id: str):
+    """Detecta automáticamente si en el clip se mencionó a algún artista de la galería."""
+    cand = _get_clip_or_404(clip_id)
+    segments = _get_clip_segments(cand)
+    full_text = " ".join(s.text for s in segments)
+    matches = detect_mentioned_artists(full_text)
+    for m in matches:
+        fn = m.get("filename")
+        src = m.get("source", "internal")
+        prefix = "/gallery_desktop" if src == "desktop" else "/gallery_media"
+        m["url"] = f"{prefix}/{fn}" if fn else None
+    return {"clip_id": clip_id, "mentioned_artists": matches}
+
+
+class ViralThumbnailBody(BaseModel):
+    title: Optional[str] = None
+    subtitle: Optional[str] = None
+    asset_id: Optional[str] = None
+    badge: Optional[str] = None
+
+
+@app.post("/api/clips/{clip_id}/generate_thumbnail")
+def generate_viral_thumbnail(clip_id: str, body: ViralThumbnailBody):
+    """Genera una miniatura 9:16 de alto impacto utilizando el orador y un artista/tema de la galería."""
+    cand = _get_clip_or_404(clip_id)
+    clip_path_str = cand.get("clip_path")
+    if not clip_path_str or not Path(clip_path_str).exists():
+        raise HTTPException(status_code=400, detail="El clip no ha sido renderizado todavía.")
+
+    clip_path = Path(clip_path_str)
+    output_thumb = clip_path.with_suffix(".jpg")
+
+    asset_filename = None
+    top_badge = body.badge
+    if body.asset_id:
+        items = get_gallery_manifest()
+        for it in items:
+            if it.get("id") == body.asset_id:
+                asset_filename = it.get("filename")
+                if not top_badge:
+                    top_badge = it.get("badge")
+                break
+
+    title = body.title or cand.get("title") or "MOMENTO VIRAL"
+    subtitle = body.subtitle or "MOMENTO VIRAL COMPLETO 🔥"
+
+    create_viral_composite_thumbnail(
+        base_frame_path=output_thumb,
+        output_path=output_thumb,
+        main_title=title,
+        subtitle=subtitle,
+        gallery_asset_filename=asset_filename,
+        top_badge=top_badge
+    )
+
+    return {
+        "ok": True,
+        "message": "Miniatura viral generada exitosamente",
+        "thumbnail_url": f"/clips_media/{output_thumb.name}"
+    }
 
 
 @app.get("/api/clips/{clip_id}/download")
@@ -700,7 +906,16 @@ class JobBody(BaseModel):
     dynamic_zoom: Optional[bool] = False
     split_glow: Optional[bool] = False
     hook_headline: Optional[str] = Field(default=None, max_length=100)
-    broll_theme: Optional[str] = Field(default="gameplay", max_length=30)
+    broll_theme: Optional[str] = Field(default="auto", max_length=30)
+    broll_mode: Optional[str] = Field(default="smart_face_avoid", max_length=30)
+    broll_density: Optional[str] = Field(default="medium", max_length=20)
+    auto_sfx: Optional[bool] = True
+    sfx_intensity: Optional[str] = Field(default="normal", max_length=20)
+    framing_mode: Optional[str] = Field(default="auto", max_length=30)
+    dominican_mode: Optional[bool] = True
+    seamless_loop: Optional[bool] = True
+    auto_broll: Optional[bool] = True
+    trim_silences: Optional[bool] = True
     live_record_minutes: Optional[float] = Field(default=None, ge=0.5, le=30.0)
 
 
@@ -1388,3 +1603,200 @@ def test_ai_connection():
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("src.api_server:app", host="127.0.0.1", port=8501, reload=False)
+
+
+# ---------------------------------------------------------------------------
+# Módulos Avanzados: B-Roll Inteligente y SFX Inteligente (Submagic / Klap)
+# ---------------------------------------------------------------------------
+from src.agents.agent3_clip_generator.smart_broll import SmartBrollEngine, BrollItem, load_clip_broll, save_clip_broll
+from src.agents.agent3_clip_generator.smart_sfx import SmartSFXEngine, SFXItem, load_clip_sfx, save_clip_sfx
+
+_broll_engine = SmartBrollEngine()
+_sfx_engine = SmartSFXEngine()
+
+@app.get("/api/broll/catalog")
+def get_broll_catalog():
+    """Devuelve el catálogo de recursos B-Roll por categorías (videos, imágenes, stickers)."""
+    return _broll_engine.get_catalog()
+
+@app.get("/api/clips/{clip_id}/broll")
+def get_clip_broll(clip_id: str):
+    """Obtiene los elementos de B-Roll programados para este clip."""
+    _get_clip_or_404(clip_id)
+    items = load_clip_broll(clip_id) or []
+    return {"clip_id": clip_id, "items": [it.to_dict() for it in items]}
+
+@app.post("/api/clips/{clip_id}/broll")
+def update_clip_broll(clip_id: str, items: List[Dict[str, Any]]):
+    """Permite al usuario editar, añadir o silenciar elementos de B-Roll en la línea de tiempo."""
+    _get_clip_or_404(clip_id)
+    b_items = [BrollItem.from_dict(it) for it in items]
+    save_clip_broll(clip_id, b_items)
+    return {"status": "ok", "count": len(b_items)}
+
+@app.get("/api/sfx/catalog")
+def get_sfx_catalog():
+    """Devuelve el catálogo de efectos de sonido en las 7 categorías con audio URLs."""
+    return _sfx_engine.get_catalog()
+
+@app.get("/api/clips/{clip_id}/sfx")
+def get_clip_sfx(clip_id: str):
+    """Obtiene los efectos de sonido programados para este clip."""
+    _get_clip_or_404(clip_id)
+    items = load_clip_sfx(clip_id) or []
+    return {"clip_id": clip_id, "items": [it.to_dict() for it in items]}
+
+@app.post("/api/clips/{clip_id}/sfx")
+def update_clip_sfx(clip_id: str, items: List[Dict[str, Any]]):
+    """Permite al usuario editar el volumen, cambiar o activar/desactivar SFX del clip."""
+    _get_clip_or_404(clip_id)
+    s_items = [SFXItem.from_dict(it) for it in items]
+    save_clip_sfx(clip_id, s_items)
+    return {"status": "ok", "count": len(s_items)}
+
+
+# ---------------------------------------------------------------------------
+# Módulos Avanzados: QR Download & Multi-Hook A/B Generator
+# ---------------------------------------------------------------------------
+import qrcode
+
+@app.get("/api/clips/{clip_id}/download_info")
+def get_clip_download_info(clip_id: str, request: Request):
+    cand = _get_clip_or_404(clip_id)
+    host = request.headers.get("x-forwarded-host") or request.headers.get("host") or "127.0.0.1:8501"
+    scheme = request.headers.get("x-forwarded-proto") or ("https" if "trycloudflare.com" in host else "http")
+    download_url = f"{scheme}://{host}/api/clips/{clip_id}/download"
+    qr_url = f"/api/clips/{clip_id}/qr"
+    return {
+        "clip_id": clip_id,
+        "title": cand.get("title") or f"Clip {clip_id}",
+        "download_url": download_url,
+        "qr_url": qr_url,
+        "duration": cand.get("duration", 0),
+        "virality_score": cand.get("virality_score", 0),
+    }
+
+@app.get("/api/clips/{clip_id}/qr")
+def get_clip_qr(clip_id: str, request: Request):
+    _get_clip_or_404(clip_id)
+    host = request.headers.get("x-forwarded-host") or request.headers.get("host") or "127.0.0.1:8501"
+    scheme = request.headers.get("x-forwarded-proto") or ("https" if "trycloudflare.com" in host else "http")
+    download_url = f"{scheme}://{host}/api/clips/{clip_id}/download"
+
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_M,
+        box_size=10,
+        border=2,
+    )
+    qr.add_data(download_url)
+    qr.make(fit=True)
+    img = qr.make_image(fill_color="#0f172a", back_color="#ffffff")
+
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    buf.seek(0)
+    return StreamingResponse(buf, media_type="image/png")
+
+class MultiHookRequest(BaseModel):
+    custom_topic: Optional[str] = None
+
+@app.post("/api/clips/{clip_id}/generate_hooks")
+def generate_clip_hooks(clip_id: str, body: Optional[MultiHookRequest] = None):
+    cand = _get_clip_or_404(clip_id)
+    title = cand.get("title", "")
+    hook_text = cand.get("hook_text", "")
+    context_text = cand.get("context_text", "")
+    full_text = f"{title}. {hook_text}. {context_text}"
+
+    # Intento con Ollama si está disponible
+    ollama_url = getattr(settings.ollama, "base_url", "http://127.0.0.1:11434")
+    o_model = db.get_setting("ollama_model", getattr(settings.ollama, "model", "llama3.2:3b"))
+    hooks = []
+
+    prompt = f"""Eres un estratega viral senior de TikTok, Reels y YouTube Shorts.
+Genera 3 ganchos (hooks) diferentes para este video corto:
+Texto del clip: "{full_text[:400]}"
+
+Devuelve EXCLUSIVAMENTE un JSON con esta estructura exacta sin explicaciones adicionales:
+[
+  {{
+    "variant": "A",
+    "name": "Curiosidad e Intriga",
+    "headline": "TITULAR EN MAYUSCULAS (MAX 6 PALABRAS)",
+    "hook_phrase": "Primera frase impactante para los primeros 3 segundos",
+    "angle": "Explicación del gatillo psicológico",
+    "copy_caption": "Copy listo para TikTok con llamada a la acción y 4 hashtags",
+    "style_preset": "hormozi"
+  }},
+  {{
+    "variant": "B",
+    "name": "Shock y Controversia",
+    "headline": "TITULAR EN MAYUSCULAS (MAX 6 PALABRAS)",
+    "hook_phrase": "Primera frase impactante para los primeros 3 segundos",
+    "angle": "Explicación del gatillo psicológico",
+    "copy_caption": "Copy listo para TikTok con llamada a la acción y 4 hashtags",
+    "style_preset": "beast"
+  }},
+  {{
+    "variant": "C",
+    "name": "Storytelling y Secreto",
+    "headline": "TITULAR EN MAYUSCULAS (MAX 6 PALABRAS)",
+    "hook_phrase": "Primera frase impactante para los primeros 3 segundos",
+    "angle": "Explicación del gatillo psicológico",
+    "copy_caption": "Copy listo para TikTok con llamada a la acción y 4 hashtags",
+    "style_preset": "glow"
+  }}
+]
+"""
+    try:
+        r = requests.post(
+            f"{ollama_url}/api/generate",
+            json={"model": o_model, "prompt": prompt, "stream": False, "format": "json"},
+            timeout=8.0
+        )
+        if r.status_code == 200:
+            parsed = json.loads(r.json().get("response", "[]"))
+            if isinstance(parsed, list) and len(parsed) >= 3:
+                hooks = parsed[:3]
+    except Exception as e:
+        pass
+
+    # Heurística de alta conversión si Ollama no está disponible o falla el parseo
+    if not hooks:
+        clean_title = (title or "Momento Viral").upper()
+        clean_title = re.sub(r'[^A-ZÁÉÍÓÚÑ0-9 ]', '', clean_title)
+        words = clean_title.split()[:4]
+        kw = " ".join(words) if words else "ESTO"
+
+        hooks = [
+            {
+                "variant": "A",
+                "name": "Curiosidad e Intriga",
+                "headline": f"¿SABÍAS ESTO DE {kw}? 👀"[:35],
+                "hook_phrase": f"Lo que casi nadie sabe sobre {kw.lower()}...",
+                "angle": "Abre un bucle de curiosidad irresistible en los primeros 2 segundos.",
+                "copy_caption": f"Nadie esperaba que esto saliera a la luz 😱 Mira hasta el final y comenta qué opinas 👇 #viral #parati #tendencia #reels",
+                "style_preset": "hormozi"
+            },
+            {
+                "variant": "B",
+                "name": "Shock y Controversia",
+                "headline": f"LA VERDAD SOBRE {kw} 🚨"[:35],
+                "hook_phrase": f"Dijo lo que todos callan sobre {kw.lower()}...",
+                "angle": "Provoca debate polarizante y comentarios inmediatos.",
+                "copy_caption": f"Se atrevió a decir lo que muchos ocultan 💥 ¿Crees que tiene la razón? Deja tu opinión abajo 💬 #debate #polemica #tiktokviral",
+                "style_preset": "beast"
+            },
+            {
+                "variant": "C",
+                "name": "Storytelling y Secreto",
+                "headline": f"EL MOMENTO DONDE TODO CAMBIÓ 🤯"[:35],
+                "hook_phrase": f"Esta historia cambió por completo cuando...",
+                "angle": "Enganche narrativo con promesa de revelación final.",
+                "copy_caption": f"Esta historia no es lo que parece 🤯 No te pierdas el desenlace completo. Sígueme para más contenido. #storytime #fyp #increible",
+                "style_preset": "glow"
+            }
+        ]
+
+    return {"clip_id": clip_id, "hooks": hooks}

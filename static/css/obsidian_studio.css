@@ -1,0 +1,1191 @@
+/* ==========================================================================
+   CLIP FACTORY PRO — OBSIDIAN STUDIO DESIGN SYSTEM
+   Inspiración: OpusClip + Riverside (Estudio de Producción Automatizada con IA)
+   Paleta Oficial:
+     Fondo principal:   #080A11
+     Superficie panel:  #101521
+     Superficie elevada:#161D2B
+     Bordes:            #252E40
+     Bordes hover:      #37435B
+     Cian principal:    #00D5FF
+     Violeta secundario:#8B5CF6
+     Verde lima:        #A3E635
+     Texto principal:   #F1F5F9
+     Texto secundario:  #94A3B8
+     Texto atenuado:    #64748B
+     Estado de error:   #F87171
+     Estado advertencia:#FBBF24
+   ========================================================================== */
+
+:root {
+  /* Obsidian Studio Official Palette */
+  --obsidian-bg: #080a11;
+  --obsidian-panel: #101521;
+  --obsidian-panel-elevated: #161d2b;
+  --obsidian-panel-hover: #1c2436;
+  --obsidian-border: #252e40;
+  --obsidian-border-hover: #37435b;
+  --obsidian-border-strong: #475569;
+  --obsidian-border-focus: #00d5ff;
+
+  --obsidian-cyan: #00d5ff;
+  --obsidian-cyan-hover: #38bdf8;
+  --obsidian-cyan-glow: rgba(0, 213, 255, 0.25);
+  --obsidian-cyan-subtle: rgba(0, 213, 255, 0.08);
+
+  --obsidian-violet: #8b5cf6;
+  --obsidian-violet-hover: #a78bfa;
+  --obsidian-violet-glow: rgba(139, 92, 246, 0.25);
+  --obsidian-violet-subtle: rgba(139, 92, 246, 0.12);
+
+  --obsidian-lime: #a3e635;
+  --obsidian-lime-hover: #bef264;
+  --obsidian-lime-glow: rgba(163, 230, 53, 0.25);
+  --obsidian-lime-subtle: rgba(163, 230, 53, 0.12);
+
+  --obsidian-pink: #ec4899;
+  --obsidian-pink-hover: #f43f5e;
+  --obsidian-pink-glow: rgba(236, 72, 153, 0.35);
+
+  --obsidian-text: #f1f5f9;
+  --obsidian-text-secondary: #94a3b8;
+  --obsidian-text-muted: #64748b;
+  --obsidian-error: #f87171;
+  --obsidian-error-subtle: rgba(248, 113, 113, 0.14);
+  --obsidian-warning: #fbbf24;
+  --obsidian-warning-subtle: rgba(251, 191, 36, 0.14);
+
+  /* Typography */
+  --font-display: "Sora", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  /* Spacing & Radii */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.45);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.55);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.7);
+  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.45);
+
+  /* Layout */
+  --sidebar-width: 250px;
+  --sidebar-collapsed-width: 68px;
+  --header-height: 60px;
+
+  /* Backwards compatibility aliases for existing JS/DOM nodes */
+  --bg-app: var(--obsidian-bg);
+  --bg-dark-app: var(--obsidian-bg);
+  --bg-sidebar: var(--obsidian-panel);
+  --bg-dark-sidebar: var(--obsidian-panel);
+  --bg-surface: var(--obsidian-panel);
+  --bg-surface-elevated: var(--obsidian-panel-elevated);
+  --bg-surface-hover: var(--obsidian-panel-hover);
+  --bg-card-glass: rgba(16, 21, 33, 0.85);
+
+  --border-subtle: var(--obsidian-border);
+  --border-card-glass: var(--obsidian-border);
+  --border-card-hover: var(--obsidian-border-hover);
+  --border-focus: var(--obsidian-cyan);
+
+  --neon-cyan: var(--obsidian-cyan);
+  --neon-purple: var(--obsidian-violet);
+  --neon-lime: var(--obsidian-lime);
+  --neon-lime-accent: var(--obsidian-lime);
+  --neon-pink: var(--obsidian-pink);
+  --neon-orange: #f97316;
+  --neon-amber: var(--obsidian-warning);
+  --neon-red: var(--obsidian-error);
+
+  --grad-logo: linear-gradient(135deg, var(--obsidian-cyan), var(--obsidian-violet));
+  --grad-cta: linear-gradient(135deg, var(--obsidian-cyan), var(--obsidian-violet));
+  --grad-btn-generate: linear-gradient(135deg, var(--obsidian-cyan), #3b82f6, var(--obsidian-violet));
+  --grad-primary-btn: linear-gradient(135deg, var(--obsidian-cyan), #0284c7);
+  --grad-active-nav: linear-gradient(90deg, rgba(0, 213, 255, 0.16), rgba(0, 213, 255, 0.04));
+
+  --text-primary: var(--obsidian-text);
+  --text-secondary: var(--obsidian-text-secondary);
+  --text-muted: var(--obsidian-text-muted);
+
+  --focus-ring: var(--obsidian-cyan);
+}
+
+/* Base Reset & Fonts */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--obsidian-bg) !important;
+  color: var(--obsidian-text) !important;
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, .view-title, .opus-section-title, .logo-title-main {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+  color: var(--obsidian-text);
+  font-weight: 700;
+}
+
+/* Scrollbar Minimal */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--obsidian-border-strong) transparent;
+}
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--obsidian-border);
+  border-radius: var(--radius-full);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--obsidian-border-hover);
+}
+
+/* ==========================================================================
+   SIDEBAR (Obsidian Studio Nav)
+   ========================================================================== */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: var(--sidebar-width);
+  background: var(--obsidian-panel) !important;
+  border-right: 1px solid var(--obsidian-border) !important;
+  display: flex;
+  flex-direction: column;
+  z-index: 100;
+  transition: width var(--transition-normal), transform var(--transition-normal);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.logo-box {
+  padding: 18px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--obsidian-border);
+  user-select: none;
+}
+
+.logo-icon-neon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, rgba(0, 213, 255, 0.2), rgba(139, 92, 246, 0.2));
+  border: 1px solid rgba(0, 213, 255, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.logo-title-main {
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.02em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.logo-title-main .pro-badge {
+  font-size: 9.5px;
+  font-weight: 800;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: linear-gradient(135deg, var(--obsidian-cyan), var(--obsidian-violet));
+  color: #000;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.logo-subtitle-desc {
+  font-size: 11px;
+  color: var(--obsidian-text-muted);
+}
+
+.nav-list {
+  list-style: none;
+  padding: 12px 10px;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex-grow: 1;
+}
+
+.nav-item {
+  position: relative;
+}
+
+.nav-item button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 12px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  color: var(--obsidian-text-secondary);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: all var(--transition-fast);
+  position: relative;
+}
+
+.nav-item button svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  stroke: var(--obsidian-text-muted);
+  transition: stroke var(--transition-fast);
+}
+
+.nav-item:hover button {
+  background: var(--obsidian-panel-elevated);
+  color: var(--obsidian-text);
+  border-color: rgba(255, 255, 255, 0.05);
+}
+.nav-item:hover button svg {
+  stroke: var(--obsidian-cyan);
+}
+
+.nav-item.active button,
+.nav-item button.active {
+  background: var(--grad-active-nav) !important;
+  color: #fff !important;
+  font-weight: 600;
+  border-left: 3px solid var(--obsidian-cyan) !important;
+  border-color: rgba(0, 213, 255, 0.3);
+  box-shadow: inset 0 0 12px rgba(0, 213, 255, 0.05);
+}
+.nav-item.active button svg,
+.nav-item button.active svg {
+  stroke: var(--obsidian-cyan) !important;
+}
+
+.nav-badge-pill {
+  margin-left: auto;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: var(--radius-full);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.sidebar-user-bottom {
+  margin-top: auto;
+  padding: 14px 12px;
+  border-top: 1px solid var(--obsidian-border);
+  background: rgba(16, 21, 33, 0.6);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ==========================================================================
+   TOP HEADER
+   ========================================================================== */
+.main-wrapper {
+  margin-left: var(--sidebar-width);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  transition: margin-left var(--transition-normal);
+}
+
+.header {
+  height: var(--header-height);
+  background: rgba(16, 21, 33, 0.85) !important;
+  backdrop-filter: blur(12px) saturate(1.2);
+  border-bottom: 1px solid var(--obsidian-border) !important;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  position: sticky;
+  top: 0;
+  z-index: 90;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.header-tabs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--obsidian-panel-elevated);
+  padding: 3px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--obsidian-border);
+}
+
+.header-tab {
+  padding: 5px 12px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--obsidian-text-secondary);
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.header-tab:hover {
+  color: var(--obsidian-text);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.header-tab.active {
+  background: var(--obsidian-cyan-subtle);
+  color: var(--obsidian-cyan);
+  font-weight: 600;
+  border: 1px solid rgba(0, 213, 255, 0.35);
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Search Box */
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--obsidian-panel-elevated);
+  border: 1px solid var(--obsidian-border);
+  border-radius: var(--radius-md);
+  padding: 6px 12px;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.search-box:focus-within {
+  border-color: var(--obsidian-cyan);
+  box-shadow: 0 0 0 2px var(--obsidian-cyan-glow);
+}
+
+.search-box input {
+  background: transparent;
+  border: none;
+  color: var(--obsidian-text);
+  font-size: 12.5px;
+  outline: none;
+  width: 180px;
+  transition: width var(--transition-normal);
+}
+.search-box input:focus {
+  width: 240px;
+}
+
+/* API Status Badge */
+.api-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 9px;
+  border-radius: var(--radius-full);
+  background: rgba(163, 230, 53, 0.1);
+  border: 1px solid rgba(163, 230, 53, 0.35);
+  color: var(--obsidian-lime);
+}
+.api-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--obsidian-lime);
+  box-shadow: 0 0 8px var(--obsidian-lime);
+  animation: pulse-dot 2s infinite;
+}
+
+@keyframes pulse-dot {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  50% { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(0.95); opacity: 0.8; }
+}
+
+/* Buttons */
+.icon-btn, .menu-btn {
+  background: transparent;
+  border: 1px solid var(--obsidian-border);
+  border-radius: var(--radius-md);
+  color: var(--obsidian-text-secondary);
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+.icon-btn:hover, .menu-btn:hover {
+  background: var(--obsidian-panel-elevated);
+  color: #fff;
+  border-color: var(--obsidian-border-hover);
+}
+
+.btn-primary, .btn-gradient, .opus-btn-getclips, .btn-generate-ai {
+  background: linear-gradient(135deg, var(--obsidian-cyan), #0284c7) !important;
+  color: #040914 !important;
+  font-family: var(--font-body);
+  font-weight: 700 !important;
+  border: none !important;
+  border-radius: var(--radius-md) !important;
+  padding: 10px 20px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all var(--transition-fast);
+  box-shadow: 0 4px 16px rgba(0, 213, 255, 0.25) !important;
+}
+.btn-primary:hover, .btn-gradient:hover, .opus-btn-getclips:hover, .btn-generate-ai:hover {
+  background: linear-gradient(135deg, #38bdf8, var(--obsidian-cyan)) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(0, 213, 255, 0.4) !important;
+}
+
+.btn-outline, .btn-sm-action {
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid var(--obsidian-border) !important;
+  color: var(--obsidian-text) !important;
+  border-radius: var(--radius-md) !important;
+  padding: 7px 14px;
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all var(--transition-fast);
+}
+.btn-outline:hover, .btn-sm-action:hover {
+  background: var(--obsidian-panel-elevated) !important;
+  border-color: var(--obsidian-border-hover) !important;
+  color: #fff !important;
+}
+
+.btn-export-zip-pink {
+  background: linear-gradient(135deg, #f43f5e, #e11d48) !important;
+  color: #fff !important;
+  font-weight: 700 !important;
+  border-radius: var(--radius-full) !important;
+  padding: 7px 18px !important;
+  border: none !important;
+  box-shadow: 0 4px 16px rgba(244, 63, 94, 0.35) !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  font-size: 13px;
+}
+.btn-export-zip-pink:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 22px rgba(244, 63, 94, 0.5) !important;
+}
+
+/* User Dropdown */
+.avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--obsidian-violet), #4f46e5);
+  color: #fff;
+  font-weight: 700;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+  border: 2px solid var(--obsidian-border);
+}
+
+.user-dropdown-menu {
+  position: absolute;
+  top: 52px;
+  right: 0;
+  width: 240px;
+  background: var(--obsidian-panel-elevated);
+  border: 1px solid var(--obsidian-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 8px;
+  z-index: 1000;
+  display: none;
+}
+.user-dropdown-menu.show {
+  display: block;
+}
+
+.user-dropdown-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--obsidian-text-secondary);
+  font-size: 12.5px;
+  cursor: pointer;
+  text-align: left;
+  transition: all var(--transition-fast);
+}
+.user-dropdown-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+}
+.user-dropdown-divider {
+  height: 1px;
+  background: var(--obsidian-border);
+  margin: 6px 0;
+}
+.user-dropdown-group-title {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--obsidian-text-muted);
+  text-transform: uppercase;
+  padding: 4px 8px;
+  letter-spacing: 0.05em;
+}
+
+/* ==========================================================================
+   GLOBAL JOB PROGRESS BANNER
+   ========================================================================== */
+.global-job-banner {
+  background: linear-gradient(90deg, rgba(16, 21, 33, 0.98), rgba(22, 29, 43, 0.98)) !important;
+  border-bottom: 1px solid var(--obsidian-cyan-subtle) !important;
+  padding: 10px 20px;
+  box-shadow: var(--shadow-sm);
+}
+.job-banner-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+.job-progress-track {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  margin: 4px 0;
+}
+.job-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--obsidian-cyan), var(--obsidian-lime));
+  transition: width 0.3s ease;
+}
+
+/* ==========================================================================
+   VIEW SECTIONS & CARDS
+   ========================================================================== */
+.view-section {
+  display: none;
+  padding: 24px 28px;
+  max-width: 1560px;
+  margin: 0 auto;
+  width: 100%;
+  animation: fadeIn 0.25s ease forwards;
+}
+.view-section.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.card, .opus-card, .macro-scrubber-card, .modal-card, .crear-clips-card {
+  background: var(--obsidian-panel) !important;
+  border: 1px solid var(--obsidian-border) !important;
+  border-radius: var(--radius-lg) !important;
+  box-shadow: var(--shadow-card) !important;
+  padding: 20px;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+.card:hover, .opus-card:hover {
+  border-color: var(--obsidian-border-hover) !important;
+}
+
+/* ==========================================================================
+   DASHBOARD (view-inicio) — OBSIDIAN STUDIO 2-COLUMN LAYOUT
+   ========================================================================== */
+.opus-dashboard-container {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: 24px;
+  margin-bottom: 30px;
+}
+
+.opus-section-title {
+  font-size: 18px;
+  margin: 0 0 16px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #fff;
+}
+
+/* Dropzone */
+.opus-dropzone {
+  background: rgba(16, 21, 33, 0.7) !important;
+  border: 2px dashed var(--obsidian-border) !important;
+  border-radius: var(--radius-lg) !important;
+  padding: 32px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  margin-bottom: 20px;
+}
+.opus-dropzone:hover, .opus-dropzone.dragover {
+  border-color: var(--obsidian-cyan) !important;
+  background: rgba(0, 213, 255, 0.04) !important;
+  box-shadow: 0 0 24px rgba(0, 213, 255, 0.12);
+}
+
+.opus-cloud-wrap {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--obsidian-panel-elevated);
+  border: 1px solid var(--obsidian-border);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.opus-drop-title {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 4px;
+}
+.opus-browse-highlight {
+  color: var(--obsidian-cyan);
+  text-decoration: underline;
+}
+
+/* URL Input Box */
+.opus-url-box {
+  background: var(--obsidian-panel-elevated) !important;
+  border: 1px solid var(--obsidian-border) !important;
+  border-radius: var(--radius-md) !important;
+  padding: 4px 6px 4px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+.opus-url-box:focus-within {
+  border-color: var(--obsidian-cyan) !important;
+  box-shadow: 0 0 0 2px var(--obsidian-cyan-glow) !important;
+}
+.opus-url-input {
+  background: transparent !important;
+  border: none !important;
+  color: #fff !important;
+  font-size: 13.5px;
+  flex-grow: 1;
+  outline: none !important;
+}
+
+/* Preset Chips */
+.preset-chip, .sub-pill-btn, .speed-chip {
+  background: var(--obsidian-panel-elevated) !important;
+  border: 1px solid var(--obsidian-border) !important;
+  color: var(--obsidian-text-secondary) !important;
+  font-size: 11.5px;
+  padding: 5px 12px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+.preset-chip:hover, .sub-pill-btn:hover, .speed-chip:hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border-color: var(--obsidian-border-hover) !important;
+  color: #fff !important;
+}
+.preset-chip.active, .sub-pill-btn.active, .speed-chip.active, .opus-pill.active {
+  background: var(--obsidian-cyan-subtle) !important;
+  border-color: var(--obsidian-cyan) !important;
+  color: var(--obsidian-cyan) !important;
+  font-weight: 600;
+}
+
+/* Form Controls & Selects */
+input[type="text"], input[type="url"], input[type="number"], select, textarea,
+.opus-select, .opus-input, .studio-select-dropdown, .studio-inline-input {
+  background: var(--obsidian-panel-elevated) !important;
+  border: 1px solid var(--obsidian-border) !important;
+  color: var(--obsidian-text) !important;
+  border-radius: var(--radius-md) !important;
+  padding: 8px 12px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  outline: none;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+input:focus, select:focus, textarea:focus,
+.opus-select:focus, .opus-input:focus {
+  border-color: var(--obsidian-cyan) !important;
+  box-shadow: 0 0 0 2px var(--obsidian-cyan-glow) !important;
+}
+
+/* Range Slider */
+input[type="range"] {
+  accent-color: var(--obsidian-cyan);
+}
+input[type="checkbox"] {
+  accent-color: var(--obsidian-cyan);
+}
+
+/* ==========================================================================
+   RECENT CLIPS & VIRAL SCORE BADGES (OpusClip Style)
+   ========================================================================== */
+.rec-video-card, .grid-clip-card {
+  background: var(--obsidian-panel) !important;
+  border: 1px solid var(--obsidian-border) !important;
+  border-radius: var(--radius-lg) !important;
+  overflow: hidden;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+}
+.rec-video-card:hover, .grid-clip-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--obsidian-border-hover) !important;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.6) !important;
+}
+
+.viral-score-badge, .grid-score {
+  background: rgba(163, 230, 53, 0.15) !important;
+  border: 1px solid rgba(163, 230, 53, 0.45) !important;
+  color: var(--obsidian-lime) !important;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ==========================================================================
+   EDITOR (view-editor) — MULTIPANEL RIVERSIDE + OPUSCLIP STUDIO
+   ========================================================================== */
+.editor-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 340px) minmax(0, 1.4fr) minmax(320px, 380px);
+  gap: 20px;
+  margin-bottom: 24px;
+  align-items: start;
+}
+
+@media (max-width: 1200px) {
+  .editor-layout {
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 420px);
+  }
+  .editor-media-lib {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 900px) {
+  .editor-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .editor-media-lib {
+    grid-column: span 1;
+  }
+}
+
+/* Video Canvas 9:16 */
+.video-preview-box {
+  width: 100%;
+  max-width: 380px;
+  aspect-ratio: 9/16;
+  background: #000;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--obsidian-border);
+  overflow: hidden;
+  position: relative;
+  margin: 0 auto 16px auto;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.8);
+}
+.video-preview-box video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Subtitle Overlay Text */
+.sub-overlay-text {
+  position: absolute;
+  bottom: 18%;
+  left: 8%;
+  right: 8%;
+  text-align: center;
+  pointer-events: none;
+  font-family: "Montserrat", "Sora", sans-serif;
+  font-weight: 800;
+  font-size: 18px;
+  text-transform: uppercase;
+  color: #fff;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9), 0 0 2px #000;
+  line-height: 1.25;
+}
+.sub-overlay-highlight {
+  color: var(--obsidian-cyan);
+  text-shadow: 0 0 10px rgba(0, 213, 255, 0.8);
+}
+
+/* TikTok / Reels Safe Zones Overlay */
+.safe-zones-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  display: none;
+}
+.safe-zones-overlay.active {
+  display: block;
+}
+.safe-zone-right-actions {
+  position: absolute;
+  right: 8px;
+  bottom: 80px;
+  width: 48px;
+  height: 220px;
+  background: rgba(244, 63, 94, 0.12);
+  border: 1px dashed rgba(244, 63, 94, 0.4);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #f43f5e;
+  font-size: 9px;
+  font-weight: 700;
+  writing-mode: vertical-rl;
+  letter-spacing: 0.05em;
+}
+.safe-zone-bottom-desc {
+  position: absolute;
+  bottom: 8px;
+  left: 10px;
+  right: 64px;
+  height: 70px;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px dashed rgba(245, 158, 11, 0.4);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #f59e0b;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+/* Inspector Tabs */
+.inspector-tabs-nav {
+  display: flex;
+  gap: 4px;
+  background: var(--obsidian-panel-elevated);
+  border: 1px solid var(--obsidian-border);
+  padding: 4px;
+  border-radius: var(--radius-md);
+  margin-bottom: 16px;
+  overflow-x: auto;
+}
+.inspector-tab-btn {
+  flex: 1;
+  padding: 6px 10px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--obsidian-text-secondary);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+}
+.inspector-tab-btn:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.04);
+}
+.inspector-tab-btn.active {
+  background: var(--obsidian-cyan-subtle);
+  color: var(--obsidian-cyan);
+  border: 1px solid rgba(0, 213, 255, 0.35);
+}
+
+.inspector-tab-pane {
+  display: none;
+  animation: fadeIn 0.2s ease forwards;
+}
+.inspector-tab-pane.active {
+  display: block;
+}
+
+/* Timeline Multipista */
+.timeline-container {
+  background: var(--obsidian-panel) !important;
+  border: 1px solid var(--obsidian-border) !important;
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  margin-top: 16px;
+}
+.timeline-top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  font-family: var(--font-mono);
+}
+.timeline-ruler {
+  position: relative;
+  height: 24px;
+  background: var(--obsidian-panel-elevated);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--obsidian-border);
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 10px;
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--obsidian-text-muted);
+  cursor: pointer;
+}
+.playhead-needle {
+  position: absolute;
+  top: 0;
+  bottom: -150px;
+  width: 2px;
+  background: var(--obsidian-cyan);
+  box-shadow: 0 0 8px var(--obsidian-cyan);
+  z-index: 50;
+  pointer-events: none;
+}
+.playhead-marker {
+  position: absolute;
+  top: -6px;
+  left: -5px;
+  width: 12px;
+  height: 12px;
+  background: var(--obsidian-cyan);
+  border-radius: 2px;
+  transform: rotate(45deg);
+}
+
+.timeline-track {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+/* Range Trim Block */
+.range-selection-block {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: rgba(245, 158, 11, 0.22);
+  border: 1px solid var(--obsidian-warning);
+  border-radius: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.range-handle {
+  width: 14px;
+  height: 100%;
+  background: var(--obsidian-warning);
+  color: #000;
+  font-weight: 800;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: ew-resize;
+  user-select: none;
+}
+
+/* ==========================================================================
+   MODALS
+   ========================================================================== */
+.modal-overlay, .modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(8, 10, 17, 0.82) !important;
+  backdrop-filter: blur(8px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+.modal-overlay.active, .modal-overlay.show, .modal-backdrop.show {
+  display: flex;
+}
+
+.modal-card {
+  background: var(--obsidian-panel-elevated) !important;
+  border: 1px solid var(--obsidian-border) !important;
+  border-radius: var(--radius-xl) !important;
+  box-shadow: var(--shadow-lg) !important;
+  max-width: 620px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  animation: modalIn 0.25s ease forwards;
+}
+
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.96) translateY(8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* ==========================================================================
+   TOAST NOTIFICATIONS
+   ========================================================================== */
+.toast-notification {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--obsidian-panel-elevated) !important;
+  border: 1px solid var(--obsidian-border-hover) !important;
+  border-left: 4px solid var(--obsidian-cyan) !important;
+  border-radius: var(--radius-md) !important;
+  box-shadow: var(--shadow-lg) !important;
+  padding: 12px 18px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  animation: toastIn 0.3s ease forwards;
+}
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN (Breakpoints: 375px, 768px, 1024px, 1440px, 1920px)
+   ========================================================================== */
+@media (max-width: 1024px) {
+  :root {
+    --sidebar-width: var(--sidebar-collapsed-width);
+  }
+  .sidebar .logo-titles,
+  .sidebar .nav-item span,
+  .sidebar .nav-badge-pill,
+  .sidebar-user-bottom span,
+  .sidebar-user-bottom button {
+    display: none !important;
+  }
+  .sidebar .logo-box {
+    justify-content: center;
+    padding: 14px 0;
+  }
+  .sidebar .nav-item button {
+    justify-content: center;
+    padding: 10px 0;
+  }
+  .opus-dashboard-container {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+    width: 260px !important;
+  }
+  .sidebar.mobile-open {
+    transform: translateX(0);
+  }
+  .main-wrapper {
+    margin-left: 0 !important;
+  }
+  .header-tabs {
+    display: none !important;
+  }
+  .search-box input {
+    width: 110px;
+  }
+  .search-box input:focus {
+    width: 150px;
+  }
+  .view-section {
+    padding: 16px 14px;
+  }
+  .mobile-bottom-nav {
+    display: flex !important;
+  }
+}
+
+@media (min-width: 769px) {
+  .mobile-bottom-nav {
+    display: none !important;
+  }
+}
+
+@media (min-width: 1920px) {
+  .view-section {
+    max-width: 1800px;
+  }
+}

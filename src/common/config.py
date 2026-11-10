@@ -29,7 +29,7 @@ class HardwareConfig(BaseModel):
 class OllamaConfig(BaseModel):
     base_url: str = "http://127.0.0.1:11434"
     model: str = "llama3.2:3b"
-    timeout_seconds: int = 120
+    timeout_seconds: int = int(os.environ.get("CLIP_OLLAMA_TIMEOUT", "180"))
 
 class VideoConfig(BaseModel):
     target_width: int = 1080

@@ -41,7 +41,12 @@ def _make_yunet(frame_w: int, frame_h: int) -> Optional[Detector]:
         if faces is not None:
             for f in faces:
                 x, y, w, h = f[:4]
-                out.append(((x + w / 2) / frame.shape[1], w / frame.shape[1]))
+                out.append((
+                    (x + w / 2) / frame.shape[1],
+                    w / frame.shape[1],
+                    (y + h / 2) / frame.shape[0],
+                    h / frame.shape[0]
+                ))
         return out
 
     return detect
@@ -61,7 +66,15 @@ def _make_haar() -> Optional[Detector]:
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         min_w = max(24, int(frame.shape[1] * MIN_FACE_WIDTH_RATIO))
         faces = cascade.detectMultiScale(gray, scaleFactor=1.2, minNeighbors=5, minSize=(min_w, min_w))
-        return [((x + w / 2) / frame.shape[1], w / frame.shape[1]) for (x, y, w, h) in faces]
+        return [
+            (
+                (x + w / 2) / frame.shape[1],
+                w / frame.shape[1],
+                (y + h / 2) / frame.shape[0],
+                h / frame.shape[0]
+            )
+            for (x, y, w, h) in faces
+        ]
 
     return detect
 
@@ -120,7 +133,11 @@ class FaceTracker:
                 faces = [f for f in detector(frame) if f[1] >= MIN_FACE_WIDTH_RATIO]
                 # los rostros más grandes primero (hablante principal), máx. 2; salida ordenada por x
                 faces = sorted(faces, key=lambda f: f[1], reverse=True)[:2]
-                samples.append(FaceSample(t=round(t, 2), xs=sorted(f[0] for f in faces)))
+                xs = sorted(f[0] for f in faces)
+                ys = [f[2] for f in faces if len(f) > 2]
+                ws = [f[1] for f in faces]
+                hs = [f[3] for f in faces if len(f) > 3]
+                samples.append(FaceSample(t=round(t, 2), xs=xs, ys=ys, ws=ws, hs=hs))
                 t += step
             return samples, src_w, src_h
         except Exception as e:

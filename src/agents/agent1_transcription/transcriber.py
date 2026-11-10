@@ -1,4 +1,4 @@
-﻿import os
+import os
 import json
 import logging
 from pathlib import Path
@@ -6,6 +6,11 @@ from typing import Optional
 
 from src.common.config import settings
 from src.common.models import TranscriptResult, TranscriptSegment, WordTimestamp
+from src.agents.agent1_transcription.dominican_slang import (
+    DOMINICAN_INITIAL_PROMPT,
+    normalize_dominican_segments,
+    correct_dominican_text
+)
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - [%(levelname)s] - %(message)s")
 logger = logging.getLogger("Agent1_Transcription")
@@ -55,16 +60,26 @@ class AudioTranscriber:
         self,
         video_or_audio_path: str,
         language: Optional[str] = None,
-        vad_filter: bool = True
+        vad_filter: bool = True,
+        initial_prompt: Optional[str] = None,
+        dominican_mode: bool = True,
+        use_llm: bool = False
     ) -> TranscriptResult:
         """
         Transcribe un archivo de video o audio generando timestamps por palabra.
+        Si dominican_mode es True, condiciona el modelo y normaliza la jerga dominicana.
         """
         path = Path(video_or_audio_path)
         if not path.exists():
             raise FileNotFoundError(f"No existe el archivo: {video_or_audio_path}")
 
         self.load_model()
+
+        # Determinar prompt contextual previo para guiar el modelo
+        prompt = initial_prompt
+        if prompt is None and dominican_mode:
+            prompt = DOMINICAN_INITIAL_PROMPT
+            logger.info("Modo Jerga Dominicana activado: inyectando contexto urbano y de dembow en Faster-Whisper.")
 
         logger.info(f"Iniciando transcripción para: {path.name}")
         segments_raw, info = self._model.transcribe(
@@ -74,7 +89,8 @@ class AudioTranscriber:
             beam_size=1,
             condition_on_previous_text=False,
             vad_filter=vad_filter,
-            vad_parameters=dict(min_silence_duration_ms=500)
+            vad_parameters=dict(min_silence_duration_ms=500),
+            initial_prompt=prompt
         )
 
         detected_language = info.language
@@ -109,6 +125,11 @@ class AudioTranscriber:
                     words=words_list
                 )
             )
+
+        if dominican_mode and parsed_segments:
+            logger.info("Aplicando normalización de fonética y jerga urbana dominicana a los segmentos...")
+            parsed_segments = normalize_dominican_segments(parsed_segments, use_llm=use_llm)
+            full_text_chunks = [s.text for s in parsed_segments]
 
         full_transcript = TranscriptResult(
             video_path=str(path.resolve()),

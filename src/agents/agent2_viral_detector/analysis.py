@@ -162,3 +162,56 @@ def snap_to_pauses(
     if e - s < min_duration or e - s > max_duration or e <= s:
         return start, end, False
     return round(s, 2), round(e, 2), adjusted
+
+
+FILLER_WORDS = frozenset({
+    "ok", "okay", "bueno", "eh", "ehh", "ehhh", "o sea", "osea", "este", "mira",
+    "entonces", "entonce", "digamos", "pues", "a ver", "haber", "mmm", "mm",
+    "yeah", "yes", "ajá", "aja", "oigan", "oye"
+})
+
+
+def trim_filler_words(
+    start: float,
+    end: float,
+    words: List[WordTimestamp],
+    min_duration: float = 20.0,
+    max_search_sec: float = 3.5,
+) -> Tuple[float, Optional[str], bool]:
+    """Recorta muletillas iniciales (filler words) en los primeros segundos para maximizar el gancho.
+
+    Devuelve (nuevo_start, nuevo_hook_text, fue_recortado).
+    Garantiza que la duración restante no sea menor a min_duration.
+    """
+    if not words or (end - start) < min_duration:
+        return start, None, False
+
+    clip_words = [w for w in words if start <= w.start <= end]
+    if not clip_words or len(clip_words) < 3:
+        return start, None, False
+
+    lead_words = [w for w in clip_words if w.start <= start + max_search_sec]
+    if not lead_words:
+        return start, None, False
+
+    first_substantive_idx = None
+    for idx, w in enumerate(lead_words):
+        clean = re.sub(r"[¿?¡!\"'.,;:()]", "", w.word).strip().lower()
+        if clean not in FILLER_WORDS:
+            first_substantive_idx = idx
+            break
+
+    if first_substantive_idx is None or first_substantive_idx == 0:
+        return start, None, False
+
+    target_word = lead_words[first_substantive_idx]
+    candidate_start = max(start, round(target_word.start - 0.10, 2))
+
+    if (end - candidate_start) < min_duration:
+        return start, None, False
+
+    remaining_words = [w.word for w in clip_words[first_substantive_idx: first_substantive_idx + 8]]
+    new_hook = " ".join(remaining_words).strip() if remaining_words else None
+
+    return candidate_start, new_hook, True
+

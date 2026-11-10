@@ -73,7 +73,22 @@ class ClipFactoryPipeline:
         split_glow: Optional[bool] = None,
         hook_headline: Optional[str] = None,
         broll_theme: Optional[str] = "gameplay",
+        dominican_mode: bool = True,
+        seamless_loop: bool = True,
+        auto_broll: bool = True,
+        auto_sfx: bool = True,
+        sfx_intensity: str = "normal",
+        broll_mode: str = "smart_face_avoid",
+        broll_density: str = "medium",
+        framing_mode: Optional[str] = None,
+        trim_silences: bool = True,
         live_record_minutes: Optional[float] = None,
+        audio_profile: str = "social",
+        master_limiter: bool = True,
+        target_lufs: float = -14.0,
+        target_lra: float = 11.0,
+        target_tp: float = -1.5,
+        true_peak_limit: float = 0.84,
         progress_callback: Optional[Callable[[str], None]] = None,
         step_callback: Optional[StepCallback] = None,
     ) -> Tuple[str, List[ViralMomentCandidate]]:
@@ -158,7 +173,7 @@ class ClipFactoryPipeline:
             except Exception as e:
                 logger.warning(f"Error leyendo caché de transcripción: {e}. Re-transcribiendo...")
         if transcript is None:
-            transcript = self.transcriber.transcribe(str(path), language=language)
+            transcript = self.transcriber.transcribe(str(path), language=language, dominican_mode=dominican_mode)
             try:
                 cached_transcript_path.write_text(transcript.model_dump_json(indent=2), encoding="utf-8")
             except Exception as e:
@@ -288,12 +303,35 @@ class ClipFactoryPipeline:
                 split_glow=split_glow,
                 hook_headline=hook_headline,
                 broll_theme=broll_theme,
+                seamless_loop=seamless_loop,
+                auto_broll=auto_broll,
+                auto_sfx=auto_sfx,
+                sfx_intensity=sfx_intensity,
+                broll_mode=broll_mode,
+                broll_density=broll_density,
+                trim_silences=trim_silences,
+                audio_profile=audio_profile,
+                master_limiter=master_limiter,
+                target_lufs=target_lufs,
+                target_lra=target_lra,
+                target_tp=target_tp,
+                true_peak_limit=true_peak_limit,
             )
             for cand in candidates:
                 res = results.get(cand.id)
                 if isinstance(res, Path):
                     cand.clip_path = str(res.resolve())
                     clip_paths[cand.id] = cand.clip_path
+                    try:
+                        from src.common.thumbnail_designer import auto_generate_viral_thumbnail_for_candidate
+                        auto_generate_viral_thumbnail_for_candidate(
+                            clip_path=res,
+                            title=cand.title or "MOMENTO VIRAL",
+                            transcript_text=cand.context_text or "",
+                            hook_text=cand.hook_text or ""
+                        )
+                    except Exception as e:
+                        logger.debug(f"No se pudo autogenerar miniatura viral para {cand.id}: {e}")
                 elif isinstance(res, Exception):
                     logger.error(f"Clip {cand.id} no se pudo renderizar: {res}")
         else:
@@ -326,9 +364,21 @@ class ClipFactoryPipeline:
         progress_bar: bool = False,
         color_filter: Optional[str] = "none",
         dynamic_zoom: bool = False,
+        punch_zooms: bool = False,
         split_glow: Optional[bool] = None,
         hook_headline: Optional[str] = None,
         broll_theme: Optional[str] = "gameplay",
+        seamless_loop: bool = True,
+        auto_broll: bool = True,
+        auto_sfx: bool = True,
+        sfx_intensity: str = "normal",
+        broll_mode: str = "smart_face_avoid",
+        broll_density: str = "medium",
+        framing_mode: Optional[str] = None,
+        trim_silences: bool = True,
+        audio_profile: str = "social",
+        master_limiter: bool = True,
+        **kwargs,
     ) -> Path:
         """Vuelve a renderizar un clip con los tiempos/título actuales de la base de datos."""
         cand_row = db.get_candidate(candidate_id)
@@ -361,6 +411,7 @@ class ClipFactoryPipeline:
         )
         if progress_callback:
             progress_callback("🎬 Renderizando el clip con los nuevos tiempos...")
+        layout_mode = framing_mode if framing_mode else None
         out = self.clip_maker.generate_clip(
             video_path=video["filepath"], candidate=cand, transcript_segments=segments,
             with_subtitles=True, subtitle_style=subtitle_style, include_emojis=include_emojis,
@@ -368,8 +419,27 @@ class ClipFactoryPipeline:
             subtitle_position=subtitle_position, custom_fontsize=custom_fontsize,
             subtitle_size=subtitle_size, custom_highlight=custom_highlight,
             progress_bar=progress_bar, color_filter=color_filter,
-            dynamic_zoom=dynamic_zoom, split_glow=split_glow,
+            dynamic_zoom=dynamic_zoom,
+            punch_zooms=punch_zooms, split_glow=split_glow,
             hook_headline=hook_headline, broll_theme=broll_theme,
+            seamless_loop=seamless_loop, auto_broll=auto_broll, trim_silences=trim_silences,
+            layout_mode=layout_mode,
+            auto_sfx=auto_sfx,
+            sfx_intensity=sfx_intensity,
+            broll_mode=broll_mode,
+            broll_density=broll_density,
+            audio_profile=audio_profile,
+            master_limiter=master_limiter,
         )
         db.update_candidate_clip_path(candidate_id, str(out.resolve()), dirty=False)
+        try:
+            from src.common.thumbnail_designer import auto_generate_viral_thumbnail_for_candidate
+            auto_generate_viral_thumbnail_for_candidate(
+                clip_path=out,
+                title=cand.title or "",
+                transcript_text=cand.context_text or "",
+                hook_text=cand.hook_text or ""
+            )
+        except Exception as e:
+            logger.debug(f"Error generando miniatura viral para rerender {candidate_id}: {e}")
         return out

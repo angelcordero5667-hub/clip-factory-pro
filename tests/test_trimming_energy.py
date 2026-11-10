@@ -92,7 +92,8 @@ def test_no_cut_keeps_old_command_unchanged():
     flt, label = VerticalClipMaker.build_filter_complex(maker, 1080, 1920)
     assert "select=" not in flt and label == "[combined]"
     cmd = VerticalClipMaker.build_ffmpeg_cmd(maker, "in.mp4", "out.mp4", 0, 17, flt, label)
-    assert cmd[cmd.index("-af") + 1] == "loudnorm=I=-14:LRA=7:TP=-1"
+    af = cmd[cmd.index("-af") + 1]
+    assert "loudnorm" in af and "alimiter" in af
 
 
 # ----------------------------------------------------------------- energía de audio

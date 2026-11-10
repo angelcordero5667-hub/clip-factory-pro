@@ -22,6 +22,7 @@ from src.agents.agent2_viral_detector.analysis import (
     normalize_text,
     sliding_windows,
     snap_to_pauses,
+    trim_filler_words,
 )
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - [%(levelname)s] - %(message)s")
@@ -107,7 +108,7 @@ class ViralMomentDetector:
         min_duration: float = 20.0,
         max_duration: float = 65.0,
         max_candidates: int = 20,
-        window_sec: float = 360.0,       # 5 a 8 minutos por ventana para el LLM
+        window_sec: float = 240.0,       # 3 a 4 minutos por ventana para el LLM
         window_overlap_sec: float = 30.0,
         heuristic_step_sec: float = 10.0,
         pause_tolerance_sec: float = 3.0,
@@ -132,7 +133,7 @@ class ViralMomentDetector:
         self.min_duration = min_duration
         self.max_duration = max_duration
         self.max_candidates = max_candidates
-        self.window_sec = min(480.0, max(300.0, window_sec))
+        self.window_sec = min(480.0, max(180.0, window_sec))
         self.window_overlap_sec = window_overlap_sec
         self.heuristic_step_sec = heuristic_step_sec
         self.pause_tolerance_sec = pause_tolerance_sec
@@ -143,16 +144,38 @@ class ViralMomentDetector:
         return "\n".join(f"[{seg.start:.1f}s -> {seg.end:.1f}s] {seg.text}" for seg in segments)
 
     @staticmethod
-    def _apply_energy(candidates: List[ViralMomentCandidate], energy) -> List[ViralMomentCandidate]:
-        """Sube o baja hasta ±8 puntos según la energía del audio del tramo (risas, énfasis, ritmo)."""
+    def _apply_energy(
+        candidates: List[ViralMomentCandidate],
+        energy,
+        transcript: Optional[TranscriptResult] = None
+    ) -> List[ViralMomentCandidate]:
+        """Sube o baja hasta ±8 puntos según la energía del audio del tramo (risas, énfasis, ritmo).
+        
+        Penalización por ruido: Si la energía acústica es alta (e > 0.75) pero la densidad verbal
+        es muy baja (< 0.6 pal/s, ej. gritos prolongados o ruido de fondo sin diálogo),
+        se penaliza en lugar de bonificar para priorizar contenido con sustancia semántica.
+        """
         if energy is None:
             return candidates
+        all_segments = transcript.segments if transcript and hasattr(transcript, "segments") else []
         for c in candidates:
             e = energy.window_score(c.start_time, c.end_time)
             bonus = energy_bonus(e)
+            penalized = False
+            if all_segments and c.duration > 5.0:
+                words_in_clip = sum(
+                    len(s.text.split()) for s in all_segments
+                    if s.end >= c.start_time and s.start <= c.end_time
+                )
+                wps = words_in_clip / c.duration
+                if e > 0.75 and wps < 0.6:
+                    bonus = -4.0
+                    penalized = True
+                    c.reasoning = f"{c.reasoning} Penalización por ruido/gritos sin densidad verbal ({wps:.1f} pal/s).".strip()
             c.virality_score = round(min(100.0, max(0.0, c.virality_score + bonus)), 1)
             sign = "+" if bonus >= 0 else ""
-            c.reasoning = f"{c.reasoning} Energía de audio {int(e * 100)}/100 ({sign}{bonus} pts).".strip()
+            if not penalized:
+                c.reasoning = f"{c.reasoning} Energía de audio {int(e * 100)}/100 ({sign}{bonus} pts).".strip()
         return candidates
 
     def detect_moments(
@@ -333,7 +356,7 @@ class ViralMomentDetector:
             logger.warning("Ningún candidato del LLM cumplió las duraciones; se usa el motor heurístico.")
             validated = self._validate_and_adjust_boundaries(self._detect_heuristic(transcript, focus_prompt=focus_prompt), transcript)
         aligned = self._align_to_pauses(validated, transcript)
-        aligned = self._apply_energy(aligned, energy)
+        aligned = self._apply_energy(aligned, energy, transcript=transcript)
         deduped = self.deduplicate_candidates(aligned)
         deduped.sort(key=lambda c: c.virality_score, reverse=True)
         deduped = self.normalize_virality_scores(deduped)
@@ -721,7 +744,7 @@ class ViralMomentDetector:
         return adjusted
 
     def _align_to_pauses(self, candidates: List[ViralMomentCandidate], transcript: TranscriptResult) -> List[ViralMomentCandidate]:
-        """Ajusta inicio y fin a la pausa más cercana (timestamps por palabra) para no cortar a media frase."""
+        """Ajusta inicio y fin a la pausa más cercana (timestamps por palabra) y poda muletillas muertas iniciales."""
         words = flatten_words(transcript.segments)
         if not words:
             return candidates
@@ -732,6 +755,13 @@ class ViralMomentDetector:
                 min_duration=self.min_duration,
                 max_duration=self.max_duration + 5.0,
             )
+            # Poda de muletillas iniciales (Filler-Word Trimmer) para arrancar directo con el gancho
+            s_trim, new_hook, trimmed = trim_filler_words(s, e, words, min_duration=self.min_duration)
+            if trimmed:
+                s = s_trim
+                changed = True
+                if new_hook and len(new_hook) > 5:
+                    c.hook_text = new_hook
             if changed:
                 c.start_time = s
                 c.end_time = min(e, transcript.duration)

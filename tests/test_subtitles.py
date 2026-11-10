@@ -51,7 +51,7 @@ def test_contorno_entre_4_y_6_px(tmp_path):
 def test_hormozi_resalta_palabra_activa_en_amarillo(tmp_path):
     out = SubtitleGenerator().generate_ass(1.0, 4.0, segs(), tmp_path / "h.ass", style_preset="hormozi")
     first = dialogues(out)[0]
-    assert "&H0000F0FF" in first and first.count("\\fscx112") == 1   # una sola palabra resaltada
+    assert "&H0000FFFF" in first and first.count("\\fscx112") == 1   # una sola palabra resaltada
     assert "NADIE" in visible_text(first)
 
 
@@ -169,7 +169,7 @@ def test_subtitle_position_bottom_low_and_numeric():
     g = SubtitleGenerator()
     align_low, margin_v_low, _ = g._margins("bottom_low", (1080, 1920))
     assert align_low == 2
-    assert margin_v_low == 280
+    assert margin_v_low == 380
 
     align_num, margin_v_num, _ = g._margins("320", (1080, 1920))
     assert align_num == 2
@@ -182,11 +182,11 @@ def test_subtitle_size_presets_in_generate_ass(tmp_path):
     out_small = g.generate_ass(0.0, 4.0, seg, tmp_path / "small.ass", style_preset="hormozi", subtitle_size="small")
     content_small = out_small.read_text(encoding="utf-8")
     assert "Style: Default" in content_small
-    assert ",51," in content_small
+    assert ",53," in content_small   # hormozi size 74 * 0.72
 
     out_large = g.generate_ass(0.0, 4.0, seg, tmp_path / "large.ass", style_preset="hormozi", subtitle_size="large")
     content_large = out_large.read_text(encoding="utf-8")
-    assert ",90," in content_large
+    assert ",92," in content_large   # hormozi size 74 * 1.25
 
 
 def test_hook_headline_in_generate_ass(tmp_path):

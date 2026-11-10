@@ -23,17 +23,27 @@ FONTS_DIR = settings.base_dir / "static" / "fonts"
 
 # Mapeo semántico de palabras clave a emojis (solo se usa si el estilo y la fuente lo permiten)
 EMOJI_KEYWORDS: Dict[str, str] = {
-    "dinero": "💰", "plata": "💸", "dolar": "💵", "dolares": "💵", "millon": "💎",
-    "millones": "💎", "rico": "🤑", "negocio": "💼", "empresa": "🏢", "precio": "🏷️",
-    "fuego": "🔥", "brutal": "⚡", "locura": "🤯", "increible": "😱", "shock": "💥",
+    # Dinero y negocios
+    "dinero": "💰", "plata": "💸", "cuarto": "💰", "cuartos": "💰", "dolar": "💵", "dolares": "💵",
+    "millon": "💎", "millones": "💎", "rico": "🤑", "rika": "🤑", "negocio": "💼", "empresa": "🏢",
+    "precio": "🏷️", "sueldo": "💵", "oro": "🪙", "banco": "🏦", "casa": "🏠", "carro": "🏎️",
+    # Emociones y energía
+    "fuego": "🔥", "candela": "🔥", "caliente": "🔥", "brutal": "⚡", "locura": "🤯", "loco": "🤪",
+    "loca": "🤪", "increible": "😱", "shock": "💥", "bomba": "💣", "explosivo": "💥",
+    # Verdad, intriga y drama
     "verdad": "💯", "secreto": "🤫", "atencion": "👀", "alerta": "🚨", "cuidado": "⚠️",
+    "carcel": "🚓", "detenida": "🚨", "detenido": "🚨", "arresto": "🚨", "policia": "👮",
+    "chisme": "🍿", "muerte": "🕊️", "murio": "🕊️", "amiga": "👯‍♀️", "tragedia": "💔", "llorar": "😭",
+    # Éxito y victoria
     "exito": "🏆", "ganar": "🥇", "crecer": "📈", "futuro": "🚀", "objetivo": "🎯",
+    # Mente y sabiduría
     "mente": "🧠", "cerebro": "🧠", "idea": "💡", "aprender": "📚", "pregunta": "❓",
-    "tiempo": "⏳", "hora": "⏱️", "rapido": "⚡", "año": "📅",
+    "tiempo": "⏳", "hora": "⏱️", "rapido": "⚡", "año": "📅", "viral": "📱",
 }
 # Cualquier emoji / pictograma (para eliminarlos del texto cuando no se pueden dibujar)
-_EMOJI_RE = re.compile("[\U0001F300-\U0001FAFF\U00002600-\U000027BF\U0001F000-\U0001F2FF️‍]+")
+_EMOJI_RE = re.compile("[🌀-🫿☀-➿🀀-🋿️‍]+")
 EMOJI_FONT_GLOB = "NotoEmoji*.ttf"   # fuente MONOCROMA: libass no dibuja emojis a color
+WIN_EMOJI_FONT = Path("C:/Windows/Fonts/seguiemj.ttf")
 
 # Fuente -> archivo en static/fonts. Si el archivo falta se usa Arial en negrita (sin error).
 FONT_FILES = {
@@ -54,8 +64,7 @@ class SubtitleStyle(dict):
 
 
 STYLES: Dict[str, Dict] = {
-    "hormozi": dict(font="Montserrat ExtraBold", size=72, outline=6, shadow=3, bold=0, uppercase=True,
-                    mode="highlight", primary="&H00FFFFFF", highlight="&H0000F0FF", allow_emoji=True),
+    "hormozi": dict(font="Montserrat ExtraBold", size=74, outline=6, shadow=3, bold=0, uppercase=True, mode="highlight", primary="&H00FFFFFF", highlight="&H0000FFFF", allow_emoji=True),
     "hormozi_classic": dict(font="Montserrat ExtraBold", size=74, outline=6, shadow=3, bold=0, uppercase=True,
                             mode="plain", primary="&H0000F0FF", highlight="&H0000F0FF", allow_emoji=True),
     "hormozi_neon": dict(font="Montserrat ExtraBold", size=72, outline=6, shadow=4, bold=0, uppercase=True,
@@ -98,7 +107,7 @@ PAUSE_BREAK = 0.6            # una pausa mayor corta el bloque
 
 
 def emoji_font_available() -> bool:
-    return any(FONTS_DIR.glob(EMOJI_FONT_GLOB))
+    return any(FONTS_DIR.glob(EMOJI_FONT_GLOB)) or WIN_EMOJI_FONT.exists()
 
 
 def resolve_font(name: str) -> Tuple[str, int]:
@@ -151,7 +160,8 @@ CHAR_WIDTH = {"Montserrat ExtraBold": 0.72, "Anton": 0.48, "Poppins SemiBold": 0
 
 def fit_font_size(lines_text: List[str], font: str, size: int, available_px: int) -> int:
     """Reduce el tamaño de fuente (hasta 60 %) si la línea más larga no cabe en el ancho seguro."""
-    longest = max((len(t) for t in lines_text), default=0)
+    clean_lines = [re.sub(r"\{.*?\}", "", t) for t in lines_text]
+    longest = max((len(t) for t in clean_lines), default=0)
     if longest == 0:
         return size
     needed = longest * size * CHAR_WIDTH.get(font, 0.66)
@@ -185,10 +195,12 @@ class SubtitleGenerator:
             cs = 99
         return f"{h}:{m:02d}:{s:02d}.{cs:02d}"
 
-    def _enrich_with_emoji(self, word: str) -> str:
+    def _enrich_with_emoji(self, word: str, base_font: str = "Montserrat ExtraBold") -> str:
         clean = re.sub(r"[^\w]", "", word.lower())
         for key, emoji in EMOJI_KEYWORDS.items():
             if key in clean:
+                if WIN_EMOJI_FONT.exists():
+                    return f"{word} {{\fnSegoe UI Emoji}}{emoji}{{\fn{base_font}}}"
                 return f"{word} {emoji}"
         return word
 
@@ -207,19 +219,19 @@ class SubtitleGenerator:
         except ValueError:
             pass
 
-        if h > w:   # vertical 9:16
+        if h > w:   # vertical 9:16 (Calibrado a Safe-Zones de TikTok / Reels / Shorts)
             v_map = {
-                "bottom": 480,
-                "bottom_low": 280,
-                "lower": 280,
-                "low": 280,
-                "abajo": 280,
+                "bottom": 460,       # Sobre la barra de descripción y título
+                "bottom_low": 380,   # Safe zone absoluta: no colisiona con el ticker musical
+                "lower": 380,
+                "low": 380,
+                "abajo": 380,
                 "middle": 0,
                 "centro": 0,
-                "top": 250,
+                "top": 250,          # Debajo de pestañas superiores de la app
                 "arriba": 250,
             }
-            return align, v_map.get(pos, SAFE_V9x16.get(pos, 480)), SAFE_H9x16
+            return align, v_map.get(pos, SAFE_V9x16.get(pos, 460)), max(SAFE_H9x16, 140)
         if w > h:   # horizontal 16:9: la interfaz es menor; margen inferior moderado
             v_map = {"bottom": 110, "bottom_low": 60, "lower": 60, "low": 60, "abajo": 60, "middle": 0, "centro": 0, "top": 90, "arriba": 90}
             return align, v_map.get(pos, 110), 220
@@ -352,7 +364,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
             if upper:
                 text = text.upper()
             if use_emoji:
-                text = self._enrich_with_emoji(text)
+                text = self._enrich_with_emoji(text, font_name)
             return text
 
         words = [w for w in self._clip_words(segments, clip_start, clip_end) if render_word(w)]

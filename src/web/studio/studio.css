@@ -1,0 +1,168 @@
+/* =====================================================================
+   Clip Factory Pro — AI Creative Studio · FASE 3: tokens + application shell
+   Solo se aplica con <html class="cf-studio"> (activado con ?ui=studio).
+   Prefijo cf- en todo lo nuevo. Sin dependencias.
+   ===================================================================== */
+:root {
+  --cf-bg: #090B10;  --cf-s1: #11151E;  --cf-s2: #191F2B;  --cf-s3: #202838;
+  --cf-line: #293242;
+  --cf-tx: #F4F5F7;  --cf-tx2: #929BAA;  --cf-tx3: #657084;
+  --cf-violet: #A78BFA;  --cf-teal: #38D6C8;  --cf-action: #E6FF70;
+  --cf-ok: #4ADE80;  --cf-warn: #FBBF24;  --cf-err: #F87171;
+
+  --cf-sp-1: 4px; --cf-sp-2: 8px; --cf-sp-3: 12px; --cf-sp-4: 16px; --cf-sp-5: 24px; --cf-sp-6: 32px; --cf-sp-7: 48px;
+  --cf-r-1: 6px; --cf-r-2: 10px; --cf-r-3: 14px;
+  --cf-shadow-pop: 0 18px 40px -12px rgba(0,0,0,.7);
+  --cf-font: 'Inter', 'Geist', -apple-system, 'Segoe UI', sans-serif;
+  --cf-mono: 'JetBrains Mono', ui-monospace, Consolas, monospace;
+  --cf-t: 160ms cubic-bezier(.2,.7,.2,1);
+
+  --cf-rail: 64px;
+  --cf-rail-open: 224px;
+  --cf-bar: 52px;
+}
+
+html.cf-studio { --cf-rail-now: var(--cf-rail); }
+html.cf-studio.cf-rail-open { --cf-rail-now: var(--cf-rail-open); }
+
+/* ---- Se apaga el marco antiguo (sidebar, cabecera, nav móvil). Las vistas se conservan. ---- */
+html.cf-studio .sidebar,
+html.cf-studio .sidebar-backdrop,
+html.cf-studio .header,
+html.cf-studio .mobile-bottom-nav,
+html.cf-studio .mobile-more-overlay { display: none !important; }
+
+html.cf-studio, html.cf-studio body { background: var(--cf-bg) !important; color: var(--cf-tx); font-family: var(--cf-font); }
+html.cf-studio .main-wrapper {
+  box-sizing: border-box;
+  margin-left: var(--cf-rail-now) !important;
+  padding-top: var(--cf-bar);
+  width: auto !important;
+  height: 100vh;
+  transition: margin-left var(--cf-t);
+}
+
+/* ---- Toast: en index.html hay dos reglas contradictorias (top y bottom, y un display que
+   ignora .active) que dejaban un aviso estirado y siempre visible. Aquí solo se ve con .active. ---- */
+html.cf-studio .toast-notification {
+  top: auto !important; bottom: 24px !important; right: 24px !important; height: auto !important;
+  display: none !important; z-index: 120 !important; max-width: min(360px, calc(100vw - 32px));
+  background: var(--cf-s2) !important; border: 1px solid var(--cf-line) !important; border-left: 3px solid var(--cf-teal) !important;
+  border-radius: var(--cf-r-2) !important; box-shadow: var(--cf-shadow-pop) !important;
+}
+html.cf-studio .toast-notification.active { display: flex !important; animation: cf-toast-in 180ms ease both; }
+@keyframes cf-toast-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@media (max-width: 820px) { html.cf-studio .toast-notification { bottom: 76px !important; left: 16px !important; right: 16px !important; max-width: none; } }
+
+/* ---- Raíl de navegación ---- */
+.cf-rail {
+  position: fixed; inset: 0 auto 0 0; z-index: 90;
+  width: var(--cf-rail-now, var(--cf-rail));
+  display: flex; flex-direction: column; gap: var(--cf-sp-1);
+  padding: var(--cf-sp-3) var(--cf-sp-2);
+  background: var(--cf-s1); border-right: 1px solid var(--cf-line);
+  transition: width var(--cf-t); overflow: hidden;
+}
+.cf-brand { display: flex; align-items: center; gap: var(--cf-sp-3); height: 40px; padding: 0 var(--cf-sp-2); margin-bottom: var(--cf-sp-3); color: var(--cf-tx); }
+.cf-brand-mark {
+  flex: none; width: 28px; height: 28px; border-radius: var(--cf-r-1);
+  background: var(--cf-action); color: #0b0f04; display: grid; place-items: center;
+  font: 800 13px/1 var(--cf-font); letter-spacing: -.02em;
+}
+.cf-brand-name { font: 650 14px/1.1 var(--cf-font); letter-spacing: -.01em; white-space: nowrap; }
+.cf-brand-name small { display: block; margin-top: 2px; font: 500 10.5px/1 var(--cf-font); color: var(--cf-tx3); letter-spacing: .02em; }
+
+.cf-nav-btn {
+  position: relative; display: flex; align-items: center; gap: var(--cf-sp-3);
+  height: 40px; padding: 0 var(--cf-sp-3); border: 0; border-radius: var(--cf-r-2);
+  background: transparent; color: var(--cf-tx2); cursor: pointer; text-align: left;
+  font: 500 13px/1 var(--cf-font); white-space: nowrap;
+  transition: background var(--cf-t), color var(--cf-t);
+}
+.cf-nav-btn svg { flex: none; width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.cf-nav-btn:hover { background: var(--cf-s2); color: var(--cf-tx); }
+.cf-nav-btn[aria-current="page"] { background: var(--cf-s3); color: var(--cf-tx); }
+.cf-nav-btn[aria-current="page"]::before {
+  content: ""; position: absolute; left: -8px; top: 9px; bottom: 9px; width: 3px; border-radius: 0 3px 3px 0; background: var(--cf-violet);
+}
+.cf-nav-label { opacity: 0; transition: opacity var(--cf-t); }
+html.cf-rail-open .cf-nav-label { opacity: 1; }
+.cf-nav-spacer { flex: 1; }
+.cf-rail-toggle svg { transition: transform var(--cf-t); }
+html.cf-rail-open .cf-rail-toggle svg { transform: rotate(180deg); }
+
+/* ---- Barra de contexto ---- */
+.cf-bar {
+  position: fixed; top: 0; right: 0; left: var(--cf-rail-now, var(--cf-rail)); z-index: 80; height: var(--cf-bar);
+  display: flex; align-items: center; gap: var(--cf-sp-4); padding: 0 var(--cf-sp-5);
+  background: rgba(9,11,16,.86); backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--cf-line); transition: left var(--cf-t);
+}
+.cf-bar-title { font: 650 15px/1 var(--cf-font); letter-spacing: -.01em; white-space: nowrap; }
+.cf-bar-sub { font: 400 12px/1 var(--cf-font); color: var(--cf-tx3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cf-bar-spacer { flex: 1; min-width: 0; }
+
+.cf-chip {
+  display: inline-flex; align-items: center; gap: var(--cf-sp-2); max-width: 280px; height: 32px; padding: 0 var(--cf-sp-3);
+  border: 1px solid var(--cf-line); border-radius: var(--cf-r-2); background: var(--cf-s1); color: var(--cf-tx2);
+  font: 500 12px/1 var(--cf-font); cursor: pointer; transition: border-color var(--cf-t), color var(--cf-t);
+}
+.cf-chip:hover { border-color: #3a465c; color: var(--cf-tx); }
+.cf-chip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.cf-status { font-family: var(--cf-mono); font-size: 11.5px; }
+.cf-dot { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--cf-tx3); }
+.cf-status[data-state="running"] { border-color: rgba(56,214,200,.45); color: var(--cf-teal); }
+.cf-status[data-state="running"] .cf-dot { background: var(--cf-teal); animation: cf-pulse 1.4s ease-in-out infinite; }
+.cf-status[data-state="queued"] .cf-dot { background: var(--cf-warn); }
+.cf-status[data-state="error"] .cf-dot { background: var(--cf-err); }
+.cf-status[data-state="idle"] .cf-dot { background: var(--cf-ok); }
+@keyframes cf-pulse { 50% { opacity: .35; transform: scale(.8); } }
+
+.cf-btn-primary {
+  height: 32px; padding: 0 var(--cf-sp-4); border: 0; border-radius: var(--cf-r-2);
+  background: var(--cf-action); color: #0b0f04; font: 650 12.5px/1 var(--cf-font); cursor: pointer; white-space: nowrap;
+  transition: filter var(--cf-t), transform var(--cf-t);
+}
+.cf-btn-primary:hover { filter: brightness(1.06); }
+.cf-btn-primary:active { transform: scale(.98); }
+
+html.cf-studio :focus-visible { outline: 2px solid var(--cf-violet) !important; outline-offset: 2px; }
+
+/* ---- Navegación móvil ---- */
+.cf-tabbar, .cf-sheet, .cf-sheet-backdrop { display: none; }
+
+@media (max-width: 820px) {
+  html.cf-studio { --cf-rail-now: 0px; }
+  .cf-rail { display: none; }
+  .cf-bar { left: 0; padding: 0 var(--cf-sp-4); gap: var(--cf-sp-3); }
+  .cf-bar-sub, .cf-btn-primary { display: none; }
+  .cf-chip { max-width: 150px; }
+  html.cf-studio .main-wrapper { margin-left: 0 !important; padding-bottom: 68px; }
+
+  .cf-tabbar {
+    position: fixed; inset: auto 0 0 0; z-index: 90; display: grid; grid-template-columns: repeat(5, 1fr);
+    height: 60px; padding-bottom: env(safe-area-inset-bottom);
+    background: var(--cf-s1); border-top: 1px solid var(--cf-line);
+  }
+  .cf-tab { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; border: 0; background: transparent; color: var(--cf-tx3); font: 500 10.5px/1 var(--cf-font); cursor: pointer; }
+  .cf-tab svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+  .cf-tab[aria-current="page"] { color: var(--cf-action); }
+
+  .cf-sheet-backdrop { position: fixed; inset: 0; z-index: 95; background: rgba(0,0,0,.6); }
+  .cf-sheet {
+    position: fixed; inset: auto 0 0 0; z-index: 96; padding: var(--cf-sp-4) var(--cf-sp-4) calc(var(--cf-sp-5) + env(safe-area-inset-bottom));
+    background: var(--cf-s2); border-radius: var(--cf-r-3) var(--cf-r-3) 0 0; border-top: 1px solid var(--cf-line);
+    box-shadow: var(--cf-shadow-pop); transform: translateY(100%); transition: transform var(--cf-t);
+  }
+  html.cf-sheet-open .cf-sheet-backdrop { display: block; }
+  html.cf-sheet-open .cf-sheet { display: block; transform: none; animation: cf-sheet-in 200ms ease both; }
+  .cf-sheet .cf-nav-btn { width: 100%; height: 48px; }
+  .cf-sheet .cf-nav-label { opacity: 1; }
+}
+@keyframes cf-sheet-in { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .cf-rail, .cf-bar, html.cf-studio .main-wrapper, .cf-nav-label, .cf-sheet { transition: none !important; animation: none !important; }
+  .cf-status[data-state="running"] .cf-dot { animation: none; }
+}
