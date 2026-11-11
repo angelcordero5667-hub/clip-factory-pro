@@ -3254,6 +3254,38 @@ h1, h2, h3, h4, .studio-title {
 </style>
 <style id="cf-audit-fixes">
 /* Correcciones de la auditoría (10-nov). Bloque aislado: se puede quitar sin afectar nada más. */
+.sub-pill-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #cbd5e1;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm, 6px);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+.sub-pill-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.25);
+}
+.sub-pill-btn.active {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.3), rgba(99, 102, 241, 0.3));
+  border-color: #a855f7;
+  color: #fff;
+  box-shadow: 0 0 12px rgba(168, 85, 247, 0.35);
+}
+.sub-pill-btn.btn-no-subs.active {
+  background: rgba(239, 68, 68, 0.25) !important;
+  border-color: #ef4444 !important;
+  color: #fca5a5 !important;
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.4) !important;
+}
 /* 1) Aviso: obsidian_studio.css lo dejaba siempre visible. Solo se muestra con .active. */
 html .toast-notification { display: none; top: auto; bottom: 24px; right: 24px; max-width: min(360px, calc(100vw - 32px)); height: auto; z-index: 2000; }
 html .toast-notification.active { display: flex; }
@@ -3687,6 +3719,9 @@ html .studio-main-viewport { min-width: 0; flex: 1 1 0; max-width: 100%; }
           <!-- Switches del Pipeline IA -->
           <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:10px; background:var(--studio-surface-elevated); padding:14px; border-radius:var(--radius-md); border:1px solid var(--studio-border);">
             <label style="display:flex; align-items:center; gap:8px; font-size:12px; color:#fff; cursor:pointer;">
+              <input type="checkbox" id="chk-with-subtitles" checked style="accent-color:var(--studio-accent-primary);"> 💬 Incluir Subtítulos Quemados
+            </label>
+            <label style="display:flex; align-items:center; gap:8px; font-size:12px; color:#fff; cursor:pointer;">
               <input type="checkbox" id="ai-reframe-check" checked style="accent-color:var(--studio-accent-secondary);"> 👤 Klap Face Tracking (YuNet)
             </label>
             <label style="display:flex; align-items:center; gap:8px; font-size:12px; color:#fff; cursor:pointer;">
@@ -3846,12 +3881,27 @@ html .studio-main-viewport { min-width: 0; flex: 1 1 0; max-width: 100%; }
           <!-- TAB 1: SUBTÍTULOS Y TRANSCRIPCIÓN INTERACTIVA -->
           <div class="inspector-tab-pane active" id="inspector-tab-pane-subtitulos">
             <div style="display:flex; flex-direction:column; gap:12px;">
-              <div>
+              <!-- Switch Subtítulos Quemados On/Off -->
+              <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.04); padding:10px 12px; border-radius:var(--radius-md); border:1px solid rgba(255,255,255,0.08);">
+                <div>
+                  <div style="font-size:12px; font-weight:700; color:#fff;">Subtítulos Quemados</div>
+                  <div style="font-size:10.5px; color:var(--obsidian-text-muted);" id="subtitles-status-label">Activados (visibles en el clip)</div>
+                </div>
+                <label style="position:relative; display:inline-block; width:40px; height:22px; margin:0; cursor:pointer;">
+                  <input type="checkbox" id="toggle-subtitles-enabled" checked onchange="toggleSubtitlesOption(this.checked)" style="opacity:0; width:0; height:0;">
+                  <span id="toggle-subtitles-slider" style="position:absolute; top:0; left:0; right:0; bottom:0; background:linear-gradient(135deg, #a855f7, #6366f1); border-radius:22px; transition:0.25s;">
+                    <span id="toggle-subtitles-thumb" style="position:absolute; height:16px; width:16px; left:20px; bottom:3px; background:#fff; border-radius:50%; transition:0.25s;"></span>
+                  </span>
+                </label>
+              </div>
+
+              <div id="sub-style-options-container">
                 <label style="font-size:11.5px; font-weight:600; color:var(--obsidian-text-secondary); display:block; margin-bottom:6px;">Estilo de Subtítulos:</label>
-                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px;">
-                  <button type="button" class="sub-pill-btn active" onclick="applySubtitleStyle('hormozi')">Hormozi Neón</button>
-                  <button type="button" class="sub-pill-btn" onclick="applySubtitleStyle('beast')">MrBeast Lime</button>
-                  <button type="button" class="sub-pill-btn" onclick="applySubtitleStyle('minimal')">Minimal</button>
+                <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:6px;">
+                  <button type="button" class="sub-pill-btn active" data-style="hormozi" onclick="applySubtitleStyle('hormozi')">Hormozi</button>
+                  <button type="button" class="sub-pill-btn" data-style="beast" onclick="applySubtitleStyle('beast')">MrBeast</button>
+                  <button type="button" class="sub-pill-btn" data-style="minimal" onclick="applySubtitleStyle('minimal')">Minimal</button>
+                  <button type="button" class="sub-pill-btn btn-no-subs" data-style="none" onclick="applySubtitleStyle('none')" title="Video limpio sin subtítulos" style="color:#f87171; border-color:rgba(239,68,68,0.35);">🚫 Sin Sub</button>
                 </div>
               </div>
 
@@ -4139,10 +4189,11 @@ html .studio-main-viewport { min-width: 0; flex: 1 1 0; max-width: 100%; }
           <!-- Pista 3: Subtítulos -->
           <div class="timeline-track">
             <span style="font-size:10px; color:var(--obsidian-text-muted); width:65px; flex-shrink:0;">Subtítulos</span>
-            <div style="display:flex; gap:4px; flex-grow:1;">
+            <div style="display:flex; gap:4px; flex-grow:1; flex-wrap:wrap;">
               <div class="sub-block sub-block-neon" onclick="applySubtitleStyle('hormozi')" style="padding:4px 10px; border-radius:4px; font-size:10.5px; font-weight:600; cursor:pointer;">Hormozi Neón</div>
               <div class="sub-block sub-block-lime" onclick="applySubtitleStyle('beast')" style="padding:4px 10px; border-radius:4px; font-size:10.5px; font-weight:600; cursor:pointer;">MrBeast Lime</div>
               <div class="sub-block sub-block-white" onclick="applySubtitleStyle('minimal')" style="padding:4px 10px; border-radius:4px; font-size:10.5px; font-weight:600; cursor:pointer;">Minimal</div>
+              <div class="sub-block" onclick="applySubtitleStyle('none')" style="padding:4px 10px; border-radius:4px; font-size:10.5px; font-weight:600; cursor:pointer; background:rgba(239,68,68,0.18); color:#fca5a5; border:1px solid rgba(239,68,68,0.35);" title="Desactivar subtítulos">🚫 Sin Sub</div>
             </div>
           </div>
 
@@ -4551,9 +4602,11 @@ html .studio-main-viewport { min-width: 0; flex: 1 1 0; max-width: 100%; }
         <div class="studio-card" style="max-width:800px;">
           <h2 style="font-size:16px; font-weight:700; color:#fff; margin:0 0 8px 0;">Estilo y Traducción de Subtítulos</h2>
           <p style="font-size:12px; color:var(--studio-text-secondary); margin:0 0 16px 0;">Aplica plantillas tipográficas Hormozi y adapta palabras a modismos dominicanos.</p>
-          <div style="display:flex; gap:10px;">
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
             <button type="button" class="btn-studio-secondary" onclick="applySubtitleStyle('hormozi')">Hormozi Neón</button>
             <button type="button" class="btn-studio-secondary" onclick="applySubtitleStyle('beast')">MrBeast Lime</button>
+            <button type="button" class="btn-studio-secondary" onclick="applySubtitleStyle('minimal')">Minimal</button>
+            <button type="button" class="btn-studio-secondary" onclick="applySubtitleStyle('none')" style="color:#fca5a5; border-color:rgba(239,68,68,0.35);">🚫 Sin Subtítulos</button>
             <button type="button" class="btn-studio-secondary" onclick="applyDominicanSlangToActiveClip()">🇩🇴 Jerga Dominicana</button>
             <button type="button" class="btn-studio-action" onclick="rerenderActiveClip()">Re-renderizar Video</button>
           </div>
@@ -6073,7 +6126,62 @@ html .studio-main-viewport { min-width: 0; flex: 1 1 0; max-width: 100%; }
     saveLastSettings();
   }
 
+  function toggleSubtitlesOption(enabled) {
+    const box = document.getElementById('sub-overlay-box');
+    const label = document.getElementById('subtitles-status-label');
+    const chk = document.getElementById('toggle-subtitles-enabled');
+    const slider = document.getElementById('toggle-subtitles-slider');
+    const thumb = document.getElementById('toggle-subtitles-thumb');
+    const styleSection = document.getElementById('sub-style-options-container');
+
+    if (chk) chk.checked = !!enabled;
+    if (slider && thumb) {
+      if (enabled) {
+        slider.style.background = 'linear-gradient(135deg, #a855f7, #6366f1)';
+        thumb.style.left = '20px';
+      } else {
+        slider.style.background = 'rgba(255,255,255,0.18)';
+        thumb.style.left = '3px';
+      }
+    }
+
+    if (enabled) {
+      if (activeSubStyle === 'none' || !activeSubStyle) activeSubStyle = 'hormozi';
+      if (box) box.style.display = 'block';
+      if (label) label.innerText = 'Activados (visibles en el clip)';
+      if (styleSection) styleSection.style.opacity = '1';
+      updateSubOverlayPreview();
+    } else {
+      activeSubStyle = 'none';
+      if (box) box.style.display = 'none';
+      if (label) label.innerText = 'Desactivados (video limpio sin texto)';
+      if (styleSection) styleSection.style.opacity = '0.65';
+    }
+
+    document.querySelectorAll('.sub-pill-btn').forEach(btn => {
+      const st = btn.getAttribute('data-style');
+      if (!enabled) {
+        if (st === 'none') btn.classList.add('active');
+        else btn.classList.remove('active');
+      } else {
+        if (st === activeSubStyle) btn.classList.add('active');
+        else btn.classList.remove('active');
+      }
+    });
+
+    saveLastSettings();
+    showToast(enabled ? `Subtítulos activados: ${activeSubStyle}` : '🚫 Subtítulos desactivados (Video limpio)');
+  }
+
   function applySubtitleStyle(st) {
+    if (st === 'none' || st === 'off' || st === 'sin_subtitulos') {
+      activeSubStyle = 'none';
+      toggleSubtitlesOption(false);
+      return;
+    }
+    activeSubStyle = st;
+    toggleSubtitlesOption(true);
+
     const box = document.getElementById('sub-overlay-box');
     const pfx = document.getElementById('sub-style-prefix');
     const hlt = document.getElementById('sub-style-highlight');
@@ -6115,7 +6223,6 @@ html .studio-main-viewport { min-width: 0; flex: 1 1 0; max-width: 100%; }
       hlt.style.color = '#fff';
       box.style.textShadow = '0 2px 4px #000';
     }
-    showToast(`Estilo de subtítulos: ${st}`);
   }
 
   // SUBIDA LOCAL
@@ -6322,6 +6429,26 @@ html .studio-main-viewport { min-width: 0; flex: 1 1 0; max-width: 100%; }
       color_filter: 'cinema',
       broll_theme: 'gameplay',
       split_glow: true
+    },
+    'Video Limpio': {
+      format: '9:16',
+      sub_style: 'none',
+      sub_size: 'medium',
+      sub_pos: 'bottom',
+      layout: 'auto',
+      speed: 'turbo',
+      hook_zoom: true,
+      fast: false,
+      language: 'es',
+      target_duration: 'medium',
+      clips: 5,
+      watermark: '',
+      focus_prompt: 'Momentos virales con video limpio sin texto',
+      progress_bar: false,
+      dynamic_zoom: false,
+      color_filter: 'none',
+      broll_theme: 'gameplay',
+      split_glow: false
     }
   };
 
@@ -6506,6 +6633,7 @@ html .studio-main-viewport { min-width: 0; flex: 1 1 0; max-width: 100%; }
     html += `<button type="button" class="preset-chip" data-preset="Podcast" onclick="applyPreset('Podcast')" title="Ajustes ideales para podcasts y entrevistas">🎙️ Podcast</button>`;
     html += `<button type="button" class="preset-chip" data-preset="Gaming" onclick="applyPreset('Gaming')" title="Layout gaming, subtítulos discretos y clips cortos">🎮 Gaming</button>`;
     html += `<button type="button" class="preset-chip" data-preset="Entrevista" onclick="applyPreset('Entrevista')" title="Hormozi Neón y clips largos de 60-90s">💬 Entrevista</button>`;
+    html += `<button type="button" class="preset-chip" data-preset="Video Limpio" onclick="applyPreset('Video Limpio')" title="Sin subtítulos quemados, video ultra nítido">🚫 Video Limpio</button>`;
 
     for (const [name, data] of Object.entries(customs)) {
       html += `<button type="button" class="preset-chip preset-custom" data-preset="${esc(name)}" onclick="applyPreset('${esc(name)}')" title="Preset personalizado">
@@ -6543,10 +6671,13 @@ html .studio-main-viewport { min-width: 0; flex: 1 1 0; max-width: 100%; }
     const langVal = (langSelect === 'auto' || !langSelect) ? null : langSelect;
     const targetDur = document.getElementById('clip-target-duration')?.value || activeClipDuration || 'medium';
 
+    const subsOpt = document.getElementById('chk-with-subtitles');
+    const withSubs = (subsOpt ? !!subsOpt.checked : true) && activeSubStyle !== 'none';
     const body = {
       source: url,
       max_clips: maxClips,
-      subtitle_style: activeSubStyle || 'hormozi',
+      with_subtitles: withSubs,
+      subtitle_style: withSubs ? (activeSubStyle || 'hormozi') : 'none',
       aspect_ratio: activeFormat || '9:16',
       fast: !!document.getElementById('fast-mode-check')?.checked,
       language: langVal,
@@ -7741,7 +7872,8 @@ html .studio-main-viewport { min-width: 0; flex: 1 1 0; max-width: 100%; }
   async function rerenderActiveClip() {
     const c = currentActiveClip;
     if (!c) { showToast('Primero selecciona un clip'); return; }
-    const style = activeSubStyle || 'hormozi';
+    const subsEnabled = document.getElementById('toggle-subtitles-enabled') ? !!document.getElementById('toggle-subtitles-enabled').checked : (activeSubStyle !== 'none');
+    const style = subsEnabled ? (activeSubStyle === 'none' ? 'hormozi' : (activeSubStyle || 'hormozi')) : 'none';
     const size = document.getElementById('editor-sub-size')?.value || activeSubSize || 'medium';
     const pos = document.getElementById('editor-sub-pos')?.value || activeSubPos || 'bottom';
     const hl = activeHighlightColor || '';
@@ -7758,6 +7890,7 @@ html .studio-main-viewport { min-width: 0; flex: 1 1 0; max-width: 100%; }
       const sfxInt = document.getElementById('editor-sfx-intensity')?.value || 'normal';
       const q = new URLSearchParams({
         style: style,
+        with_subtitles: subsEnabled,
         aspect: activeFormat || '9:16',
         position: pos,
         size: size,
@@ -7775,7 +7908,7 @@ html .studio-main-viewport { min-width: 0; flex: 1 1 0; max-width: 100%; }
         auto_sfx: (typeof sfxInt !== 'undefined' && sfxInt !== 'off')
       });
       const data = await apiJson(`/api/clips/${encodeURIComponent(c.id)}/rerender?${q.toString()}`, { method: 'POST' });
-      showToast(`Re-renderizando con estilo y efectos (trabajo #${data.job_id})`);
+      showToast(subsEnabled ? `Re-renderizando con estilo y efectos (trabajo #${data.job_id})` : `Re-renderizando video limpio sin subtítulos (trabajo #${data.job_id})`);
       activeJobId = data.job_id;
       trackJobProgress(data.job_id);
     } catch (e) {
@@ -8454,7 +8587,8 @@ html .studio-main-viewport { min-width: 0; flex: 1 1 0; max-width: 100%; }
       showToast(`Recorte guardado (${dur.toFixed(1)} s). Re-renderizando clip...`);
 
       // 2. POST /api/clips/{id}/rerender
-      const style = activeSubStyle || 'hormozi';
+      const subsEnabled = document.getElementById('toggle-subtitles-enabled') ? !!document.getElementById('toggle-subtitles-enabled').checked : (activeSubStyle !== 'none');
+      const style = subsEnabled ? (activeSubStyle === 'none' ? 'hormozi' : (activeSubStyle || 'hormozi')) : 'none';
       const size = document.getElementById('editor-sub-size')?.value || activeSubSize || 'medium';
       const pos = document.getElementById('editor-sub-pos')?.value || activeSubPos || 'bottom';
       const aspect = activeFormat || '9:16';
@@ -8465,6 +8599,7 @@ html .studio-main-viewport { min-width: 0; flex: 1 1 0; max-width: 100%; }
 
       const q = new URLSearchParams({
         style: style,
+        with_subtitles: subsEnabled,
         aspect: aspect,
         position: pos,
         size: size,

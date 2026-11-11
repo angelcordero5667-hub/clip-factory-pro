@@ -52,7 +52,8 @@ SUBTITLE_STYLES = (
     "hormozi", "limpio", "karaoke", "minimal",
     "hormozi_classic", "hormozi_neon", "beast", "mrbeast",
     "gaming", "podcast", "clean", "classic", "neon", "minimal_white",
-    "bounce", "glow", "pop", "bouncing"
+    "bounce", "glow", "pop", "bouncing",
+    "none", "off", "sin_subtitulos"
 )
 ASPECT_RATIOS = ("9:16", "1:1", "16:9")
 LAYOUT_MODES = ("auto", "gaming", "blur", "split", "broll")
@@ -431,6 +432,7 @@ def edit_clip(clip_id: str, body: EditBody):
 def rerender_clip(
     clip_id: str,
     style: str = "hormozi",
+    with_subtitles: Optional[bool] = True,
     aspect: str = "9:16",
     position: str = "bottom",
     size: str = "medium",
@@ -455,8 +457,10 @@ def rerender_clip(
     _get_clip_or_404(clip_id)
     if style not in SUBTITLE_STYLES or aspect not in ASPECT_RATIOS:
         raise HTTPException(status_code=400, detail="Estilo o formato inválido.")
+    eff_with_subtitles = bool(with_subtitles) and style not in ("none", "off", "sin_subtitulos")
     job_id = db.create_job(source=clip_id, kind="rerender", candidate_id=clip_id,
                            options={
+                               "with_subtitles": eff_with_subtitles,
                                "subtitle_style": style,
                                "aspect_ratio": aspect,
                                "subtitle_position": position,
@@ -899,6 +903,7 @@ class JobBody(BaseModel):
     target_duration: Optional[str] = "medium"
     min_clip_duration: Optional[float] = None
     max_clip_duration: Optional[float] = None
+    with_subtitles: Optional[bool] = True
     subtitle_style: str = "hormozi"
     aspect_ratio: str = "9:16"
     include_emojis: bool = True
@@ -1009,6 +1014,8 @@ def create_job(body: JobBody):
 
     source = _validate_source(body.source)
     options = body.model_dump(exclude={"source"})
+    if body.subtitle_style in ("none", "off", "sin_subtitulos"):
+        options["with_subtitles"] = False
     options["language"] = lang
     options["target_duration"] = td
     options["min_clip_duration"] = float(min_dur)

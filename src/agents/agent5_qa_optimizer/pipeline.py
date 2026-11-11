@@ -47,6 +47,7 @@ class ClipFactoryPipeline:
         video_input: str,
         max_candidates: int = 5,
         render_clips: bool = True,
+        with_subtitles: bool = True,
         subtitle_style: str = "hormozi",
         include_emojis: bool = True,
         aspect_ratio: str = "9:16",
@@ -274,13 +275,15 @@ class ClipFactoryPipeline:
             workers = settings.render.parallel_clips if memory_ok else 1
             total = len(candidates)
             step(3, 0.25, f"🎬 Renderizando {total} clips ({workers} en paralelo)...")
+            clean_sub_style = (subtitle_style or "").lower().strip()
+            eff_with_subs = bool(with_subtitles) and clean_sub_style not in ("none", "off", "sin_subtitulos", "sin_subtítulo", "sin_subtítulos", "false", "0")
             results = self.clip_maker.generate_clips_parallel(
                 str(render_source),
                 candidates,
                 transcript.segments,
                 workers=workers,
                 progress=lambda done, tot, cand: step(3, 0.25 + 0.75 * (done / max(1, tot)), f"🎬 Clip {done}/{tot} listo: \"{cand.title}\""),
-                with_subtitles=True,
+                with_subtitles=eff_with_subs,
                 subtitle_style=subtitle_style,
                 include_emojis=include_emojis,
                 aspect_ratio=aspect_ratio,
@@ -345,6 +348,7 @@ class ClipFactoryPipeline:
     def rerender_candidate(
         self,
         candidate_id: str,
+        with_subtitles: bool = True,
         subtitle_style: str = "hormozi",
         aspect_ratio: str = "9:16",
         include_emojis: bool = True,
@@ -404,9 +408,11 @@ class ClipFactoryPipeline:
         if progress_callback:
             progress_callback("🎬 Renderizando el clip con los nuevos tiempos...")
         layout_mode = framing_mode if framing_mode else None
+        clean_sub_style = (subtitle_style or "").lower().strip()
+        eff_with_subs = bool(with_subtitles) and clean_sub_style not in ("none", "off", "sin_subtitulos", "sin_subtítulo", "sin_subtítulos", "false", "0")
         out = self.clip_maker.generate_clip(
             video_path=video["filepath"], candidate=cand, transcript_segments=segments,
-            with_subtitles=True, subtitle_style=subtitle_style, include_emojis=include_emojis,
+            with_subtitles=eff_with_subs, subtitle_style=subtitle_style, include_emojis=include_emojis,
             aspect_ratio=aspect_ratio, use_scene_detection=False,
             subtitle_position=subtitle_position, custom_fontsize=custom_fontsize,
             subtitle_size=subtitle_size, custom_highlight=custom_highlight,

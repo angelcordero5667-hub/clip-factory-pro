@@ -79,6 +79,7 @@ class JobWorker:
                 self.db.update_job(job_id, step_index=3, step_label=STEPS[3], message="Re-renderizando clip...", progress=0.5)
                 pipeline.rerender_candidate(
                     job["candidate_id"],
+                    with_subtitles=bool(opts.get("with_subtitles", True)),
                     subtitle_style=opts.get("subtitle_style", "hormozi"),
                     aspect_ratio=opts.get("aspect_ratio", "9:16"),
                     subtitle_position=opts.get("subtitle_position", "bottom"),
@@ -136,6 +137,7 @@ class JobWorker:
             video_id, cands = pipeline.run_pipeline(
                 video_input=job["source"],
                 max_candidates=int(opts.get("max_clips", 5)),
+                with_subtitles=bool(opts.get("with_subtitles", True)),
                 subtitle_style=opts.get("subtitle_style", "hormozi"),
                 aspect_ratio=opts.get("aspect_ratio", "9:16"),
                 include_emojis=bool(opts.get("include_emojis", True)),

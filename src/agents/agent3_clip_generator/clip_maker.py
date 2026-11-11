@@ -521,7 +521,9 @@ class VerticalClipMaker:
             headline_text = getattr(candidate, "headline", None) or getattr(candidate, "title", None) or getattr(candidate, "hook_text", None)
 
         ass_path = None
-        if with_subtitles and sub_segments:
+        clean_sub_style = (subtitle_style or "").lower().strip()
+        subtitles_enabled = bool(with_subtitles) and clean_sub_style not in ("none", "off", "sin_subtitulos", "sin_subtítulo", "sin_subtítulos", "false", "0")
+        if subtitles_enabled and sub_segments:
             ass_path = settings.cache_dir / f"{candidate.id}_subtitles.ass"
             self.subtitle_generator.generate_ass(
                 clip_start=sub_start,
