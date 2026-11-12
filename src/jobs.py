@@ -6,6 +6,7 @@ así que el dashboard puede recargarse o reiniciarse sin perder la cola.
 """
 import logging
 import threading
+import time
 from typing import Any, Callable, Dict, Optional
 
 from src.common.database import Database, db as default_db
@@ -77,8 +78,27 @@ class JobWorker:
 
             if job["kind"] == "rerender":
                 self.db.update_job(job_id, step_index=3, step_label=STEPS[3], message="Re-renderizando clip...", progress=0.5)
+                # Cancelar un render en marcha (?force=true): este vigilante convierte "cancelado" en la base
+                # de datos en una señal que mata el árbol de procesos de Remotion. Con FFmpeg no se puede
+                # interrumpir (llamada bloqueante), y se ve en el estado final. Termina solo cuando el
+                # trabajo deja de estar "running".
+                cancel_event = threading.Event()
+
+                def _watch_cancel():
+                    while True:
+                        time.sleep(1.0)
+                        cur = self.db.get_job(job_id)
+                        if not cur or cur.get("status") != "running":
+                            if cur and cur.get("status") == "cancelled":
+                                cancel_event.set()
+                            return
+
+                threading.Thread(target=_watch_cancel, name=f"cancel-watch-{job_id}", daemon=True).start()
                 pipeline.rerender_candidate(
                     job["candidate_id"],
+                    visual_engine=opts.get("visual_engine", "ffmpeg"),
+                    cancel_event=cancel_event,
+                    progress_callback=lambda m: self.db.update_job(job_id, message=str(m)[:200]),
                     with_subtitles=bool(opts.get("with_subtitles", True)),
                     subtitle_style=opts.get("subtitle_style", "hormozi"),
                     aspect_ratio=opts.get("aspect_ratio", "9:16"),

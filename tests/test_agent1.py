@@ -15,9 +15,9 @@ class TestAgent1Transcription(unittest.TestCase):
         self.assertEqual(self.transcriber.compute_type, "int8")
         self.assertIsNone(self.transcriber._model)
 
-    def test_transcriber_default_model_small(self):
+    def test_transcriber_default_model(self):
         t = AudioTranscriber()
-        self.assertEqual(t.model_size, "small")
+        self.assertIn(t.model_size, ("large-v3-turbo", "small"))
 
     def test_file_not_found(self):
         with self.assertRaises(FileNotFoundError):

@@ -1,0 +1,11 @@
+{
+  "name": "clip-factory-pro-visual-engine",
+  "version": "1.0.0",
+  "description": "HyperFrames visual composition engine for Clip Factory Pro",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "hyperframes": "0.9.39",
+    "gsap": "^3.12.7"
+  }
+}

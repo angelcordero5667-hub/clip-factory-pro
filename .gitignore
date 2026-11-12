@@ -46,3 +46,9 @@ tools/Library/
 # Operating system files
 Thumbs.db
 .DS_Store
+
+# Dependencias y artefactos de Node (Remotion / HyperFrames): nunca se versionan
+node_modules/
+src/remotion/public/
+src/remotion/out/
+visual_engine/**/node_modules/

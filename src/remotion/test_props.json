@@ -1,0 +1,23 @@
+{
+  "videoSrc": "bench.mp4",
+  "clipStartSec": 0,
+  "clipEndSec": 2,
+  "durationInFrames": 30,
+  "fps": 30,
+  "width": 1080,
+  "height": 1920,
+  "subtitles": [
+    {
+      "id": 1,
+      "start": 0.2,
+      "end": 1.5,
+      "text": "PRUEBA REMOTION",
+      "words": [
+        { "word": "PRUEBA", "start": 0.2, "end": 0.8 },
+        { "word": "REMOTION", "start": 0.8, "end": 1.5, "highlight": true }
+      ]
+    }
+  ],
+  "hookHeadline": "PRUEBA CLI",
+  "punchZoom": true
+}

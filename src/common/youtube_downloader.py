@@ -100,6 +100,64 @@ def download_youtube_video(url: str, output_dir: Path = settings.inputs_dir, max
     return filename, title
 
 
+def download_youtube_segment_stream(url: str, start_s: float, end_s: float,
+                                    output_dir: Path = settings.inputs_dir,
+                                    output_filename: Optional[str] = None) -> Tuple[str, str]:
+    """
+    Extracción ultra-eficiente de un segmento mediante HTTP Range Requests y seeking nativo de FFmpeg.
+    Evita descargar videos enteros de 1-2 horas, extrayendo los 50s en pocos segundos.
+    """
+    output_dir.mkdir(parents=True, exist_ok=True)
+    import subprocess
+    import yt_dlp
+    
+    ydl_opts = {
+        'quiet': True,
+        'no_warnings': True,
+        'format': 'bestvideo[height<=1080]+bestaudio/best[height<=1080]/best',
+        'noplaylist': True,
+    }
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        info = ydl.extract_info(url, download=False)
+        title = info.get('title') or 'Clip'
+        video_id = info.get('id') or 'vid'
+        
+    v_url = None
+    a_url = None
+    if info.get('requested_formats') and len(info['requested_formats']) >= 2:
+        v_url = info['requested_formats'][0].get('url')
+        a_url = info['requested_formats'][1].get('url')
+    elif info.get('url'):
+        v_url = info['url']
+        a_url = info['url']
+        
+    if not v_url or not a_url:
+        return download_youtube_video(url, output_dir=output_dir, time_range=(start_s, end_s))
+        
+    out_name = output_filename or f"{video_id}_seg_{int(start_s)}_{int(end_s)}.mp4"
+    dest_path = output_dir / out_name
+    if dest_path.exists() and dest_path.stat().st_size > 500000:
+        logger.info(f"⚡ Segmento recuperado de caché: {dest_path.name}")
+        return str(dest_path.resolve()), title
+        
+    cmd = [
+        settings.ffmpeg_exe, "-y", "-hide_banner", "-loglevel", "error",
+        "-ss", str(start_s), "-to", str(end_s), "-i", v_url,
+        "-ss", str(start_s), "-to", str(end_s), "-i", a_url,
+        "-c:v", "libx264", "-preset", "ultrafast", "-crf", "22",
+        "-c:a", "aac", "-b:a", "128k",
+        "-threads", "4",
+        str(dest_path.resolve())
+    ]
+    res = subprocess.run(cmd, capture_output=True, text=True)
+    if res.returncode != 0 or not dest_path.exists() or dest_path.stat().st_size == 0:
+        logger.warning(f"Extracción por streaming falló, usando método estándar yt-dlp: {res.stderr[-200:]}")
+        return download_youtube_video(url, output_dir=output_dir, time_range=(start_s, end_s))
+        
+    logger.info(f"⚡ Segmento extraído exitosamente en segundos ({dest_path.stat().st_size // 1024} KB): {dest_path.name}")
+    return str(dest_path.resolve()), title
+
+
 def download_youtube_audio(url: str, output_dir: Path = settings.inputs_dir,
                            progress: ProgressFn = None,
                            time_range: Optional[Tuple[float, float]] = None) -> Tuple[str, str]:

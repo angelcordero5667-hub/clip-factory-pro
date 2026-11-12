@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from typing import Optional
 from pydantic import BaseModel
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -23,8 +24,22 @@ class HardwareConfig(BaseModel):
     device: str = "cpu"
     compute_type: str = "int8"
     cpu_threads: int = 8
-    whisper_model_size: str = os.environ.get("CLIP_WHISPER_MODEL", "small")  # Options: 'tiny', 'base', 'small', 'medium'
+    whisper_model_size: str = os.environ.get("CLIP_WHISPER_MODEL", "large-v3-turbo")  # Activado por defecto en alta fidelidad
+    whisper_beam_size: int = int(os.environ.get("CLIP_WHISPER_BEAM_SIZE", "1"))
+    whisper_conf_threshold: float = float(os.environ.get("CLIP_WHISPER_CONF_THRESHOLD", "0.7"))
     max_ram_usage_gb: int = 18        # Out of 24 GB RAM
+
+class ASRConfig(BaseModel):
+    mode: str = os.environ.get("CLIP_ASR_MODE", "hybrid")  # Modo híbrido activado por defecto
+    primary: str = os.environ.get("CLIP_ASR_PRIMARY", "whisper")
+    secondary: str = os.environ.get("CLIP_ASR_SECONDARY", "qwen3")
+    cloud_enabled: bool = os.environ.get("CLIP_ASR_CLOUD_ENABLED", "0").lower() in ("1", "true")
+    aligner_enabled: bool = os.environ.get("CLIP_ASR_ALIGNER_ENABLED", "1").lower() in ("1", "true")
+    language: str = os.environ.get("CLIP_ASR_LANGUAGE", "es")
+    auto_detect_lang: bool = os.environ.get("CLIP_ASR_AUTO_DETECT", "0").lower() in ("1", "true")
+    dominican_mode: bool = os.environ.get("CLIP_ASR_DOMINICAN", "1").lower() in ("1", "true")  # Activado por defecto
+    low_confidence_threshold: float = float(os.environ.get("CLIP_ASR_CONF_THRESHOLD", "0.7"))
+    elevenlabs_api_key: Optional[str] = os.environ.get("ELEVENLABS_API_KEY", None)
 
 class OllamaConfig(BaseModel):
     base_url: str = "http://127.0.0.1:11434"
@@ -40,13 +55,13 @@ class VideoConfig(BaseModel):
     max_candidates: int = 20
 
 class RenderConfig(BaseModel):
-    parallel_clips: int = 2           # clips renderizados en paralelo
-    threads_per_clip: int = 4         # -threads de FFmpeg por clip
-    preset: str = "medium"            # preset base de alta calidad (calidad de compresión y detalle)
-    speed_mode: str = "quality"       # quality (medium/crf 18), studio (slow/crf 17), fast (veryfast/crf 19)
-    crf: int = 18                     # CRF 18 = calidad de estudio visualmente sin pérdida (era 24)
+    parallel_clips: int = 3           # clips renderizados en paralelo (3 concurrentes optimizados)
+    threads_per_clip: int = 4         # -threads de FFmpeg por clip (12 hilos para 3 renders en CPU de 16 hilos)
+    preset: str = "veryfast"          # preset base ultra veloz (veryfast) para producción rápida
+    speed_mode: str = "fast"          # fast (veryfast/crf 21), quality (medium/crf 18), studio (slow/crf 17)
+    crf: int = 24                     # CRF 24 base (configurable entre 17-24 según speed_mode)
     use_hw_encoder: bool = os.environ.get("CLIP_HW_ENCODER", "1") != "0"  # h264_amf si existe, con fallback a libx264
-    bg_scale_div: int = 2             # desenfoque suave de alta resolución (era 4, producía pixelado)
+    bg_scale_div: int = 4             # desenfoque optimizado a 1/4 resolución (270x480) reescalado con blur rápido
     smart_framing: bool = os.environ.get("CLIP_SMART_FRAMING", "1") != "0"  # auto-encuadre al hablante
     trim_silences: bool = os.environ.get("CLIP_TRIM_SILENCES", "1") != "0"  # quita pausas largas y muletillas
     hook_zoom: bool = True            # punch-in zoom en los primeros 2.5s para retención estilo TikTok
@@ -61,6 +76,7 @@ class Settings(BaseModel):
     ollama: OllamaConfig = OllamaConfig()
     video: VideoConfig = VideoConfig()
     render: RenderConfig = RenderConfig()
+    asr: ASRConfig = ASRConfig()
 
     @property
     def face_model_path(self) -> Path:

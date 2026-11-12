@@ -236,7 +236,7 @@ class VerticalClipMaker:
         if hook_zoom:
             parts.append(
                 f";{label}split=2[v_base][v_hook];"
-                f"[v_hook]crop=w=iw/1.08:h=ih/1.08,scale={w}:{h}:flags=lanczos+accurate_rnd[v_punch];"
+                f"[v_hook]crop=w=iw/1.08:h=ih/1.08,scale={w}:{h}[v_punch];"
                 f"[v_base][v_punch]overlay=x=0:y=0:enable='between(t,0,2.5)'[v_hooked]"
             )
             label = "[v_hooked]"
@@ -296,16 +296,22 @@ class VerticalClipMaker:
     @staticmethod
     def video_codec_args(encoder: str, speed_mode: Optional[str] = None) -> List[str]:
         r = settings.render
-        mode = speed_mode or r.speed_mode
+        mode = (speed_mode or r.speed_mode or "fast").lower()
         if mode == "studio":
-            preset = "slow"
+            preset = "medium"
             crf_val = min(17, r.crf)
         elif mode == "turbo":
-            preset = "fast"
+            preset = "superfast"
             crf_val = min(19, r.crf)
+        elif mode == "fast":
+            preset = "veryfast"
+            crf_val = r.crf
+        elif mode == "ultrafast":
+            preset = "ultrafast"
+            crf_val = 23
         else:
-            preset = "medium"
-            crf_val = r.crf  # 18 por defecto para calidad nítida sin pérdida visible
+            preset = r.preset or "veryfast"
+            crf_val = r.crf
 
         if encoder == "h264_amf":
             # AMD AMF con máxima calidad visual: preset quality, perfil High, CQP ajustado y bitrate alto

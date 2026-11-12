@@ -8,7 +8,7 @@ from src.common.config import settings
 from src.common.database import db
 from src.common.models import ViralMomentCandidate, TranscriptResult
 from src.common.youtube_downloader import download_youtube_video, download_youtube_audio, capture_live_stream
-from src.agents.agent1_transcription.transcriber import AudioTranscriber
+from src.agents.agent1_transcription.transcriber import AudioTranscriber, transcript_cache_key
 from src.agents.agent2_viral_detector.detector import ViralMomentDetector
 from src.agents.agent2_viral_detector.audio_energy import compute_energy_profile
 from src.agents.agent2_viral_detector.chat_activity import parse_chat_messages, build_chat_profile
@@ -162,8 +162,13 @@ class ClipFactoryPipeline:
         # FASE 1: transcripción con caché
         transcripts_cache_dir = settings.cache_dir / "transcripts"
         transcripts_cache_dir.mkdir(parents=True, exist_ok=True)
-        clean_stem = re.sub(r"[^\w]", "_", path.stem)
-        cached_transcript_path = transcripts_cache_dir / f"{clean_stem}.json"
+        # La clave incluye archivo (nombre, tamaño, fecha), idioma, modo dominicano, modelo y versión de la caché:
+        # antes era solo el nombre, y al cambiar de modelo se servía la transcripción anterior.
+        cache_key = transcript_cache_key(
+            path, language, dominican_mode,
+            getattr(self.transcriber, "model_size", None), getattr(self.transcriber, "compute_type", None),
+            getattr(self.transcriber, "beam_size", None))
+        cached_transcript_path = transcripts_cache_dir / f"{cache_key}.json"
 
         step(1, 0.0, "🎙️ Transcribiendo con Faster-Whisper (INT8 CPU)...")
         transcript = None
@@ -345,6 +350,30 @@ class ClipFactoryPipeline:
 
         return video_id, candidates
 
+    def _rerender_with_remotion(self, video_path, cand, segments, progress_callback, cancel_event, options):
+        """Intenta el render con Remotion. Devuelve la ruta del clip, o None si hay que usar FFmpeg
+        (Remotion no disponible o con error). Si el usuario cancela, propaga la cancelación."""
+        try:
+            from src.common.remotion_engine import remotion_engine
+            if not remotion_engine.is_available():
+                raise RuntimeError("Remotion no está instalado (falta src/remotion/node_modules).")
+            out_path = self.clip_maker.get_unique_output_path(Path(video_path).name, cand.id)
+
+            def _prog(p, msg):
+                if progress_callback:
+                    progress_callback(f"🎞️ Remotion {int(p * 100)}%: {msg}")
+
+            return remotion_engine.render_candidate(
+                video_path, cand, segments, out_path, options=options, on_progress=_prog,
+                cancel_event=cancel_event, concurrency=2)
+        except Exception as e:
+            if cancel_event is not None and cancel_event.is_set():
+                raise RuntimeError("Trabajo cancelado por el usuario.")
+            logger.warning(f"Remotion falló ({e}); se usa el motor FFmpeg.")
+            if progress_callback:
+                progress_callback(f"⚠️ Remotion falló ({str(e)[:120]}). Usando FFmpeg.")
+            return None
+
     def rerender_candidate(
         self,
         candidate_id: str,
@@ -374,9 +403,14 @@ class ClipFactoryPipeline:
         trim_silences: bool = True,
         audio_profile: str = "social",
         master_limiter: bool = True,
+        visual_engine: str = "ffmpeg",
+        cancel_event=None,
         **kwargs,
     ) -> Path:
-        """Vuelve a renderizar un clip con los tiempos/título actuales de la base de datos."""
+        """Vuelve a renderizar un clip con los tiempos/título actuales de la base de datos.
+
+        `visual_engine`: "ffmpeg" (por defecto, motor de producción) o "remotion" (opcional). Si Remotion
+        falla o no está instalado se registra el motivo y se usa FFmpeg, sin duplicar el clip."""
         cand_row = db.get_candidate(candidate_id)
         if not cand_row:
             raise ValueError(f"Clip no encontrado: {candidate_id}")
@@ -410,7 +444,15 @@ class ClipFactoryPipeline:
         layout_mode = framing_mode if framing_mode else None
         clean_sub_style = (subtitle_style or "").lower().strip()
         eff_with_subs = bool(with_subtitles) and clean_sub_style not in ("none", "off", "sin_subtitulos", "sin_subtítulo", "sin_subtítulos", "false", "0")
-        out = self.clip_maker.generate_clip(
+        out = None
+        if (visual_engine or "ffmpeg").lower() == "remotion":
+            out = self._rerender_with_remotion(
+                video["filepath"], cand, segments, progress_callback, cancel_event,
+                dict(subtitle_style=subtitle_style if eff_with_subs else "none", subtitle_position=subtitle_position,
+                     custom_highlight=custom_highlight, progress_bar=progress_bar, color_filter=color_filter,
+                     dynamic_zoom=dynamic_zoom, punch_zooms=punch_zooms, hook_headline=hook_headline,
+                     seamless_loop=seamless_loop, audio_profile=audio_profile, master_limiter=master_limiter))
+        out = out or self.clip_maker.generate_clip(
             video_path=video["filepath"], candidate=cand, transcript_segments=segments,
             with_subtitles=eff_with_subs, subtitle_style=subtitle_style, include_emojis=include_emojis,
             aspect_ratio=aspect_ratio, use_scene_detection=False,

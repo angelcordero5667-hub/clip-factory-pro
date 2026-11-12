@@ -1,0 +1,1 @@
+{"tag": "w1", "workers": 1, "threads_per_clip": 8, "total_s": 1155.7, "clips_ok": 3, "errors": {}, "per_clip_s": {"bench_w1_0": 140.0, "bench_w1_1": 164.7, "bench_w1_2": 149.3}, "clip_content_s": 148, "ram_peak_gb": 1.02, "cpu_avg_pct": 33.6, "cpu_max_pct": 99.1, "out_mb": 212.9, "finished": "03:03:52"}

@@ -3651,6 +3651,9 @@ html .studio-main-viewport { min-width: 0; flex: 1 1 0; max-width: 100%; }
             <div style="flex-grow:1; display:flex; align-items:center; background:var(--studio-surface-elevated); border:1px solid var(--studio-border); border-radius:var(--radius-md); padding:4px 10px;">
               <input type="url" id="yt-url-input" placeholder="https://www.youtube.com/watch?v=..." style="flex-grow:1; background:transparent; border:none; color:#fff; font-size:13px; outline:none;" oninput="onUrlInputChanged(this.value)">
             </div>
+            <button type="button" class="btn-studio-action btn-pack-viral-action" id="btn-submit-pack-viral" onclick="submitViralPack()" style="background:linear-gradient(135deg, #FF0055 0%, #FF5500 50%, #FFCC00 100%); color:#fff; font-weight:800; border:none; box-shadow:0 0 20px rgba(255, 85, 0, 0.45); padding:10px 22px; border-radius:var(--radius-md); cursor:pointer; display:flex; align-items:center; gap:8px;" title="Genera automáticamente los 3 mejores clips 9:16 en paralelo, subtítulos Hormozi, miniaturas y copys">
+              <span>🚀</span> GENERAR PACK VIRAL (3 CLIPS)
+            </button>
             <button type="button" class="btn-studio-action" id="btn-submit-process" onclick="submitCreation()">
               Crear Clips ⚡
             </button>
@@ -3661,6 +3664,105 @@ html .studio-main-viewport { min-width: 0; flex: 1 1 0; max-width: 100%; }
           </div>
 
           <!-- URL Preview Card -->
+          <!-- PANEL FASE 2: PACK VIRAL 1-CLIC (PROGRESO CONCURRENTE 3 TARJETAS) -->
+          <div id="viral-pack-progress-panel" style="display:none; margin-top:20px; background:rgba(18, 18, 26, 0.95); border:1px solid rgba(255, 85, 0, 0.4); border-radius:14px; padding:18px; box-shadow:0 8px 32px rgba(0,0,0,0.6);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:10px;">
+              <div style="display:flex; align-items:center; gap:10px;">
+                <span style="font-size:22px;">🚀</span>
+                <div>
+                  <h3 style="margin:0; font-size:15.5px; font-weight:700; color:#fff;">Motor Pack Viral 1-Clic</h3>
+                  <p id="viral-pack-overall-status" style="margin:2px 0 0; font-size:12px; color:#ffaa44;">Iniciando motor de 16 hilos...</p>
+                </div>
+              </div>
+              <div id="viral-pack-export-badge" style="display:none; display:flex; gap:8px;">
+                <span style="background:rgba(0,255,100,0.15); border:1px solid #00ff66; color:#00ff66; padding:4px 10px; border-radius:6px; font-size:11.5px; font-weight:600; display:flex; align-items:center; gap:4px;">
+                  ✓ Guardado en Descargas/Clip_Factory_Pro
+                </span>
+              </div>
+            </div>
+
+            <!-- Barra general de progreso -->
+            <div style="width:100%; height:7px; background:rgba(255,255,255,0.08); border-radius:999px; overflow:hidden; margin-bottom:16px;">
+              <div id="viral-pack-main-bar" style="width:5%; height:100%; background:linear-gradient(90deg, #FF0055, #FF5500, #FFCC00); transition:width 0.3s;"></div>
+            </div>
+
+            <!-- Las 3 Tarjetas Concurrentes -->
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:14px;" id="vp-cards-container">
+              <!-- Tarjeta 1 -->
+              <div id="vp-card-0" style="background:#0f1016; border:1px solid rgba(255,255,255,0.09); border-radius:10px; padding:14px; display:flex; flex-direction:column; gap:8px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="font-size:12px; font-weight:700; color:#FF5500; text-transform:uppercase;">CLIP 01</span>
+                  <span id="vp-pct-0" style="font-size:12px; font-weight:700; color:#fff;">0%</span>
+                </div>
+                <div id="vp-title-0" style="font-size:12.5px; font-weight:600; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Clip 1: Detección...</div>
+                <div style="width:100%; height:4px; background:rgba(255,255,255,0.06); border-radius:4px; overflow:hidden;">
+                  <div id="vp-bar-0" style="width:0%; height:100%; background:#FF5500; transition:width 0.2s;"></div>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; color:#888; margin-top:2px;">
+                  <span id="vp-stage-0">En cola</span>
+                  <span id="vp-time-0">0.0s</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px;">
+                  <button type="button" class="btn-cancel-vp" onclick="cancelVpClip(0)" style="background:transparent; border:1px solid #444; color:#aaa; font-size:10px; padding:3px 8px; border-radius:4px; cursor:pointer;">Cancelar</button>
+                  <a id="vp-prev-0" href="#" target="_blank" style="display:none; font-size:11px; color:#00ff88; text-decoration:none; font-weight:600;">▶ Ver Video</a>
+                </div>
+              </div>
+
+              <!-- Tarjeta 2 -->
+              <div id="vp-card-1" style="background:#0f1016; border:1px solid rgba(255,255,255,0.09); border-radius:10px; padding:14px; display:flex; flex-direction:column; gap:8px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="font-size:12px; font-weight:700; color:#FF5500; text-transform:uppercase;">CLIP 02</span>
+                  <span id="vp-pct-1" style="font-size:12px; font-weight:700; color:#fff;">0%</span>
+                </div>
+                <div id="vp-title-1" style="font-size:12.5px; font-weight:600; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Clip 2: Detección...</div>
+                <div style="width:100%; height:4px; background:rgba(255,255,255,0.06); border-radius:4px; overflow:hidden;">
+                  <div id="vp-bar-1" style="width:0%; height:100%; background:#FF5500; transition:width 0.2s;"></div>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; color:#888; margin-top:2px;">
+                  <span id="vp-stage-1">En cola</span>
+                  <span id="vp-time-1">0.0s</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px;">
+                  <button type="button" class="btn-cancel-vp" onclick="cancelVpClip(1)" style="background:transparent; border:1px solid #444; color:#aaa; font-size:10px; padding:3px 8px; border-radius:4px; cursor:pointer;">Cancelar</button>
+                  <a id="vp-prev-1" href="#" target="_blank" style="display:none; font-size:11px; color:#00ff88; text-decoration:none; font-weight:600;">▶ Ver Video</a>
+                </div>
+              </div>
+
+              <!-- Tarjeta 3 -->
+              <div id="vp-card-2" style="background:#0f1016; border:1px solid rgba(255,255,255,0.09); border-radius:10px; padding:14px; display:flex; flex-direction:column; gap:8px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="font-size:12px; font-weight:700; color:#FF5500; text-transform:uppercase;">CLIP 03</span>
+                  <span id="vp-pct-2" style="font-size:12px; font-weight:700; color:#fff;">0%</span>
+                </div>
+                <div id="vp-title-2" style="font-size:12.5px; font-weight:600; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Clip 3: Detección...</div>
+                <div style="width:100%; height:4px; background:rgba(255,255,255,0.06); border-radius:4px; overflow:hidden;">
+                  <div id="vp-bar-2" style="width:0%; height:100%; background:#FF5500; transition:width 0.2s;"></div>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; color:#888; margin-top:2px;">
+                  <span id="vp-stage-2">En cola</span>
+                  <span id="vp-time-2">0.0s</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px;">
+                  <button type="button" class="btn-cancel-vp" onclick="cancelVpClip(2)" style="background:transparent; border:1px solid #444; color:#aaa; font-size:10px; padding:3px 8px; border-radius:4px; cursor:pointer;">Cancelar</button>
+                  <a id="vp-prev-2" href="#" target="_blank" style="display:none; font-size:11px; color:#00ff88; text-decoration:none; font-weight:600;">▶ Ver Video</a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- PANEL FASE 3: SOCIAL MEDIA PUBLISHING CENTER -->
+          <div id="social-media-publishing-center" style="display:none; margin-top:24px; background:rgba(15,16,22,0.95); border:1px solid rgba(255,255,255,0.1); border-radius:14px; padding:18px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px;">
+              <h3 style="margin:0; font-size:16px; font-weight:800; color:#fff; display:flex; align-items:center; gap:8px;">
+                <span>📱</span> SOCIAL MEDIA PUBLISHING CENTER
+              </h3>
+              <span style="font-size:11.5px; color:#aaa;">Copia y pega directo en YouTube Studio, TikTok y Meta</span>
+            </div>
+            <div id="social-publishing-cards" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(310px, 1fr)); gap:16px;">
+              <!-- Tarjetas dinámicas inyectadas por JS -->
+            </div>
+          </div>
+
           <div id="url-preview-card" style="display:none; background:var(--studio-surface-elevated); border:1px solid var(--studio-border); border-radius:var(--radius-md); padding:12px; margin-top:10px;">
             <div style="display:flex; gap:12px; align-items:center;">
               <div id="url-preview-placeholder" style="width:100px; aspect-ratio:16/9; background:#000; border-radius:4px; overflow:hidden; flex-shrink:0;">
@@ -3824,6 +3926,19 @@ html .studio-main-viewport { min-width: 0; flex: 1 1 0; max-width: 100%; }
         <!-- PANEL CENTRAL: VIDEO CANVAS 9:16 Y CONTROLES -->
         <main class="editor-canvas-center" style="display:flex; flex-direction:column; align-items:center;">
           <!-- Contenedor del Reproductor Vertical 9:16 -->
+          <!-- Selector de Modo de Reproducción: Estándar vs Remotion Studio -->
+          <div style="display:flex; justify-content:center; gap:8px; margin-bottom:12px; width:100%; max-width:380px;">
+            <button type="button" class="btn-outline btn-sm-action active" id="btn-player-mode-standard" onclick="switchPlayerMode('standard')" style="font-size:12px; font-weight:700;">
+              <span>HTML5 Player</span>
+            </button>
+            <button type="button" class="btn-outline btn-sm-action" id="btn-player-mode-remotion" onclick="switchPlayerMode('remotion')" style="font-size:12px; font-weight:700; border-color:#a855f7; color:#c084fc;">
+              <span>⚡ Remotion Live Studio</span>
+            </button>
+          </div>
+
+          <!-- Contenedor Interactivo de Remotion Player -->
+          <div id="remotion-player-container" style="display:none; width:340px; height:604px; margin-bottom:16px; border-radius:18px; overflow:hidden; background:#0b0c10; box-shadow:0 12px 40px rgba(0,0,0,0.85); border:1px solid rgba(168,85,247,0.4);"></div>
+
           <div class="video-preview-box" id="player-container" onclick="togglePlay()" style="cursor:pointer;" title="Haz clic para reproducir/pausar">
             <video id="editor-video" loop playsinline></video>
             
@@ -9767,5 +9882,113 @@ html .studio-main-viewport { min-width: 0; flex: 1 1 0; max-width: 100%; }
     </button>
   </nav>
 
+<script src="/static/js/remotion-player.js"></script>
+<script>
+
+  // ==========================================
+  // INTEGRACIÓN REMOTION LIVE STUDIO
+  // ==========================================
+  let currentRemotionProps = null;
+  let remotionPlayerMounted = false;
+
+  async function switchPlayerMode(mode) {
+    const stdBtn = document.getElementById('btn-player-mode-standard');
+    const remBtn = document.getElementById('btn-player-mode-remotion');
+    const stdBox = document.getElementById('player-container');
+    const remBox = document.getElementById('remotion-player-container');
+    const controlsRow = document.querySelector('.player-controls-row');
+
+    if (mode === 'remotion') {
+      if (stdBtn) stdBtn.classList.remove('active');
+      if (remBtn) remBtn.classList.add('active');
+      if (stdBox) stdBox.style.display = 'none';
+      if (remBox) remBox.style.display = 'flex';
+      if (controlsRow) controlsRow.style.display = 'none'; // Remotion Player tiene sus propios controles nativos
+
+      // Pausar video HTML5 si estaba corriendo
+      const vid = document.getElementById('editor-video');
+      if (vid) vid.pause();
+
+      if (currentActiveClip) {
+        try {
+          const res = await fetch(`/api/clips/${encodeURIComponent(currentActiveClip.id)}/remotion_props`);
+          if (res.ok) {
+            currentRemotionProps = await res.json();
+            if (currentRemotionProps.webVideoSrc) {
+              currentRemotionProps.videoSrc = currentRemotionProps.webVideoSrc;
+            }
+            if (window.RemotionPlayerStudio) {
+              window.RemotionPlayerStudio.mount(remBox, currentRemotionProps);
+              remotionPlayerMounted = true;
+            }
+          }
+        } catch (e) {
+          console.error('Error cargando Remotion props:', e);
+        }
+      }
+    } else {
+      if (remBtn) remBtn.classList.remove('active');
+      if (stdBtn) stdBtn.classList.add('active');
+      if (remBox) remBox.style.display = 'none';
+      if (stdBox) stdBox.style.display = 'flex';
+      if (controlsRow) controlsRow.style.display = 'flex';
+    }
+  }
+
+  function syncRemotionLiveProps() {
+    if (!window.RemotionPlayerStudio || !currentRemotionProps) return;
+    const styleEl = document.getElementById('editor-subtitle-style');
+    const punchZoomEl = document.getElementById('opt-punch-zoom');
+    const framingEl = document.getElementById('editor-framing-mode');
+    const colorFilterEl = document.getElementById('editor-color-filter');
+    const progBarEl = document.getElementById('opt-progress-bar');
+    const headlineEl = document.getElementById('inp-hook-headline');
+
+    const updates = {};
+    if (styleEl) updates.subtitleStyle = styleEl.value;
+    if (punchZoomEl) updates.punchZoom = punchZoomEl.checked;
+    if (framingEl) updates.framingMode = framingEl.value;
+    if (colorFilterEl) updates.colorFilter = colorFilterEl.value;
+    if (progBarEl) updates.progressBar = progBarEl.checked;
+    if (headlineEl) updates.hookHeadline = headlineEl.value;
+
+    window.RemotionPlayerStudio.updateProps(updates);
+  }
+
+  async function renderWithRemotion() {
+    if (!currentActiveClip) {
+      if (typeof showToast === 'function') showToast('Selecciona un clip primero', 'warning');
+      else alert('Selecciona un clip primero');
+      return;
+    }
+    if (typeof showToast === 'function') showToast('Iniciando render profesional con Remotion (1080x1920)...', 'info');
+    
+    try {
+      const res = await fetch(`/api/clips/${encodeURIComponent(currentActiveClip.id)}/render_remotion`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fps: 30,
+          concurrency: 4,
+          subtitle_style: document.getElementById('editor-subtitle-style')?.value || 'hormozi',
+          framing_mode: document.getElementById('editor-framing-mode')?.value || 'blur',
+          punch_zoom: document.getElementById('opt-punch-zoom')?.checked ?? true,
+          color_filter: document.getElementById('editor-color-filter')?.value || 'pop',
+          progress_bar: document.getElementById('opt-progress-bar')?.checked ?? true
+        })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        if (typeof showToast === 'function') showToast('¡Clip renderizado exitosamente con Remotion!', 'success');
+        if (typeof loadClips === 'function') loadClips();
+      } else {
+        if (typeof showToast === 'function') showToast('Error en Remotion: ' + (data.detail || data.error), 'error');
+      }
+    } catch (err) {
+      if (typeof showToast === 'function') showToast('Error conectando con el servicio Remotion', 'error');
+    }
+  }
+
+</script>
 </body>
 </html>

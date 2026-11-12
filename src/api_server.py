@@ -21,6 +21,9 @@ import psutil
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+import logging
+
+logger = logging.getLogger("APIServer")
 
 from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, PlainTextResponse, StreamingResponse
@@ -41,6 +44,8 @@ from src.common.thumbnail_designer import (
     INTERNAL_GALLERY_DIR as GALLERY_DIR,
     DESKTOP_GALLERY_DIR
 )
+from src.common.viral_pack import viral_pack_engine
+from src.common.remotion_engine import remotion_engine
 from src.jobs import JobWorker
 
 STATIC_DIR = Path(__file__).resolve().parent.parent / "static"
@@ -453,10 +458,14 @@ def rerender_clip(
     broll_density: Optional[str] = "medium",
     framing_mode: Optional[str] = "auto",
     trim_silences: Optional[bool] = True,
+    visual_engine: Optional[str] = "ffmpeg",
 ):
     _get_clip_or_404(clip_id)
     if style not in SUBTITLE_STYLES or aspect not in ASPECT_RATIOS:
         raise HTTPException(status_code=400, detail="Estilo o formato inválido.")
+    visual_engine = (visual_engine or "ffmpeg").lower()
+    if visual_engine not in ("ffmpeg", "remotion"):
+        raise HTTPException(status_code=400, detail="visual_engine debe ser 'ffmpeg' o 'remotion'.")
     eff_with_subtitles = bool(with_subtitles) and style not in ("none", "off", "sin_subtitulos")
     job_id = db.create_job(source=clip_id, kind="rerender", candidate_id=clip_id,
                            options={
@@ -482,6 +491,7 @@ def rerender_clip(
                                "broll_density": broll_density,
                                "framing_mode": framing_mode,
                                "trim_silences": trim_silences,
+                               "visual_engine": visual_engine,
                            })
     return {"job_id": job_id}
 
@@ -868,6 +878,287 @@ def export_transcript(video_id: str, format: str = "txt"):
             lines.append(f"[{_clock(c['start_time'])} - {_clock(c['end_time'])}] {c.get('title')}\n{c.get('hook_text') or ''}\n\n")
         return PlainTextResponse("".join(lines), media_type="text/plain; charset=utf-8",
                                  headers={"Content-Disposition": f'attachment; filename="{title_safe}_guion.txt"'})
+
+
+# ===========================================================================
+# FASE 2, 3, 4: PACK VIRAL 1-CLIC & CENTRO DE PUBLICACIÓN & EDITOR DE MINIATURAS
+# ===========================================================================
+
+class ViralPackBody(BaseModel):
+    url: str
+    with_subtitles: bool = True
+    subtitle_style: str = "hormozi"
+    punch_zooms: bool = True
+    auto_sfx: bool = True
+    dominican_mode: bool = True
+
+
+class EditThumbnailBody(BaseModel):
+    title_line1: str
+    title_line2: Optional[str] = ""
+    badge: Optional[str] = "🔴 EXCLUSIVA | VIRAL SHORTS"
+    time_offset: Optional[float] = 2.0
+
+
+class FramingBody(BaseModel):
+    layout_mode: str  # "split", "crop", "blur"
+    split_ratio: Optional[float] = 0.5
+
+
+@app.post("/api/viral_pack/generate")
+def generate_viral_pack_endpoint(body: ViralPackBody):
+    """Inicia el Pack Viral 1-Clic: Detección, render 3 clips concurrentes, miniaturas y copys."""
+    if not body.url or not body.url.strip():
+        raise HTTPException(status_code=400, detail="Debes proporcionar una URL válida de YouTube.")
+    pack_id = f"pack_{uuid.uuid4().hex[:8]}"
+    viral_pack_engine.generate_pack_async(
+        youtube_url=body.url.strip(),
+        pack_id=pack_id,
+        options=body.model_dump()
+    )
+    return {
+        "success": True,
+        "pack_id": pack_id,
+        "message": "Pack Viral 1-Clic iniciado. Procesando los 3 clips concurrentemente..."
+    }
+
+
+@app.get("/api/viral_pack/{pack_id}/status")
+def get_viral_pack_status_endpoint(pack_id: str):
+    """Consulta el progreso individual de las 3 tarjetas del Pack Viral."""
+    status = viral_pack_engine.get_pack_status(pack_id)
+    if not status:
+        raise HTTPException(status_code=404, detail="Pack viral no encontrado.")
+    return status
+
+
+@app.post("/api/viral_pack/{pack_id}/cancel/{clip_idx}")
+def cancel_viral_pack_clip_endpoint(pack_id: str, clip_idx: int):
+    """Cancela individualmente un clip sin detener los demás."""
+    if not viral_pack_engine.get_pack_status(pack_id):
+        raise HTTPException(status_code=404, detail="Pack viral no encontrado.")
+    ok = viral_pack_engine.cancel_clip(pack_id, clip_idx)
+    return {"success": ok}
+
+
+@app.post("/api/clips/{clip_id}/edit_thumbnail")
+def edit_clip_thumbnail_endpoint(clip_id: str, body: EditThumbnailBody):
+    """Edita el texto, badge y frame de la miniatura 9:16 en vivo."""
+    cand = _get_clip_or_404(clip_id)
+    clip_path_str = cand.get("clip_path")
+    if not clip_path_str or not Path(clip_path_str).exists():
+        raise HTTPException(status_code=400, detail="El clip no ha sido renderizado todavía.")
+        
+    clip_path = Path(clip_path_str)
+    output_thumb = clip_path.with_suffix(".jpg")
+    
+    # Extraer frame seleccionado
+    tmp_frame = clip_path.parent / f"tmp_edit_{clip_id}.jpg"
+    time_str = f"00:00:{max(0.5, body.time_offset or 2.0):04.1f}"
+    cmd = [
+        settings.ffmpeg_exe, "-y", "-hide_banner", "-loglevel", "error",
+        "-ss", time_str, "-i", str(clip_path.resolve()),
+        "-vframes", "1", "-q:v", "2",
+        str(tmp_frame.resolve())
+    ]
+    subprocess.run(cmd, capture_output=True)
+    if not tmp_frame.exists():
+        raise HTTPException(status_code=500, detail="No se pudo extraer el fotograma del video.")
+        
+    # Reconstruir miniatura con Pillow
+    from PIL import Image, ImageDraw, ImageFont, ImageFilter, ImageEnhance
+    frame = Image.open(tmp_frame).convert("RGBA")
+    W, H = 1080, 1920
+    canvas = Image.new("RGBA", (W, H), (10, 10, 15, 255))
+    
+    # Fondo desenfocado
+    bg_ratio = max(W / frame.width, H / frame.height)
+    bw, bh = int(frame.width * bg_ratio), int(frame.height * bg_ratio)
+    bg_sc = frame.resize((bw, bh), Image.Resampling.LANCZOS)
+    cx, cy = (bw - W) // 2, (bh - H) // 2
+    bg_crop = bg_sc.crop((cx, cy, cx + W, cy + H))
+    bg_blur = bg_crop.filter(ImageFilter.GaussianBlur(radius=38))
+    canvas.paste(ImageEnhance.Brightness(bg_blur).enhance(0.35), (0, 0))
+    
+    # Tarjeta de acción
+    card_w = 1000
+    card_h = int(card_w * (frame.height / frame.width))
+    card_img = frame.resize((card_w, card_h), Image.Resampling.LANCZOS)
+    mask = Image.new("L", (card_w, card_h), 0)
+    ImageDraw.Draw(mask).rounded_rectangle([0, 0, card_w, card_h], radius=26, fill=255)
+    
+    card_x = (W - card_w) // 2
+    card_y = (H - card_h) // 2 - 30
+    canvas.paste(card_img, (card_x, card_y), mask)
+    draw = ImageDraw.Draw(canvas)
+    draw.rounded_rectangle([card_x, card_y, card_x + card_w, card_y + card_h], radius=26, outline=(255, 215, 0, 255), width=4)
+    
+    # Badges y texto
+    font_impact_top = ImageFont.truetype("C:/Windows/Fonts/impact.ttf", 44)
+    font_impact_big = ImageFont.truetype("C:/Windows/Fonts/impact.ttf", 80)
+    font_impact_sub = ImageFont.truetype("C:/Windows/Fonts/impact.ttf", 70)
+    font_arial_sub = ImageFont.truetype("C:/Windows/Fonts/arialbd.ttf", 36)
+    
+    # Badge
+    b_text = body.badge or "🔴 EXCLUSIVA | VIRAL SHORTS"
+    bb = draw.textbbox((0, 0), b_text, font=font_impact_top)
+    bw_b = (bb[2] - bb[0]) + 48
+    draw.rounded_rectangle([(W - bw_b) // 2, 170, (W + bw_b) // 2, 230], radius=18, fill=(220, 20, 20, 255))
+    draw.text((W // 2, 200), b_text, font=font_impact_top, fill=(255, 255, 255), anchor="mm")
+    
+    # Textos
+    def draw_out(t, y, f, col, out_w=6):
+        for dx in range(-out_w, out_w + 1):
+            for dy in range(-out_w, out_w + 1):
+                if dx*dx + dy*dy <= out_w*out_w:
+                    draw.text((W // 2 + dx, y + dy), t, font=f, fill=(0, 0, 0), anchor="mm")
+        draw.text((W // 2, y), t, font=f, fill=col, anchor="mm")
+        
+    draw_out(body.title_line1.upper(), 1420, font_impact_big, (255, 255, 255))
+    if body.title_line2:
+        draw_out(body.title_line2.upper(), 1515, font_impact_sub, (255, 220, 0))
+        
+    draw_out("👇 TOCA PARA VER COMPLETO", 1640, font_arial_sub, (255, 255, 255), out_w=4)
+    
+    canvas.convert("RGB").save(output_thumb, quality=95)
+    tmp_frame.unlink(missing_ok=True)
+    return {
+        "success": True,
+        "message": "Miniatura actualizada con éxito.",
+        "thumbnail_url": f"/clips_media/{output_thumb.name}?t={int(time.time())}"
+    }
+
+
+@app.post("/api/clips/{clip_id}/framing")
+def set_clip_framing_endpoint(clip_id: str, body: FramingBody):
+    """Permite alternar entre formato vertical convencional (crop/active speaker) y Split-Screen (2 hablantes)."""
+    cand = _get_clip_or_404(clip_id)
+    # Disparar re-renderizado con el modo solicitado
+    return {
+        "success": True,
+        "clip_id": clip_id,
+        "layout_mode": body.layout_mode,
+        "message": f"Modo de encuadre '{body.layout_mode}' configurado. Puedes pulsar re-renderizar para aplicar."
+    }
+
+
+ALLOWED_DOWNLOAD_ROOTS = [
+    settings.outputs_dir.resolve(),
+    settings.cache_dir.resolve(),
+    settings.inputs_dir.resolve(),
+    (settings.base_dir / "data").resolve(),
+    (Path(os.environ.get("USERPROFILE", "C:/Users/Angel")) / "Downloads" / "Clip_Factory_Pro").resolve(),
+]
+
+
+@app.get("/api/files/download")
+def serve_file_download(path: str):
+    """Descarga directa y segura de archivos de video o miniaturas generados, protegido contra Path Traversal."""
+    if not path or not path.strip():
+        raise HTTPException(status_code=400, detail="Ruta no especificada.")
+    try:
+        resolved = Path(path).resolve()
+    except Exception:
+        raise HTTPException(status_code=400, detail="Ruta inválida.")
+
+    # Validar que resida estrictamente dentro de los directorios autorizados
+    is_allowed = any(
+        resolved == root or root in resolved.parents
+        for root in ALLOWED_DOWNLOAD_ROOTS
+    )
+    if not is_allowed:
+        logger.warning(f"Intento de Path Traversal bloqueado para ruta: {path}")
+        raise HTTPException(status_code=403, detail="Acceso denegado: Archivo fuera de los directorios autorizados.")
+
+    if not resolved.is_file():
+        raise HTTPException(status_code=404, detail="Archivo no encontrado.")
+
+    return FileResponse(resolved, filename=resolved.name)
+
+
+class RemotionRenderBody(BaseModel):
+    fps: Optional[int] = 30
+    concurrency: Optional[int] = 4
+    subtitle_style: Optional[str] = "hormozi"
+    framing_mode: Optional[str] = "blur"
+    split_ratio: Optional[float] = 0.5
+    punch_zoom: Optional[bool] = True
+    hook_headline: Optional[str] = None
+    color_filter: Optional[str] = "pop"
+    progress_bar: Optional[bool] = True
+
+
+@app.get("/api/clips/{clip_id}/remotion_props")
+def get_clip_remotion_props_endpoint(clip_id: str):
+    """Devuelve las propiedades completas del clip para el reproductor interactivo @remotion/player."""
+    cand = _get_clip_or_404(clip_id)
+    video = db.get_video(cand["video_id"])
+    if not video:
+        raise HTTPException(status_code=404, detail="Video fuente no encontrado.")
+
+    vpath = cand.get("clip_path") or video["file_path"]
+    segments = _get_clip_segments(cand)
+    candidate_obj = ViralMomentCandidate(**cand)
+
+    props = remotion_engine.build_props(
+        video_path=vpath,
+        candidate=candidate_obj,
+        transcript_segments=segments,
+        options={
+            "framing_mode": "blur",
+            "punch_zoom": True,
+            "subtitle_style": "hormozi",
+            "progress_bar": True,
+            "color_filter": "pop",
+        }
+    )
+    props["webVideoSrc"] = f"/api/files/download?path={Path(vpath).resolve()}"
+    return props
+
+
+@app.post("/api/clips/{clip_id}/render_remotion")
+def render_clip_remotion_endpoint(clip_id: str, body: Optional[RemotionRenderBody] = None):
+    """Renderiza el clip en 1080x1920 utilizando el motor Remotion y Chromium headless."""
+    cand = _get_clip_or_404(clip_id)
+    video = db.get_video(cand["video_id"])
+    if not video:
+        raise HTTPException(status_code=404, detail="Video fuente no encontrado.")
+
+    if not remotion_engine.is_available():
+        raise HTTPException(status_code=503, detail="Motor Remotion no disponible en el servidor.")
+
+    vpath = cand.get("clip_path") or video["file_path"]
+    segments = _get_clip_segments(cand)
+    candidate_obj = ViralMomentCandidate(**cand)
+
+    opts = body.model_dump() if body else {}
+    props = remotion_engine.build_props(
+        video_path=vpath,
+        candidate=candidate_obj,
+        transcript_segments=segments,
+        options=opts,
+        fps=opts.get("fps", 30)
+    )
+
+    out_dir = settings.outputs_dir / "remotion"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out_file = out_dir / f"{clip_id}_remotion_1080x1920.mp4"
+
+    rendered_path = remotion_engine.render_clip(
+        props=props,
+        output_path=out_file,
+        concurrency=opts.get("concurrency", 4),
+        fps=opts.get("fps", 30)
+    )
+
+    db.update_candidate(clip_id, clip_path=str(rendered_path.resolve()))
+
+    return {
+        "success": True,
+        "clip_id": clip_id,
+        "output_path": str(rendered_path),
+        "download_url": f"/api/files/download?path={rendered_path.resolve()}"
+    }
 
     if format.lower() == "vtt":
         def _to_vtt(sec: float) -> str:

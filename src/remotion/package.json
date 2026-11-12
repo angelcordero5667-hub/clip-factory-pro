@@ -1,0 +1,28 @@
+{
+  "name": "clip-factory-pro-remotion",
+  "version": "1.0.0",
+  "description": "Motor de composición audiovisual profesional con Remotion para Clip Factory Pro",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build-player": "node build_player.mjs",
+    "render": "node render.mjs",
+    "preview": "remotion preview src/index.ts"
+  },
+  "dependencies": {
+    "@remotion/bundler": "4.0.543",
+    "@remotion/cli": "4.0.543",
+    "@remotion/player": "4.0.543",
+    "@remotion/renderer": "4.0.543",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "remotion": "4.0.543"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.7",
+    "@types/react": "^18.3.1",
+    "@types/react-dom": "^18.3.1",
+    "esbuild": "^0.21.5",
+    "typescript": "^5.4.5"
+  }
+}
